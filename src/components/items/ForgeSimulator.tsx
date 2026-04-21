@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { baseItems, combinedItems } from "@/lib/data";
-import { Plus, Zap, RefreshCw, Box } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Plus, Zap, RefreshCw, Box, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function ForgeSimulator() {
@@ -9,6 +10,18 @@ export function ForgeSimulator() {
   const [slot2, setSlot2] = useState<string | null>(null);
   const [isFusing, setIsFusing] = useState(false);
   const [fusionResult, setFusionResult] = useState<string | null>(null);
+
+  const { data: items, isLoading } = useQuery({
+    queryKey: ['items'],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from('items').select('*');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const baseItems = items?.filter(i => i.type === 'base') || [];
+  const combinedItems = items?.filter(i => i.type === 'combined') || [];
 
   const handleReset = () => {
     setSlot1(null);
@@ -28,14 +41,22 @@ export function ForgeSimulator() {
         (item.recipe?.[0] === slot1 && item.recipe?.[1] === slot2) ||
         (item.recipe?.[0] === slot2 && item.recipe?.[1] === slot1)
       );
-      setFusionResult(result?.id || null);
+      setFusionResult(result?.slug || null);
       setIsFusing(false);
     }, 800);
   };
 
-  const selectedA = baseItems.find(i => i.id === slot1);
-  const selectedB = baseItems.find(i => i.id === slot2);
-  const resultItem = combinedItems.find(i => i.id === fusionResult);
+  const selectedA = baseItems.find(i => i.slug === slot1);
+  const selectedB = baseItems.find(i => i.slug === slot2);
+  const resultItem = combinedItems.find(i => i.slug === fusionResult);
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center panel bg-black/40 border-primary/20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-12 py-12 px-6 panel bg-black/40 border-primary/20 relative overflow-hidden">
@@ -57,14 +78,14 @@ export function ForgeSimulator() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                key={item.id}
+                key={item.slug}
                 onClick={() => {
-                  if (!slot1) setSlot1(item.id);
-                  else if (!slot2) setSlot2(item.id);
+                  if (!slot1) setSlot1(item.slug);
+                  else if (!slot2) setSlot2(item.slug);
                 }}
                 disabled={!!fusionResult || isFusing}
                 className={`flex items-center gap-3 p-3 rounded border transition-all text-left ${
-                  (slot1 === item.id || slot2 === item.id) 
+                  (slot1 === item.slug || slot2 === item.slug) 
                     ? 'border-primary bg-primary/10 shadow-glow text-primary' 
                     : 'border-border bg-card/50 text-muted-foreground hover:border-primary/40'
                 } disabled:opacity-50`}
@@ -163,7 +184,7 @@ export function ForgeSimulator() {
                  </div>
                  <div className="text-6xl mb-4 drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]">{resultItem.icon}</div>
                  <h4 className="font-display text-2xl text-cyan font-bold tracking-widest uppercase">{resultItem.name}</h4>
-                 <p className="text-xs text-muted-foreground leading-relaxed max-w-[200px] mx-auto opacity-80">{resultItem.desc}</p>
+                 <p className="text-xs text-muted-foreground leading-relaxed max-w-[200px] mx-auto opacity-80">{resultItem.description}</p>
                  <Button 
                   variant="outline" 
                   size="sm" 

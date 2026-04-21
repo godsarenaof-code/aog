@@ -1,12 +1,35 @@
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
-import { baseItems, combinedItems, specialItems, rareItems, divineItems } from "@/lib/data";
-import { Zap, Plus, ChevronLeft, Sparkles, Box, Info, Skull, Crown, Star, History } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Zap, Plus, ChevronLeft, Sparkles, Box, Info, Skull, Crown, Star, History, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ForgeSimulator } from "@/components/items/ForgeSimulator";
 import { Badge } from "@/components/ui/badge";
 
 export default function Items() {
+  const { data: items, isLoading } = useQuery({
+    queryKey: ['items'],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from('items').select('*');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const baseItems = items?.filter(i => i.type === 'base') || [];
+  const combinedItems = items?.filter(i => i.type === 'combined') || [];
+  const rareItems = items?.filter(i => i.type === 'rare') || [];
+  const divineItems = items?.filter(i => i.type === 'divine') || [];
+  const specialItems = items?.filter(i => i.type === 'special') || [];
   return (
     <div className="min-h-screen pb-24 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-background via-background to-background">
       <Navbar />
@@ -55,7 +78,7 @@ export default function Items() {
               <div className="text-4xl group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300 drop-shadow-[0_0_10px_rgba(34,211,238,0.3)]">{item.icon}</div>
               <div>
                 <h3 className="font-display text-sm mb-1 uppercase tracking-tighter text-foreground group-hover:text-primary">{item.name}</h3>
-                <p className="text-[10px] text-muted-foreground font-display opacity-80">{item.desc}</p>
+                <p className="text-[10px] text-muted-foreground font-display opacity-80">{item.description}</p>
               </div>
             </div>
           ))}
@@ -78,7 +101,7 @@ export default function Items() {
                 <Badge variant="outline" className="border-[#ff4d4d]/40 text-[#ff4d4d] text-[10px] tracking-widest font-display">NÃO FABRICÁVEL</Badge>
               </div>
               <h3 className="font-display text-xl text-white uppercase tracking-wider">{item.name}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
               <div className="pt-2 flex items-center gap-2">
                  <Skull className="h-3 w-3 text-[#ff4d4d]" />
                  <span className="text-[9px] font-display text-[#ff4d4d]/80 uppercase tracking-widest">Drop Raro: Rodadas PvE (2-4%)</span>
@@ -188,7 +211,7 @@ export default function Items() {
               </div>
               
               <p className="text-xs text-purple-100/70 leading-relaxed font-display relative z-10 h-10 line-clamp-2">
-                {item.desc}
+                {item.description}
               </p>
               
               <div className="flex items-center justify-between pt-4 border-t border-purple-500/20 relative z-10">
