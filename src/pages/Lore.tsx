@@ -203,15 +203,15 @@ export default function Lore() {
         <div className="flex gap-6">
           <button 
             onClick={prevSlide}
-            className="h-14 w-14 rounded-full border border-cyan flex items-center justify-center text-cyan bg-cyan/10 hover:bg-cyan/20 shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all duration-300"
+            className="h-14 w-14 rounded-full border border-cyan flex items-center justify-center text-cyan bg-cyan/10 hover:bg-cyan/20 shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all duration-300 group"
           >
-            <ChevronLeft size={32} />
+            <ChevronLeft className="h-8 w-8 group-hover:scale-110 transition-transform" strokeWidth={3} />
           </button>
           <button 
             onClick={nextSlide}
-            className="h-14 w-14 rounded-full border border-cyan flex items-center justify-center text-cyan bg-cyan/10 hover:bg-cyan/20 shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all duration-300"
+            className="h-14 w-14 rounded-full border border-cyan flex items-center justify-center text-cyan bg-cyan/10 hover:bg-cyan/20 shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all duration-300 group"
           >
-            <ChevronRight size={32} />
+            <ChevronRight className="h-8 w-8 group-hover:scale-110 transition-transform" strokeWidth={3} />
           </button>
         </div>
 
