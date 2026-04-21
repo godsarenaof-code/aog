@@ -197,13 +197,53 @@ const Champions = () => {
       </section>
 
       {/* CAMPEÕES POR TIER */}
-      <section className="container py-12 space-y-12">
+      <section className="container py-12 space-y-8">
         <div className="space-y-3">
           <div className="text-xs font-display tracking-[0.4em] text-accent">// ELENCO COMPLETO</div>
           <h2 className="font-display text-3xl md:text-4xl font-bold">CAMPEÕES POR <span className="text-gold">TIER</span></h2>
+          <p className="text-sm text-muted-foreground">Filtre por sinergia para ver quais unidades pertencem a cada origem ou classe.</p>
         </div>
 
-        {grouped.map(({ tier, units }) => {
+        {/* FILTRO DE SINERGIAS */}
+        <div className="panel p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="font-display text-xs tracking-[0.3em] text-primary">// FILTRAR POR SINERGIA</span>
+            {active && (
+              <button
+                onClick={() => setActive(null)}
+                className="flex items-center gap-1 text-xs font-display tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-3 w-3" /> LIMPAR
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {allTraits.map((t) => {
+              const isActive = active === t.name;
+              const isOrigin = t.kind === "origin";
+              return (
+                <button
+                  key={t.name}
+                  onClick={() => setActive(isActive ? null : t.name)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded font-display text-xs tracking-wider border transition-all ${
+                    isActive
+                      ? isOrigin
+                        ? "bg-primary/20 border-primary text-primary shadow-glow"
+                        : "bg-accent/20 border-accent text-accent shadow-glow"
+                      : isOrigin
+                        ? "border-primary/30 text-primary/70 hover:border-primary/60 hover:text-primary"
+                        : "border-accent/30 text-accent/70 hover:border-accent/60 hover:text-accent"
+                  }`}
+                >
+                  <span>{t.icon}</span>
+                  {t.name.toUpperCase()}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {grouped.filter((g) => g.units.length > 0).map(({ tier, units }) => {
           const cfg = tierConfig[tier];
           return (
             <div key={tier} className="space-y-4">
