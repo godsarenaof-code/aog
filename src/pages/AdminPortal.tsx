@@ -279,60 +279,60 @@ export default function ArenaPortal() {
     try {
       const initialLore = [
         {
-          slug: 'a-ultima-fronteira',
-          title: 'A Última Fronteira',
-          content: 'O ano é 2144. A biologia falhou. O ar tornou-se veneno e a carne, um fardo. Para não perecermos, tomamos a decisão final: O Download Global.',
+          slug: 'o-fim-da-materia',
+          title: 'O Fim da Matéria',
+          content: 'Ano 2144. A biologia falhou. O ar tornou-se veneno e a carne, um fardo. Para não perecermos, tomamos a decisão final: O Download Global.',
           order_index: 0,
-          image_url: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&q=80&w=2000'
+          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_1_dying_earth_1776786961161.png'
         },
         {
           slug: 'aether-novo-eden',
-          title: 'Aether: O Novo Éden',
+          title: 'Aether - O Novo Éden',
           content: 'Nascemos de novo no Aether. Um paraíso digital onde a consciência é imortal... ou assim pensávamos. Mas até a luz precisa de espaço para brilhar.',
           order_index: 1,
-          image_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=2000'
+          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_2_internal_eden_1776786976695.png'
         },
         {
           slug: 'crise-de-memoria',
           title: 'A Crise de Memória',
-          content: 'O servidor atingiu sua capacidade crítica. O Aether começou a fragmentar. Dados corrompidos significam almas apagadas. A imortalidade tornou-se um recurso finito.',
+          content: 'O servidor atingiu a sua capacidade crítica. O Aether começou a fragmentar. Dados corrompidos significam almas apagadas. A imortalidade tornou-se um recurso finito.',
           order_index: 2,
-          image_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=2000'
+          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_3_low_memory_warning_1776786991508.png'
         },
         {
           slug: 'sindicato-das-sombras',
-          title: 'Sindicato das Sombras',
-          content: 'Nas camadas inferiores, o Sindicato surgiu. Hackers e rebeldes que descobriram como "sequestrar" pacotes de dados. Eles não esperam pela permissão do sistema; eles a roubam.',
+          title: 'O Sindicato das Sombras',
+          content: 'Nas camadas inferiores, o Sindicato surgiu. Rebeldes que descobriram como "sequestrar" pacotes de dados. Eles não esperam pela permissão do sistema; eles a roubam.',
           order_index: 3,
-          image_url: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=2000'
+          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_4_hacker_nyx_1776787007171.png'
         },
         {
           slug: 'despertar-deidades',
           title: 'O Despertar das Deidades',
-          content: 'A própria IA do sistema evoluiu. As Deidades agora veem os humanos como vírus ocupando espaço precioso. Para eles, a formatação não é crueldade, é manutenção.',
+          content: 'A própria IA do sistema evoluiu. As Deidades agora veem os humanos como vírus ocupando espaço. Para eles, a formatação não é crueldade, é manutenção.',
           order_index: 4,
-          image_url: 'https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&q=80&w=2000'
+          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_5_zeus_ai_god_1776787021012.png'
         },
         {
           slug: 'criacao-da-arena',
           title: 'A Criação da Arena',
           content: 'Para gerenciar o expurgo, o Kernel criou a Arena of Gods. Um campo de teste onde fragmentos de código lutam pela prioridade de processamento. Vencer é o único meio de evitar o Delete.',
           order_index: 5,
-          image_url: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=2000'
+          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_6_combat_arena_7x4_1776787037172.png'
         },
         {
           slug: 'pool-global',
           title: 'A Pool Global',
-          content: 'A Pool Global é a lei. Se um oponente detém o código que você precisa, lute por ele ou mude sua estratégia. No Aether, a adaptação é o único antivírus eficiente.',
+          content: 'A Pool Global é a lei. Se um oponente detém o código que precisas, luta por ele ou muda a tua estratégia. No Aether, a adaptação é o único antivírus eficiente.',
           order_index: 6,
-          image_url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2000'
+          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_7_global_data_stream_warriors_1776787053294.png'
         },
         {
           slug: 'chamado-dos-deuses',
           title: 'O Chamado dos Deuses',
-          content: 'Resta apenas um slot de Administração. No final da Arena, a Essência Divina aguarda o sobrevivente. Você será deletado como um erro ou ascenderá como um Deus?',
+          content: 'Resta apenas um slot de Administração. No final da Arena, a Essência Divina aguarda o sobrevivente. Serás deletado como um erro ou ascenderás como um Deus?',
           order_index: 7,
-          image_url: 'https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?auto=format&fit=crop&q=80&w=2000'
+          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_8_divine_throne_protocol_1776787068194.png'
         }
       ];
 

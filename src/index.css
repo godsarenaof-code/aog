@@ -136,3 +136,6 @@
 }
 .animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
 .animate-float { animation: float 4s ease-in-out infinite; }
+.shadow-cyan-glow {
+  box-shadow: 0 0 15px hsl(var(--primary) / 0.8), 0 0 30px hsl(var(--primary) / 0.4);
+}
