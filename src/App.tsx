@@ -58,9 +58,9 @@ const App = () => (
               <Route path="/lobby" element={<ProtectedRoute><Lobby /></ProtectedRoute>} />
               <Route path="/match" element={<ProtectedRoute><Match /></ProtectedRoute>} />
               <Route path="/collection" element={<ProtectedRoute><Collection /></ProtectedRoute>} />
-              <Route path="/champions" element={<ProtectedRoute><Champions /></ProtectedRoute>} />
-              <Route path="/items" element={<ProtectedRoute><Items /></ProtectedRoute>} />
-              <Route path="/simulator" element={<ProtectedRoute><TeamBuilder /></ProtectedRoute>} />
+              <Route path="/champions" element={<Champions />} />
+              <Route path="/items" element={<Items />} />
+              <Route path="/simulator" element={<TeamBuilder />} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               
               <Route path="/ranked" element={<ProtectedRoute><Placeholder title="RANKED" desc="Sistema competitivo." /></ProtectedRoute>} />
