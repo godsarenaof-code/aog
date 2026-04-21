@@ -3,6 +3,7 @@ import { Navbar } from "@/components/Navbar";
 import { baseItems, combinedItems, specialItems, rareItems, divineItems } from "@/lib/data";
 import { Zap, Plus, ChevronLeft, Sparkles, Box, Info, Skull, Crown, Star, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ForgeSimulator } from "@/components/items/ForgeSimulator";
 import { Badge } from "@/components/ui/badge";
 
 export default function Items() {
@@ -33,6 +34,11 @@ export default function Items() {
             </Link>
           </div>
         </div>
+      </section>
+
+      {/* SIMULADOR DE FORJA */}
+      <section className="container pb-12 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        <ForgeSimulator />
       </section>
 
       {/* COMPONENTES BASE */}
