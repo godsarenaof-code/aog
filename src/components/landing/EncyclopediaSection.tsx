@@ -2,8 +2,15 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
-import { champions } from "@/lib/data";
+import { ChevronRight, Sparkles, Zap, Shield, Target } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const traits = [
   "Ciborgue", "Holográfico", "Ascendente", "Sindicato", "Deidade",
@@ -12,6 +19,20 @@ const traits = [
 
 export function EncyclopediaSection() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [selectedChamp, setSelectedChamp] = useState<any | null>(null);
+
+  // Fetch Champions from Supabase
+  const { data: champions = [], isLoading } = useQuery({
+    queryKey: ['champions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('champions')
+        .select('*')
+        .order('tier', { ascending: false });
+      if (error) throw error;
+      return data;
+    }
+  });
 
   // Show only 5 featured champions on the landing page
   const featuredChampions = champions.slice(0, 5);
@@ -54,15 +75,28 @@ export function EncyclopediaSection() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12">
-        {featuredChampions.map((champ) => {
-          const isFaded = activeFilter !== null && !champ.classes.includes(activeFilter) && !champ.origins.includes(activeFilter);
+        {isLoading ? (
+           Array(5).fill(0).map((_, i) => (
+             <div key={i} className="panel flex flex-col items-center p-4 animate-pulse opacity-50">
+               <div className="w-24 h-24 bg-card rounded-xl mb-4" />
+               <div className="h-4 w-20 bg-card rounded mb-2" />
+               <div className="h-3 w-32 bg-card rounded" />
+             </div>
+           ))
+        ) : featuredChampions.map((champ: any) => {
+          const isFaded = activeFilter !== null && !champ.classes?.includes(activeFilter) && !champ.origins?.includes(activeFilter);
           return (
             <div
               key={champ.id}
-              className={`panel flex flex-col items-center p-4 transition-all duration-300 ${isFaded ? 'opacity-20 grayscale scale-95' : 'hover:-translate-y-2 hover:shadow-glow'}`}
+              onClick={() => setSelectedChamp(champ)}
+              className={`panel flex flex-col items-center p-4 transition-all duration-300 cursor-pointer ${isFaded ? 'opacity-20 grayscale scale-95' : 'hover:-translate-y-2 hover:shadow-cyan-glow border-primary/20 bg-background/40 hover:bg-background/60'}`}
             >
-              <div className={`w-24 h-24 bg-background rounded-xl border-2 mb-4 flex items-center justify-center font-display text-2xl font-bold uppercase overflow-hidden ${getTierColor(champ.tier)}`}>
-                <span className="text-muted-foreground/30 select-none">{champ.name.substring(0, 2)}</span>
+              <div className={`w-24 h-24 bg-background rounded-xl border-2 mb-4 flex items-center justify-center font-display text-2xl font-bold uppercase overflow-hidden transition-transform group-hover:scale-105 ${getTierColor(champ.tier)}`}>
+                 {champ.image_url ? (
+                   <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
+                 ) : (
+                   <span className="text-muted-foreground/30 select-none">{champ.name.substring(0, 2)}</span>
+                 )}
               </div>
               <h3 className="font-display text-lg mb-1">{champ.name}</h3>
               <div className="flex flex-wrap justify-center gap-1 mb-3">
@@ -73,7 +107,7 @@ export function EncyclopediaSection() {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground text-center line-clamp-2 mt-auto border-t border-border/40 pt-2 w-full">
-                {champ.ability?.name || "Habilidade Desconhecida"}
+                {champ.ability?.name || "Habilidade Especial"}
               </p>
             </div>
           );
@@ -88,6 +122,52 @@ export function EncyclopediaSection() {
           </Button>
         </Link>
       </div>
+
+      {/* MODAL CINEMÁTICO DO DEUS */}
+      <Dialog open={!!selectedChamp} onOpenChange={(open) => !open && setSelectedChamp(null)}>
+        <DialogContent className="max-w-4xl bg-background/95 border-primary/20 p-0 overflow-hidden backdrop-blur-xl">
+           <div className="grid lg:grid-cols-2">
+              <div className="relative aspect-[3/4] lg:aspect-auto h-[400px] lg:h-[600px] bg-card overflow-hidden">
+                 {selectedChamp?.action_image_url ? (
+                   <img src={selectedChamp.action_image_url} className="w-full h-full object-cover animate-fade-in" />
+                 ) : (
+                    <div className="h-full flex items-center justify-center text-muted-foreground/20 font-display text-8xl font-black">A.O.G</div>
+                 )}
+                 <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+              </div>
+              
+              <div className="p-8 flex flex-col justify-center space-y-6">
+                 <div>
+                    <div className="text-[10px] font-display tracking-[0.4em] text-cyan mb-2">// ARQUIVO DO DEUS</div>
+                    <DialogTitle className="font-display text-5xl font-black uppercase tracking-tighter">
+                       {selectedChamp?.name}
+                    </DialogTitle>
+                    <div className="flex gap-2 mt-2">
+                       {selectedChamp?.origins?.map((o: string) => <Badge key={o} variant="outline" className="border-primary/40 text-primary">{o}</Badge>)}
+                       {selectedChamp?.classes?.map((c: string) => <Badge key={c} variant="outline" className="border-accent/40 text-accent">{c}</Badge>)}
+                    </div>
+                 </div>
+                 
+                 <div className="panel p-4 bg-muted/20 border-primary/10">
+                    <div className="flex items-center gap-2 text-primary font-display text-xs mb-2 tracking-widest">
+                       <Zap className="h-3 w-3" /> HABILIDADE: {selectedChamp?.ability?.name}
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                       {selectedChamp?.ability?.effect || selectedChamp?.description}
+                    </p>
+                 </div>
+                 
+                 <p className="text-xs text-muted-foreground italic leading-relaxed">
+                    "{selectedChamp?.description || "A guardiã da Arena observa, aguardando o chamado dos deuses para a batalha final."}"
+                 </p>
+                 
+                 <Button onClick={() => setSelectedChamp(null)} className="w-full bg-primary text-black font-display font-bold tracking-widest mt-4">
+                    VOLTAR PARA A MATRIZ
+                 </Button>
+              </div>
+           </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/Navbar";
 import { champions as staticChampions } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,8 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Database, ShieldCheck, Upload, Database as DbIcon, Trash2, Edit2, Plus, Zap } from "lucide-react";
+import { Database, ShieldCheck, Upload, Database as DbIcon, Trash2, Edit2, Plus, Zap, Loader2, Camera, User } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export default function ArenaPortal() {
   const queryClient = useQueryClient();
@@ -65,7 +72,38 @@ export default function ArenaPortal() {
     }
   };
 
+  const [isUploading, setIsUploading] = useState(false);
+  const [editingChamp, setEditingChamp] = useState<any>(null);
+  
+  const handleUpload = async (file: File, type: 'portrait' | 'action', champSlug: string) => {
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${champSlug}-${type}-${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('characters')
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('characters')
+        .getPublicUrl(filePath);
+
+      toast.success(`Upload de ${type} concluído!`);
+      return publicUrl;
+    } catch (error: any) {
+      toast.error("Erro no upload: " + error.message);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const [newChamp, setNewChamp] = useState({
+    id: undefined, // Used for edit
     name: "",
     slug: "",
     tier: 1,
@@ -76,22 +114,62 @@ export default function ArenaPortal() {
     action_image_url: ""
   });
 
-  const addMutation = useMutation({
+  const upsertMutation = useMutation({
     mutationFn: async (champ: any) => {
-      const { error } = await (supabase as any).from('champions').insert([{
-        ...champ,
-        origins: champ.origins.split(',').map((s: string) => s.trim()),
-        classes: champ.classes.split(',').map((s: string) => s.trim()),
-        ability: { name: "Habilidade do Deus", mana: 100, effect: "Efeito devastador configurado via DB." }
-      }]);
-      if (error) throw error;
+      const isUpdate = !!champ.id;
+      const payload = {
+        name: champ.name,
+        slug: champ.slug,
+        tier: champ.tier,
+        origins: typeof champ.origins === 'string' ? champ.origins.split(',').map((s: string) => s.trim()) : champ.origins,
+        classes: typeof champ.classes === 'string' ? champ.classes.split(',').map((s: string) => s.trim()) : champ.classes,
+        description: champ.description,
+        image_url: champ.image_url,
+        action_image_url: champ.action_image_url,
+        ability: champ.ability || { name: "Habilidade do Deus", mana: 100, effect: "Efeito configurado via DB." }
+      };
+
+      if (isUpdate) {
+        const { error } = await supabase.from('champions').update(payload).eq('id', champ.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('champions').insert([payload]);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
-      toast.success("Novo campeão forjado!");
-      setNewChamp({ name: "", slug: "", tier: 1, origins: "", classes: "", description: "", image_url: "", action_image_url: "" });
+      toast.success(editingChamp ? "Deus atualizado na rede!" : "Novo campeão forjado!");
+      setNewChamp({ id: undefined, name: "", slug: "", tier: 1, origins: "", classes: "", description: "", image_url: "", action_image_url: "" });
+      setEditingChamp(null);
       queryClient.invalidateQueries({ queryKey: ['champions'] });
     }
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('champions').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Registro removido.");
+      queryClient.invalidateQueries({ queryKey: ['champions'] });
+    }
+  });
+
+  const openEditModal = (champion: any) => {
+    setEditingChamp(champion);
+    setNewChamp({
+      id: champion.id,
+      name: champion.name,
+      slug: champion.slug,
+      tier: champion.tier,
+      origins: champion.origins.join(', '),
+      classes: champion.classes.join(', '),
+      description: champion.description,
+      image_url: champion.image_url || "",
+      action_image_url: champion.action_image_url || ""
+    });
+  };
 
   return (
     <div className="min-h-screen pb-24 bg-background">
@@ -145,29 +223,50 @@ export default function ArenaPortal() {
                  <Label className="text-[10px] tracking-widest">TIER (1-5)</Label>
                  <Input type="number" min="1" max="5" value={newChamp.tier} onChange={e => setNewChamp({...newChamp, tier: parseInt(e.target.value)})} className="bg-background" />
               </div>
+
+              <ImageUploadField 
+                label="RETRATO (1:1)" 
+                value={newChamp.image_url} 
+                onUpload={async (file) => {
+                  const url = await handleUpload(file, 'portrait', newChamp.slug);
+                  if (url) setNewChamp({...newChamp, image_url: url});
+                }}
+                isUploading={isUploading}
+              />
+
+              <ImageUploadField 
+                label="ARTE DE AÇÃO (CINEMÁTICA)" 
+                value={newChamp.action_image_url} 
+                onUpload={async (file) => {
+                  const url = await handleUpload(file, 'action', newChamp.slug);
+                  if (url) setNewChamp({...newChamp, action_image_url: url});
+                }}
+                isUploading={isUploading}
+              />
+
               <div className="space-y-2">
-                 <Label className="text-[10px] tracking-widest">ORIGENS (SEPARADAS POR VÍRGULA)</Label>
-                 <Input value={newChamp.origins} onChange={e => setNewChamp({...newChamp, origins: e.target.value})} placeholder="Ciborgue, Sindicato" className="bg-background" />
-              </div>
-              <div className="space-y-2">
-                 <Label className="text-[10px] tracking-widest">CLASSES (SEPARADAS POR VÍRGULA)</Label>
-                 <Input value={newChamp.classes} onChange={e => setNewChamp({...newChamp, classes: e.target.value})} placeholder="Lâmina, Sentinela" className="bg-background" />
-              </div>
-              <div className="space-y-2">
-                 <Label className="text-[10px] tracking-widest">URL DO RETRATO (OPCIONAL)</Label>
-                 <Input value={newChamp.image_url} onChange={e => setNewChamp({...newChamp, image_url: e.target.value})} placeholder="https://..." className="bg-background" />
+                 <Label className="text-[10px] tracking-widest">ORIGENS (VÍRGULA)</Label>
+                 <Input value={newChamp.origins} onChange={e => setNewChamp({...newChamp, origins: e.target.value})} placeholder="Ciborgue" className="bg-background" />
               </div>
            </div>
-           <div className="space-y-2">
-              <Label className="text-[10px] tracking-widest">DESCRIÇÃO E HISTÓRIA</Label>
-              <Textarea value={newChamp.description} onChange={e => setNewChamp({...newChamp, description: e.target.value})} placeholder="Descrição do deus..." className="bg-background" />
+
+           <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                 <Label className="text-[10px] tracking-widest">CLASSES (VÍRGULA)</Label>
+                 <Input value={newChamp.classes} onChange={e => setNewChamp({...newChamp, classes: e.target.value})} placeholder="Lâmina" className="bg-background" />
+              </div>
+              <div className="space-y-2">
+                 <Label className="text-[10px] tracking-widest">DESCRIÇÃO E HISTÓRIA</Label>
+                 <Textarea value={newChamp.description} onChange={e => setNewChamp({...newChamp, description: e.target.value})} placeholder="Descrição do deus..." className="bg-background h-[40px]" />
+              </div>
            </div>
+
            <Button 
             className="w-full bg-primary text-black font-display font-bold tracking-[0.2em]"
-            onClick={() => addMutation.mutate(newChamp)}
-            disabled={!newChamp.name || !newChamp.slug}
+            onClick={() => upsertMutation.mutate(newChamp)}
+            disabled={!newChamp.name || !newChamp.slug || upsertMutation.isPending}
            >
-              REGISTRAR NA ETERNIDADE
+              {upsertMutation.isPending ? <Loader2 className="animate-spin" /> : "REGISTRAR NA ETERNIDADE"}
            </Button>
         </div>
 
@@ -184,9 +283,9 @@ export default function ArenaPortal() {
               ) : champions?.map((champion: any) => (
                 <div key={champion.id} className="panel p-4 flex items-center justify-between group hover:border-primary/40 transition-all">
                   <div className="flex items-center gap-4">
-                    <div className={`h-12 w-12 rounded border flex items-center justify-center font-display text-xl ${champion.tier === 5 ? 'border-gold bg-gold/5 text-gold' : 'border-border bg-card'}`}>
+                    <div className={`h-12 w-12 rounded border flex items-center justify-center font-display text-xl overflow-hidden ${champion.tier === 5 ? 'border-gold bg-gold/5 text-gold' : 'border-border bg-card'}`}>
                       {champion.image_url ? (
-                        <img src={champion.image_url} className="h-full w-full object-cover rounded" />
+                        <img src={champion.image_url} className="h-full w-full object-cover" />
                       ) : (
                         champion.name.substring(0, 2).toUpperCase()
                       )}
@@ -194,21 +293,28 @@ export default function ArenaPortal() {
                     <div>
                       <h4 className="font-display font-bold uppercase tracking-widest">{champion.name}</h4>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-display tracking-widest">TIER {champion.tier}</span>
-                        <span className="text-[9px] text-muted-foreground uppercase">{champion.origins.join(', ')}</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-display tracking-widest uppercase">TIER {champion.tier}</span>
+                        <span className="text-[9px] text-muted-foreground uppercase">{(champion.origins || []).join(', ')}</span>
                       </div>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-cyan hover:bg-cyan/10">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-cyan hover:bg-cyan/10"
+                      onClick={() => openEditModal(champion)}
+                    >
                       <Edit2 className="h-4 w-4" />
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="icon" 
                       className="h-8 w-8 text-red-500 hover:bg-red-500/10"
-                      onClick={() => deleteMutation.mutate(champion.id)}
+                      onClick={() => {
+                        if(confirm(`Desintegrar ${champion.name} do banco de dados?`)) deleteMutation.mutate(champion.id);
+                      }}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -218,9 +324,132 @@ export default function ArenaPortal() {
            </div>
         </div>
       </main>
+
+      {/* MODAL DE EDIÇÃO */}
+      <Dialog open={!!editingChamp} onOpenChange={(open) => !open && setEditingChamp(null)}>
+        <DialogContent className="max-w-2xl bg-background border-primary/20">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl uppercase tracking-widest text-primary flex items-center gap-2">
+              <Edit2 className="h-5 w-5" /> RECONFIGURAR DEIDADE
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid md:grid-cols-2 gap-4 py-4">
+             <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] tracking-widest">NOME</Label>
+                  <Input value={newChamp.name} onChange={e => setNewChamp({...newChamp, name: e.target.value})} className="bg-card" />
+                </div>
+                <div className="flex gap-4">
+                  <div className="space-y-2 flex-1">
+                    <Label className="text-[10px] tracking-widest">TIER</Label>
+                    <Input type="number" min="1" max="5" value={newChamp.tier} onChange={e => setNewChamp({...newChamp, tier: parseInt(e.target.value)})} className="bg-card" />
+                  </div>
+                  <div className="space-y-2 flex-1">
+                    <Label className="text-[10px] tracking-widest">SLUG</Label>
+                    <Input value={newChamp.slug} disabled className="bg-card opacity-50" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] tracking-widest">ORIGENS</Label>
+                  <Input value={newChamp.origins} onChange={e => setNewChamp({...newChamp, origins: e.target.value})} className="bg-card" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] tracking-widest">CLASSES</Label>
+                  <Input value={newChamp.classes} onChange={e => setNewChamp({...newChamp, classes: e.target.value})} className="bg-card" />
+                </div>
+             </div>
+             
+             <div className="space-y-4">
+                <ImageUploadField 
+                  label="EDITAR RETRATO" 
+                  value={newChamp.image_url} 
+                  onUpload={async (file) => {
+                    const url = await handleUpload(file, 'portrait', newChamp.slug);
+                    if (url) setNewChamp({...newChamp, image_url: url});
+                  }}
+                  isUploading={isUploading}
+                />
+                <ImageUploadField 
+                  label="EDITAR ARTE DE AÇÃO" 
+                  value={newChamp.action_image_url} 
+                  onUpload={async (file) => {
+                    const url = await handleUpload(file, 'action', newChamp.slug);
+                    if (url) setNewChamp({...newChamp, action_image_url: url});
+                  }}
+                  isUploading={isUploading}
+                />
+                <div className="space-y-2">
+                  <Label className="text-[10px] tracking-widest">HISTÓRIA</Label>
+                  <Textarea value={newChamp.description} onChange={e => setNewChamp({...newChamp, description: e.target.value})} className="bg-card h-[100px]" />
+                </div>
+             </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditingChamp(null)} className="font-display tracking-widest">CANCELAR</Button>
+            <Button 
+              className="bg-primary text-black font-display font-bold tracking-widest shadow-glow px-8"
+              onClick={() => upsertMutation.mutate(newChamp)}
+              disabled={upsertMutation.isPending}
+            >
+              {upsertMutation.isPending ? <Loader2 className="animate-spin" /> : "SALVAR ALTERAÇÕES"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
+function ImageUploadField({ label, value, onUpload, isUploading }: { label: string, value: string, onUpload: (file: File) => void, isUploading: boolean }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <div className="space-y-2">
+      <Label className="text-[10px] tracking-widest uppercase text-muted-foreground">{label}</Label>
+      <div className="flex gap-3">
+        <div className="h-10 w-10 shrink-0 rounded border border-dashed border-border flex items-center justify-center bg-card relative overflow-hidden group">
+          {value ? (
+            <img src={value} className="h-full w-full object-cover" />
+          ) : (
+            <User className="h-4 w-4 text-muted-foreground/40" />
+          )}
+          <button 
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <Camera className="h-4 w-4 text-white" />
+          </button>
+        </div>
+        <div className="flex-1 relative">
+          <Input value={value} readOnly placeholder="URL ou upload..." className="bg-background pr-10 text-[10px]" />
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            className="absolute right-0 top-0 h-10 w-10 hover:text-primary"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          </Button>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            className="hidden" 
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) onUpload(file);
+            }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 function StatCard({ label, value, icon }: { label: string, value: string | number, icon: React.ReactNode }) {
   return (
