@@ -68,10 +68,39 @@ const tierConfig = {
   5: { color: "text-gold", border: "border-gold/60", bg: "bg-gradient-gold/10", label: "T5" },
 } as const;
 
+const allTraits = [
+  { name: "Ciborgue", kind: "origin" as const, icon: "⚙️" },
+  { name: "Holográfico", kind: "origin" as const, icon: "👤" },
+  { name: "Sindicato", kind: "origin" as const, icon: "💰" },
+  { name: "Ascendente", kind: "origin" as const, icon: "✨" },
+  { name: "Deidade", kind: "origin" as const, icon: "⚡" },
+  { name: "Lâmina", kind: "class" as const, icon: "⚔️" },
+  { name: "Sentinela", kind: "class" as const, icon: "🛡️" },
+  { name: "Tecnomago", kind: "class" as const, icon: "🧪" },
+  { name: "Atirador", kind: "class" as const, icon: "🏹" },
+  { name: "Bastion", kind: "class" as const, icon: "🧱" },
+];
+
+const viability = [
+  { trait: "Lâminas", icon: "⚔️", count: 6, max: "2/4/6", note: "Kael, Nyx, Sombra, Zane, Draven-X, Ares. Bônus máx (6) sem margem — todos necessários ou use Espátula." },
+  { trait: "Tecnomagos", icon: "🧪", count: 6, max: "2/4", note: "Volt, Nano-Bit, Astra, Nova, Luna, Zeus-01. Bônus máx (4) é confortável — sobram 2 de margem." },
+  { trait: "Ciborgues", icon: "⚙️", count: 6, max: "2/4/6", note: "Kael, Tork, Volt, Vector, Zane, Helius. Pivote para (4) é seguro." },
+  { trait: "Sentinelas", icon: "🛡️", count: 6, max: "2/4", note: "Tork, Barão, Nano-Bit, Titan, Helius, Gaia. Bônus (4) tem 2 unidades de folga." },
+  { trait: "Bastions", icon: "🧱", count: 5, max: "2/3", note: "Pax, Barão, Titan, Cyber-Monk, Ares. Bônus máx (3) é trivial de fechar." },
+  { trait: "Atiradores", icon: "🏹", count: 4, max: "2/4", note: "M1-RA, Lyra, Vector, Luna. Bônus máx (4) requer todos — comp dedicada." },
+];
+
 const Champions = () => {
+  const [active, setActive] = useState<string | null>(null);
+
+  const filtered = useMemo(
+    () => (active ? champions.filter((c) => c.origins.includes(active) || c.classes.includes(active)) : champions),
+    [active]
+  );
+
   const grouped = [1, 2, 3, 4, 5].map((t) => ({
     tier: t as 1 | 2 | 3 | 4 | 5,
-    units: champions.filter((c) => c.tier === t),
+    units: filtered.filter((c) => c.tier === t),
   }));
 
   return (
