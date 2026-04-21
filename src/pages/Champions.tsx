@@ -232,10 +232,9 @@ const Champions = () => {
                   </div>
                 ))}
               </div>
-                </div>
-              </div>
-            );
-          })}
+            </div>
+          );
+        })}
         </>
       )}
       </section>
