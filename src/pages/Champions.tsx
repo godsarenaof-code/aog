@@ -32,6 +32,15 @@ const Champions = () => {
     units: filtered.filter((c) => c.tier === t),
   }));
 
+  const activeTrait = useMemo(() => {
+    if (!active) return null;
+    const o = origins.find((x) => x.name === active);
+    if (o) return { ...o, kind: "origin" as const };
+    const c = classes.find((x) => x.name === active);
+    if (c) return { ...c, kind: "class" as const, icon: "⚔️" };
+    return null;
+  }, [active]);
+
   return (
     <div className="min-h-screen overflow-x-hidden pb-12">
       <Navbar />
