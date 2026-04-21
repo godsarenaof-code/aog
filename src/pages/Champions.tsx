@@ -1,11 +1,7 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Navbar } from "@/components/Navbar";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-import { Search, Filter, Shield, Zap, Sparkles, ChevronRight, Info, Crown, Coins, Droplet, X } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Sparkles, Crown, Coins, Droplet, X } from "lucide-react";
+import { champions, origins, classes } from "@/lib/data";
 
 const tierConfig = {
   1: { color: "text-muted-foreground", border: "border-muted", bg: "bg-muted/20", label: "T1" },
@@ -15,33 +11,32 @@ const tierConfig = {
   5: { color: "text-gold", border: "border-gold/60", bg: "bg-gradient-gold/10", label: "T5" },
 } as const;
 
-const allTraits = [
-  ...origins.map(o => ({ name: o.name, kind: "origin" as const, icon: o.icon })),
-  ...classes.map(c => ({ name: c.name, kind: "class" as const, icon: "⚔️" })), // Default icon for classes if not specific
+type Trait = { name: string; kind: "origin" | "class"; icon: any; levels?: string; desc: string };
+const allTraits: Trait[] = [
+  ...origins.map((o) => ({ name: o.name, kind: "origin" as const, icon: o.icon, levels: o.levels, desc: o.desc })),
+  ...classes.map((c) => ({ name: c.name, kind: "class" as const, icon: c.icon, levels: c.levels, desc: c.desc })),
 ];
 
+const renderIcon = (icon: any, className = "h-4 w-4") => {
+  if (!icon) return null;
+  if (typeof icon === "string") return <span>{icon}</span>;
+  const Icon = icon;
+  return <Icon className={className} />;
+};
+
 const Champions = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [active, setActive] = useState<string | null>(null);
 
-  const { data: dbChampions = [], isLoading } = useQuery({
-    queryKey: ['champions'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('champions').select('*');
-      if (error) throw error;
-      return data;
-    }
-  });
-
-  const filteredChampions = dbChampions.filter(champ => {
-    const matchesSearch = champ.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = !activeFilter || champ.origins?.includes(activeFilter) || champ.classes?.includes(activeFilter);
-    return matchesSearch && matchesFilter;
-  });
+  const filtered = useMemo(() => {
+    if (!active) return champions;
+    return champions.filter(
+      (c) => c.origins?.includes(active) || c.classes?.includes(active)
+    );
+  }, [active]);
 
   const grouped = [1, 2, 3, 4, 5].map((t) => ({
     tier: t as 1 | 2 | 3 | 4 | 5,
-    units: filteredChampions.filter((c) => c.tier === t),
+    units: filtered.filter((c) => c.tier === t),
   }));
 
   const activeTrait = useMemo(() => {
@@ -49,7 +44,7 @@ const Champions = () => {
     const o = origins.find((x) => x.name === active);
     if (o) return { ...o, kind: "origin" as const };
     const c = classes.find((x) => x.name === active);
-    if (c) return { ...c, kind: "class" as const, icon: "⚔️" };
+    if (c) return { ...c, kind: "class" as const };
     return null;
   }, [active]);
 
@@ -57,7 +52,6 @@ const Champions = () => {
     <div className="min-h-screen overflow-x-hidden pb-12">
       <Navbar />
 
-      {/* HERO */}
       <section className="relative pt-32 pb-12">
         <div className="container space-y-4 animate-fade-in">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/40 bg-primary/5 text-xs font-display tracking-[0.3em] text-primary">
@@ -72,16 +66,14 @@ const Champions = () => {
             para forjar composições devastadoras.
           </p>
           <div className="flex gap-8 pt-4 text-sm">
-            <div><div className="font-display text-2xl text-cyan">22</div><div className="text-muted-foreground uppercase text-[10px] tracking-widest">Unidades</div></div>
-            <div><div className="font-display text-2xl text-cyan">5</div><div className="text-muted-foreground uppercase text-[10px] tracking-widest">Origens</div></div>
-            <div><div className="font-display text-2xl text-cyan">5</div><div className="text-muted-foreground uppercase text-[10px] tracking-widest">Classes</div></div>
+            <div><div className="font-display text-2xl text-cyan">{champions.length}</div><div className="text-muted-foreground uppercase text-[10px] tracking-widest">Unidades</div></div>
+            <div><div className="font-display text-2xl text-cyan">{origins.length}</div><div className="text-muted-foreground uppercase text-[10px] tracking-widest">Origens</div></div>
+            <div><div className="font-display text-2xl text-cyan">{classes.length}</div><div className="text-muted-foreground uppercase text-[10px] tracking-widest">Classes</div></div>
           </div>
         </div>
       </section>
 
-      {/* CAMPEÕES POR TIER */}
       <section className="container py-12 space-y-8">
-        {/* FILTRO DE SINERGIAS */}
         <div className="panel p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className="font-display text-xs tracking-[0.3em] text-primary uppercase">// Filtrar Sinergias</span>
@@ -112,7 +104,7 @@ const Champions = () => {
                         : "border-accent/30 text-accent/70 hover:border-accent/60 hover:text-accent"
                   }`}
                 >
-                  <span className="text-sm">{t.icon}</span>
+                  {renderIcon(t.icon)}
                   {t.name.toUpperCase()}
                 </button>
               );
@@ -120,11 +112,10 @@ const Champions = () => {
           </div>
         </div>
 
-        {/* PAINEL DA SINERGIA ATIVA */}
         {activeTrait && (
           <div className={`panel p-5 border-2 ${activeTrait.kind === "origin" ? "border-primary/60 bg-primary/5" : "border-accent/60 bg-accent/5"}`}>
             <div className="flex items-start gap-4">
-              <div className="text-4xl shrink-0">{activeTrait.icon}</div>
+              <div className="text-4xl shrink-0">{renderIcon(activeTrait.icon, "h-10 w-10")}</div>
               <div className="flex-1 space-y-2">
                 <div className="flex items-center gap-3 flex-wrap">
                   <h3 className={`font-display text-2xl ${activeTrait.kind === "origin" ? "text-primary" : "text-accent"}`}>
@@ -133,9 +124,11 @@ const Champions = () => {
                   <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-muted/30 text-muted-foreground">
                     {activeTrait.kind === "origin" ? "ORIGEM" : "CLASSE"}
                   </span>
-                  <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-cyan/10 text-cyan border border-cyan/30">
-                    NÍVEIS {activeTrait.levels}
-                  </span>
+                  {activeTrait.levels && (
+                    <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-cyan/10 text-cyan border border-cyan/30">
+                      NÍVEIS {activeTrait.levels}
+                    </span>
+                  )}
                   <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-muted/30 text-muted-foreground">
                     {filtered.length} {filtered.length === 1 ? "UNIDADE DISPONÍVEL" : "UNIDADES DISPONÍVEIS"}
                   </span>
