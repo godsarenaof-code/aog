@@ -57,11 +57,16 @@ export const ChampionCard: React.FC<ChampionCardProps> = ({ champion, onClick, c
                )}
                
                {/* Tier Tag */}
-               <div className="absolute top-2 right-2">
-                  <Badge variant="outline" className={`bg-black/60 backdrop-blur-md border-white/10 font-black px-2 py-0.5 text-[10px] ${champion.tier === 5 ? 'text-amber-400' : 'text-white'}`}>
-                    {champion.tier}G
-                  </Badge>
-               </div>
+                <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+                   <Badge variant="outline" className={`bg-black/60 backdrop-blur-md border-white/10 font-black px-2 py-0.5 text-[10px] ${champion.tier === 5 ? 'text-amber-400' : 'text-white'}`}>
+                     {champion.tier}G
+                   </Badge>
+                   {champion.equippedSkin && (
+                     <Badge className="bg-cyan/80 text-black border-none text-[8px] font-black uppercase tracking-tighter shadow-glow-sm">
+                        SKIN ATIVA
+                     </Badge>
+                   )}
+                </div>
 
                {/* Bottom Overlay Info */}
                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3 pt-6">
@@ -109,11 +114,16 @@ export const ChampionCard: React.FC<ChampionCardProps> = ({ champion, onClick, c
                    <span className="text-xs font-display font-bold">{champion.hp || 700}</span>
                    <span className="text-[8px] text-muted-foreground uppercase tracking-widest">HP</span>
                 </div>
-                <div className="bg-white/5 rounded-lg p-2 border border-white/5 flex flex-col items-center">
-                   <Sword className="h-3 w-3 text-orange-500 mb-1" />
-                   <span className="text-xs font-display font-bold">{champion.attack || 120}</span>
-                   <span className="text-[8px] text-muted-foreground uppercase tracking-widest">ATK</span>
-                </div>
+                 <div className="bg-white/5 rounded-lg p-2 border border-white/5 flex flex-col items-center relative overflow-hidden group/stat">
+                    <Sword className="h-3 w-3 text-orange-500 mb-1" />
+                    <span className="text-xs font-display font-bold">
+                      {Math.round((champion.attack || 120) * (1 + (champion.equippedSkin?.damage_bonus || 0) / 100))}
+                    </span>
+                    <span className="text-[8px] text-muted-foreground uppercase tracking-widest">ATK</span>
+                    {champion.equippedSkin && (
+                      <div className="absolute top-0 right-0 bg-emerald-500 text-[6px] px-1 font-black">+{champion.equippedSkin.damage_bonus}%</div>
+                    )}
+                 </div>
                 <div className="bg-white/5 rounded-lg p-2 border border-white/5 flex flex-col items-center">
                    <Timer className="h-3 w-3 text-cyan-500 mb-1" />
                    <span className="text-xs font-display font-bold">{champion.speed || 1.3}</span>

@@ -38,6 +38,22 @@ export default function TeamBuilder() {
     }
   });
 
+  const { data: equippedSkins, isLoading: skinsLoading } = useQuery({
+    queryKey: ['equippedSkins'],
+    queryFn: async () => {
+      const token = localStorage.getItem('aog_token');
+      if (!token) return [];
+      const res = await fetch('http://localhost:3001/api/store/my-skins', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const skins = await res.json();
+        return skins.filter((s: any) => s.is_equipped);
+      }
+      return [];
+    }
+  });
+
   const addToTeam = (champ: any) => {
     if (team.some(c => c.id === champ.id)) {
       toast.error(`${champ.name} já está no seu time! No simulador usamos apenas 1 peça por personagem.`);
@@ -60,7 +76,10 @@ export default function TeamBuilder() {
     toast.success("Campo de batalha limpo!");
   };
 
-  const filteredChamps = champions?.filter(c => 
+  const filteredChamps = champions?.map(c => {
+    const skin = equippedSkins?.find((s: any) => s.champion_id === c.id);
+    return { ...c, equippedSkin: skin };
+  }).filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
@@ -75,7 +94,7 @@ export default function TeamBuilder() {
     }
   };
 
-  const isLoading = champsLoading || traitsLoading;
+  const isLoading = champsLoading || traitsLoading || skinsLoading;
 
   return (
     <div className="min-h-screen bg-background pb-20">

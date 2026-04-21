@@ -17,6 +17,7 @@ import PatchNotes from "./pages/PatchNotes.tsx";
 import Profile from "./pages/Profile.tsx";
 import AdminPortal from "./pages/AdminPortal.tsx";
 import TeamBuilder from "./pages/TeamBuilder.tsx";
+import Store from "./pages/Store.tsx";
 import Lore from "./pages/Lore.tsx";
 import Placeholder from "./pages/Placeholder.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -62,6 +63,7 @@ const App = () => (
               <Route path="/items" element={<Items />} />
               <Route path="/simulator" element={<TeamBuilder />} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/store" element={<ProtectedRoute><Store /></ProtectedRoute>} />
               
               <Route path="/ranked" element={<ProtectedRoute><Placeholder title="RANKED" desc="Sistema competitivo." /></ProtectedRoute>} />
               <Route path="/clans" element={<ProtectedRoute><Placeholder title="CLÃS" desc="Forme alianças." /></ProtectedRoute>} />

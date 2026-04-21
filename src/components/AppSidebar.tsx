@@ -1,5 +1,5 @@
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
-import { Swords, Home, Users, Trophy, User, Map, BookOpen, Settings } from "lucide-react";
+import { Swords, Home, Users, Trophy, User, Map, BookOpen, Settings, ShoppingCart } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +23,7 @@ const playItems = [
 
 const metaItems = [
   { title: "Coleção", url: "/collection", icon: BookOpen },
+  { title: "Loja", url: "/store", icon: ShoppingCart },
   { title: "Roadmap", url: "/roadmap", icon: Map },
   { title: "Clãs", url: "/clans", icon: Users },
 ];
