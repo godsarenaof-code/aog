@@ -107,6 +107,10 @@ router.get('/leaderboard', async (req, res) => {
       userPosition: userContext ? parseInt(userContext.position) : null
     });
   } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar leaderboard.' });
+  }
+});
+
 // @route   POST /api/user/update-nickname
 router.post('/update-nickname', authMiddleware, async (req: AuthRequest, res) => {
   const { newNickname } = req.body;

@@ -188,10 +188,10 @@ const Settings = () => {
                   >
                     <div className="space-y-1">
                         <h2 className="text-2xl font-display font-black italic uppercase italic tracking-tighter">PROTOCOLO DE <span className="text-primary italic">IDENTIDADE</span></h2>
-                        <p className="text-xs text-muted-foreground uppercase tracking-widest opacity-60">Gerencie sua assinatura e presença visual na Arena</p>
+                        <p className="text-xs text-muted-foreground uppercase tracking-widest opacity-60 font-bold underline decoration-primary/40">GERENCIE SEU NICKNAME, TÍTULO E AVATAR</p>
                      </div>
 
-                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                        <div className="space-y-6">
                        <div className="space-y-3">
                           <label className="text-[10px] font-display font-black tracking-widest text-muted-foreground uppercase">Nickname Atual</label>
@@ -334,6 +334,7 @@ const Settings = () => {
                        </div>
                     </div>
                   </div>
+                 </motion.div>
                 )}
 
                 {activeTab === "visual" && (
