@@ -14,6 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
+      champions: {
+        Row: {
+          ability: Json
+          action_image_url: string | null
+          classes: string[] | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          origins: string[] | null
+          slug: string
+          tier: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          ability?: Json
+          action_image_url?: string | null
+          classes?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          origins?: string[] | null
+          slug: string
+          tier?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          ability?: Json
+          action_image_url?: string | null
+          classes?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          origins?: string[] | null
+          slug?: string
+          tier?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      items: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          divine_upgrade_slug: string | null
+          icon: string | null
+          id: string
+          name: string
+          recipe: string[] | null
+          slug: string
+          stats: Json | null
+          type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          divine_upgrade_slug?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          recipe?: string[] | null
+          slug: string
+          stats?: Json | null
+          type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          divine_upgrade_slug?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          recipe?: string[] | null
+          slug?: string
+          stats?: Json | null
+          type?: string | null
+        }
+        Relationships: []
+      }
       pre_registrations: {
         Row: {
           created_at: string | null
@@ -35,6 +119,36 @@ export type Database = {
           id?: string
           name?: string | null
           referral_source?: string | null
+        }
+        Relationships: []
+      }
+      traits: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          levels: string | null
+          name: string
+          type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          levels?: string | null
+          name: string
+          type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          levels?: string | null
+          name?: string
+          type?: string | null
         }
         Relationships: []
       }
