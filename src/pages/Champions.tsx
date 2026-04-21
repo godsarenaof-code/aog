@@ -32,6 +32,15 @@ const Champions = () => {
     units: filtered.filter((c) => c.tier === t),
   }));
 
+  const activeTrait = useMemo(() => {
+    if (!active) return null;
+    const o = origins.find((x) => x.name === active);
+    if (o) return { ...o, kind: "origin" as const };
+    const c = classes.find((x) => x.name === active);
+    if (c) return { ...c, kind: "class" as const, icon: "⚔️" };
+    return null;
+  }, [active]);
+
   return (
     <div className="min-h-screen overflow-x-hidden pb-12">
       <Navbar />
@@ -98,6 +107,32 @@ const Champions = () => {
             })}
           </div>
         </div>
+
+        {/* PAINEL DA SINERGIA ATIVA */}
+        {activeTrait && (
+          <div className={`panel p-5 border-2 ${activeTrait.kind === "origin" ? "border-primary/60 bg-primary/5" : "border-accent/60 bg-accent/5"}`}>
+            <div className="flex items-start gap-4">
+              <div className="text-4xl shrink-0">{activeTrait.icon}</div>
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h3 className={`font-display text-2xl ${activeTrait.kind === "origin" ? "text-primary" : "text-accent"}`}>
+                    {activeTrait.name.toUpperCase()}
+                  </h3>
+                  <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-muted/30 text-muted-foreground">
+                    {activeTrait.kind === "origin" ? "ORIGEM" : "CLASSE"}
+                  </span>
+                  <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-cyan/10 text-cyan border border-cyan/30">
+                    NÍVEIS {activeTrait.levels}
+                  </span>
+                  <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-muted/30 text-muted-foreground">
+                    {filtered.length} {filtered.length === 1 ? "UNIDADE DISPONÍVEL" : "UNIDADES DISPONÍVEIS"}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{activeTrait.desc}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {grouped.filter((g) => g.units.length > 0).map(({ tier, units }) => {
           const cfg = tierConfig[tier];
