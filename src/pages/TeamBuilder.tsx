@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { BattlefieldGrid } from "@/components/team/BattlefieldGrid";
 
 export default function TeamBuilder() {
   const [team, setTeam] = useState<any[]>([]);
@@ -58,12 +59,12 @@ export default function TeamBuilder() {
 
   const getTierColor = (tier: number) => {
     switch (tier) {
-      case 1: return "border-muted text-muted-foreground bg-muted/10";
-      case 2: return "border-success text-success bg-success/10";
-      case 3: return "border-cyan text-cyan bg-cyan/10";
-      case 4: return "border-accent text-accent bg-accent/10";
-      case 5: return "border-gold text-gold bg-gold/10";
-      default: return "border-white";
+      case 1: return "border-slate-500/30 text-slate-400 bg-slate-500/5";
+      case 2: return "border-emerald-500/30 text-emerald-400 bg-emerald-500/5";
+      case 3: return "border-cyan/30 text-cyan bg-cyan/5";
+      case 4: return "border-purple-500/30 text-purple-400 bg-purple-500/5";
+      case 5: return "border-amber-500/50 text-amber-400 bg-amber-500/5 shadow-[0_0_10px_rgba(245,158,11,0.2)]";
+      default: return "border-border/40 text-muted-foreground bg-muted/5";
     }
   };
 
@@ -124,53 +125,8 @@ export default function TeamBuilder() {
             {/* Middle: Grid & Selection */}
             <div className="lg:col-span-9 space-y-8">
                
-               {/* Selected Team Bench */}
-               <div className="panel p-6 bg-black/40 border-primary/20 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                     <Sword className="h-24 w-24" />
-                  </div>
-                  
-                  <div className="flex items-center justify-between mb-8">
-                     <h3 className="font-display text-sm tracking-[0.3em] uppercase">Sua Composição ({team.length}/{teamLimit})</h3>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-10 gap-3 min-h-[100px]">
-                     <AnimatePresence>
-                        {team.map((champ) => (
-                           <motion.div
-                             layout
-                             initial={{ opacity: 0, scale: 0.5 }}
-                             animate={{ opacity: 1, scale: 1 }}
-                             exit={{ opacity: 0, scale: 0.5 }}
-                             key={champ.tempId}
-                             className="relative group"
-                           >
-                              <div className={`aspect-square rounded-lg border-2 overflow-hidden bg-background shadow-lg transition-transform hover:scale-105 ${getTierColor(champ.tier)}`}>
-                                 {champ.image_url ? (
-                                   <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
-                                 ) : (
-                                   <div className="w-full h-full flex items-center justify-center font-display text-xl font-bold bg-muted/20">
-                                      {champ.name[0]}
-                                   </div>
-                                 )}
-                              </div>
-                              <button 
-                                onClick={() => removeFromTeam(champ.tempId)}
-                                className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10"
-                              >
-                                 ✕
-                              </button>
-                              <div className="text-[8px] font-display text-center mt-1 truncate opacity-60 uppercase">{champ.name}</div>
-                           </motion.div>
-                        ))}
-                        {Array.from({ length: Math.max(0, 10 - team.length) }).map((_, i) => (
-                           <div key={`empty-${i}`} className="aspect-square rounded-lg border border-dashed border-border/20 flex items-center justify-center opacity-20">
-                              <Plus className="h-4 w-4" />
-                           </div>
-                        ))}
-                     </AnimatePresence>
-                  </div>
-               </div>
+               {/* Battle Arena & Bench */}
+               <BattlefieldGrid team={team} />
 
                {/* Champion Selection Grid */}
                <div className="space-y-6">
@@ -188,35 +144,66 @@ export default function TeamBuilder() {
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
-                    {filteredChamps.map((champ: any) => (
-                       <motion.button
-                         whileHover={{ y: -5 }}
-                         whileTap={{ scale: 0.95 }}
-                         key={champ.id}
-                         onClick={() => addToTeam(champ)}
-                         className={`panel p-3 text-left group border-border/40 hover:border-cyan/40 bg-card/40 transition-all ${getTierColor(champ.tier)} bg-opacity-5`}
-                       >
-                          <div className="flex items-start justify-between mb-3">
-                             <div className={`h-12 w-12 rounded border-2 shadow-inner overflow-hidden ${getTierColor(champ.tier)}`}>
-                                {champ.image_url ? (
-                                   <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
-                                ) : (
-                                   <div className="w-full h-full flex items-center justify-center font-display font-black opacity-30">{champ.name[0]}</div>
-                                )}
-                             </div>
-                             <div className="text-[10px] font-display font-bold">{champ.tier}G</div>
-                          </div>
-                          <h4 className="font-display text-xs font-bold truncate uppercase">{champ.name}</h4>
-                          <div className="flex flex-wrap gap-1 mt-2">
-                             {[...(champ.origins || []), ...(champ.classes || [])].slice(0, 2).map((t: string) => (
-                                <span key={t} className="text-[7px] font-display tracking-widest bg-background/60 px-1 border border-border/20 rounded uppercase">
-                                   {t}
-                                </span>
-                             ))}
-                          </div>
-                       </motion.button>
-                    ))}
+                 <div className="space-y-12">
+                    {[5, 4, 3, 2, 1].map(tier => {
+                       const tierChamps = filteredChamps.filter(c => c.tier === tier);
+                       if (tierChamps.length === 0) return null;
+
+                       return (
+                         <div key={tier} className="space-y-4">
+                            <div className="flex items-center gap-4">
+                               <h4 className={`font-display text-[10px] tracking-[0.5em] font-black py-1 px-4 rounded border ${
+                                 tier === 5 ? 'border-amber-500 text-amber-500 bg-amber-500/10' :
+                                 tier === 4 ? 'border-purple-500 text-purple-500 bg-purple-500/10' :
+                                 tier === 3 ? 'border-primary text-primary bg-primary/10' :
+                                 tier === 2 ? 'border-emerald-500 text-emerald-500 bg-emerald-500/10' :
+                                 'border-slate-500 text-slate-500 bg-slate-500/10'
+                               }`}>
+                                 TIER {tier} ({tier}G)
+                               </h4>
+                               <div className="h-px flex-1 bg-border/20" />
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                               {tierChamps.map((champ: any) => {
+                                  const styles = getTierColor(champ.tier);
+                                  const isT5 = champ.tier === 5;
+                                  
+                                  return (
+                                    <motion.button
+                                      whileHover={{ y: -5, scale: 1.02 }}
+                                      whileTap={{ scale: 0.95 }}
+                                      key={champ.id}
+                                      onClick={() => addToTeam(champ)}
+                                      className={`panel p-3 text-left group border transition-all duration-300 ${styles} ${
+                                        isT5 ? 'shadow-[0_0_20px_rgba(245,158,11,0.2)]' : ''
+                                      }`}
+                                    >
+                                       <div className="flex items-start justify-between mb-3">
+                                          <div className={`h-12 w-12 rounded border-2 shadow-inner overflow-hidden flex items-center justify-center bg-background ${styles} ${isT5 ? 'border-amber-500/50' : ''}`}>
+                                             {champ.image_url ? (
+                                                <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                             ) : (
+                                                <div className="w-full h-full flex items-center justify-center font-display font-black opacity-30">{champ.name[0]}</div>
+                                             )}
+                                          </div>
+                                          <div className={`text-[10px] font-display font-black ${isT5 ? 'text-amber-500' : ''}`}>{champ.tier}G</div>
+                                       </div>
+                                       <h4 className={`font-display text-xs font-bold truncate uppercase tracking-widest ${isT5 ? 'text-amber-500' : ''}`}>{champ.name}</h4>
+                                       <div className="flex flex-wrap gap-1 mt-2">
+                                          {[...(champ.origins || []), ...(champ.classes || [])].slice(0, 2).map((t: string) => (
+                                             <span key={t} className="text-[7.5px] font-display font-bold tracking-widest bg-black/40 px-1.5 py-0.5 border border-white/10 rounded uppercase opacity-80">
+                                                {t}
+                                             </span>
+                                          ))}
+                                       </div>
+                                    </motion.button>
+                                  );
+                               })}
+                            </div>
+                         </div>
+                       );
+                    })}
                  </div>
                </div>
 

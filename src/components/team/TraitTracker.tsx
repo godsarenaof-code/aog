@@ -39,7 +39,7 @@ export function TraitTracker({ team, traits }: TraitTrackerProps) {
 
     return traits.map(trait => {
         const count = counts[trait.name] || 0;
-        const levels = trait.levels.split('/').map((l: string) => parseInt(l.trim()));
+        const levels = trait.levels?.split('/').map((l: string) => parseInt(l.trim())) || [];
         
         // Find current level
         let activeLevel = 0;
@@ -59,6 +59,18 @@ export function TraitTracker({ team, traits }: TraitTrackerProps) {
         return b.count - a.count;
     });
   }, [team, traits]);
+
+  const getTraitColor = (activeLevel: number, totalLevels: number) => {
+    if (activeLevel === 0) return { bg: "bg-muted", text: "text-muted-foreground", border: "border-muted" };
+    
+    if (activeLevel === totalLevels) {
+      if (totalLevels >= 4) return { bg: "bg-purple-500", text: "text-white", border: "border-purple-400", shadow: "shadow-[0_0_15px_rgba(168,85,247,0.4)]" };
+      return { bg: "bg-amber-500", text: "text-black", border: "border-amber-400", shadow: "shadow-[0_0_15px_rgba(245,158,11,0.4)]" };
+    }
+    
+    if (activeLevel >= 2) return { bg: "bg-slate-300", text: "text-black", border: "border-slate-200" };
+    return { bg: "bg-orange-700", text: "text-white", border: "border-orange-600" };
+  };
 
   return (
     <div className="space-y-6">
@@ -80,7 +92,7 @@ export function TraitTracker({ team, traits }: TraitTrackerProps) {
           ) : (
             activeTraits.map((trait) => {
               const Icon = traitIcons[trait.name] || Globe;
-              const isMax = trait.activeLevel === trait.totalLevels && trait.activeLevel > 0;
+              const { bg, text, border, shadow } = getTraitColor(trait.activeLevel, trait.totalLevels);
               const isActive = trait.activeLevel > 0;
 
               return (
@@ -90,19 +102,14 @@ export function TraitTracker({ team, traits }: TraitTrackerProps) {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   key={trait.name}
-                  className={`panel p-3 border-l-4 transition-all ${
-                    isMax ? 'border-l-gold bg-gold/5 shadow-glow-sm' : 
-                    isActive ? 'border-l-primary bg-primary/5' : 
-                    'border-l-muted bg-muted/5 opacity-60'
-                  }`}
+                  className={`panel p-3 border-l-4 transition-all ${isActive ? 'bg-card/40' : 'opacity-60'} ${
+                    trait.activeLevel === trait.totalLevels ? 'border-l-amber-500' : 
+                    isActive ? 'border-l-primary' : 'border-l-muted'
+                  } ${shadow || ''}`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className={`h-8 w-8 rounded flex items-center justify-center ${
-                        isMax ? 'bg-gold text-black' : 
-                        isActive ? 'bg-primary text-black' : 
-                        'bg-muted text-muted-foreground'
-                      }`}>
+                      <div className={`h-8 w-8 rounded flex items-center justify-center transition-colors ${bg} ${text} ${shadow ? 'animate-pulse' : ''}`}>
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
@@ -110,21 +117,25 @@ export function TraitTracker({ team, traits }: TraitTrackerProps) {
                           {trait.name}
                         </div>
                         <div className="flex gap-1 mt-1">
-                          {trait.levels.map((level: number, i: number) => (
-                            <div 
-                              key={i}
-                              className={`h-1.5 w-4 rounded-full ${
-                                trait.count >= level 
-                                  ? (i + 1 === trait.totalLevels ? 'bg-gold' : 'bg-primary') 
-                                  : 'bg-muted/40'
-                              }`}
-                            />
-                          ))}
+                          {trait.levels.map((level: number, i: number) => {
+                             const isLevelActive = trait.count >= level;
+                             const isLast = i + 1 === trait.totalLevels;
+                             return (
+                               <div 
+                                 key={i}
+                                 className={`h-1.5 w-4 rounded-full transition-all ${
+                                   isLevelActive 
+                                     ? (isLast ? (trait.totalLevels >= 4 ? 'bg-purple-500' : 'bg-amber-500') : 'bg-primary') 
+                                     : 'bg-muted/40'
+                                 } ${isLevelActive && isLast ? 'shadow-[0_0_5px_currentColor]' : ''}`}
+                               />
+                             );
+                          })}
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                       <div className={`font-display text-lg font-black ${isMax ? 'text-gold' : isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                       <div className={`font-display text-lg font-black ${trait.activeLevel === trait.totalLevels ? 'text-amber-500' : isActive ? 'text-primary' : 'text-muted-foreground'}`}>
                          {trait.count}
                        </div>
                     </div>

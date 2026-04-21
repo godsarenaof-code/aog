@@ -14,11 +14,11 @@ import {
 } from "@/components/ui/dialog";
 
 const tierConfig = {
-  1: { color: "text-muted-foreground", border: "border-muted", bg: "bg-muted/20", label: "T1" },
-  2: { color: "text-success", border: "border-success/60", bg: "bg-success/10", label: "T2" },
-  3: { color: "text-cyan", border: "border-cyan/60", bg: "bg-cyan/10", label: "T3" },
-  4: { color: "text-accent", border: "border-accent/60", bg: "bg-accent/10", label: "T4" },
-  5: { color: "text-gold", border: "border-gold/60", bg: "bg-gradient-gold/10", label: "T5" },
+  1: { color: "text-slate-400", border: "border-slate-500/30", bg: "bg-slate-500/10", label: "TIER 1" },
+  2: { color: "text-emerald-400", border: "border-emerald-500/30", bg: "bg-emerald-500/10", label: "TIER 2" },
+  3: { color: "text-blue-400", border: "border-blue-500/30", bg: "bg-blue-500/10", label: "TIER 3" },
+  4: { color: "text-purple-400", border: "border-purple-500/30", bg: "bg-purple-500/10", label: "TIER 4" },
+  5: { color: "text-amber-400", border: "border-amber-500/50", bg: "bg-amber-500/10", label: "TIER 5", shadow: "shadow-[0_0_20px_rgba(245,158,11,0.2)]" },
 } as const;
 
 type Trait = { id: string; name: string; type: "origin" | "class"; icon: any; levels?: string; description: string };
@@ -202,10 +202,10 @@ const Champions = () => {
                   <div
                     key={u.id}
                     onClick={() => setSelectedChamp(u)}
-                    className={`panel p-5 hover:shadow-cyan-glow transition-all hover:-translate-y-1 cursor-pointer group ${cfg.border}`}
+                    className={`panel p-5 transition-all duration-300 hover:-translate-y-1 cursor-pointer group bg-card/40 ${cfg.border} ${(cfg as any).shadow || ''} hover:border-cyan/40`}
                   >
                     <div className="flex items-start justify-between mb-3">
-                      <div className={`h-16 w-16 rounded-md overflow-hidden bg-card border-2 ${cfg.border} shadow-lg transition-transform group-hover:scale-105`}>
+                      <div className={`h-16 w-16 rounded-md overflow-hidden bg-background border-2 transition-transform group-hover:scale-105 ${cfg.border}`}>
                         {u.image_url ? (
                           <img src={u.image_url} alt={u.name} className="w-full h-full object-cover" />
                         ) : (
@@ -216,8 +216,8 @@ const Champions = () => {
                           </div>
                         )}
                       </div>
-                      <span className={`font-display text-[10px] tracking-widest px-2 py-1 rounded ${cfg.bg} ${cfg.color} flex items-center gap-1`}>
-                        <Coins className="h-3 w-3" />{tier}
+                      <span className={`font-display text-[10px] tracking-[0.2em] font-black px-3 py-1 rounded border ${cfg.bg} ${cfg.color} ${cfg.border} shadow-sm`}>
+                         {tier}G
                       </span>
                     </div>
                     <h3 className="font-display text-lg mb-1">{u.name}</h3>

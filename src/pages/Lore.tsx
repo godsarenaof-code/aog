@@ -8,14 +8,14 @@ import {
   Volume2, VolumeX, Cpu, Zap, ChevronLeft, ChevronRight, 
   Loader2, Info
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { LeadCaptureModal } from "@/components/landing/LeadCaptureModal";
 
 export default function Lore() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [volume, setVolume] = useState(0.5);
   const [isMuted, setIsMuted] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data: chapters, isLoading } = useQuery({
@@ -53,47 +53,20 @@ export default function Lore() {
     };
   }, [isPaused, chapters, nextSlide]);
 
-  // Speech Synthesis Logic
-  const speakContent = useCallback((text: string) => {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    
-    window.speechSynthesis.cancel();
-    
-    if (isMuted || volume === 0) return;
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "pt-BR";
-    utterance.rate = 0.9;
-    utterance.pitch = 0.8;
-    utterance.volume = volume;
-    speechRef.current = utterance;
-    
-    window.speechSynthesis.speak(utterance);
-  }, [isMuted, volume]);
-
-  useEffect(() => {
-    if (chapters && chapters[currentIndex]) {
-      speakContent(chapters[currentIndex].content);
-    }
-    return () => {
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-    };
-  }, [currentIndex, chapters, speakContent]);
-
   // Audio Ambiência
   useEffect(() => {
-    if (!isMuted && volume > 0) {
+    if (!isMuted) {
       if (!audioRef.current) {
         audioRef.current = new Audio("https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f694b.mp3?filename=sci-fi-ambience-11042.mp3");
         audioRef.current.loop = true;
       }
-      audioRef.current.volume = volume * 0.3;
+      audioRef.current.volume = 0.2; // Volume fixo confortável
       audioRef.current.play().catch(e => console.log("Audio play blocked"));
     } else if (audioRef.current) {
       audioRef.current.pause();
     }
     return () => audioRef.current?.pause();
-  }, [isMuted, volume]);
+  }, [isMuted]);
 
   if (isLoading) {
     return (
@@ -109,8 +82,7 @@ export default function Lore() {
   return (
     <div className="relative h-screen w-full bg-black text-white overflow-hidden font-display">
       <Navbar />
-
-      {/* Top Progress Bar & Audio Controls */}
+      {/* Top Progress Bar & Mute Control */}
       <div className="fixed top-20 inset-x-0 z-50 flex flex-col items-center">
         <div className="w-full h-[2px] bg-white/5 relative overflow-hidden">
           <motion.div 
@@ -129,35 +101,13 @@ export default function Lore() {
            </div>
 
            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md p-1.5 rounded-full border border-cyan/20">
-                <button 
-                  onClick={() => setIsMuted(!isMuted)}
-                  className="p-2 hover:text-cyan transition-colors"
-                >
-                  {isMuted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                </button>
-                
-                <div className="flex items-center gap-1 border-l border-cyan/10 pl-2 pr-2">
-                  <button 
-                    onClick={() => setVolume(prev => Math.max(0, prev - 0.1))}
-                    className="h-6 w-6 flex items-center justify-center hover:bg-cyan/10 rounded-full text-[10px] font-bold leading-none"
-                  >
-                    -
-                  </button>
-                  <div className="w-16 h-1 bg-cyan/10 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-cyan transition-all duration-300" 
-                      style={{ width: `${volume * 100}%` }}
-                    />
-                  </div>
-                  <button 
-                    onClick={() => setVolume(prev => Math.min(1, prev + 0.1))}
-                    className="h-6 w-6 flex items-center justify-center hover:bg-cyan/10 rounded-full text-[10px] font-bold leading-none"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
+              <button 
+                onClick={() => setIsMuted(!isMuted)}
+                className="h-10 w-10 flex items-center justify-center bg-black/40 backdrop-blur-md rounded-full border border-cyan/20 hover:border-cyan/60 hover:text-cyan transition-all"
+                title={isMuted ? "Ativar som" : "Desativar som"}
+              >
+                {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              </button>
 
               <button 
                 onClick={() => window.location.href = '/'}
