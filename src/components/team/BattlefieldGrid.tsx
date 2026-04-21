@@ -173,8 +173,9 @@ export function BattlefieldGrid({ team, onPositionChange }: BattlefieldGridProps
           })
         ))}
       </div>
+    </div>
 
-      {/* Bench Selection UI */}
+    {/* Bench Selection UI */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
            <h4 className="font-display text-[10px] tracking-[0.3em] uppercase text-cyan">BANCO DE POSICIONAMENTO</h4>
