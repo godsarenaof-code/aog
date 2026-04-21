@@ -163,7 +163,10 @@ export function TraitTracker({ team, traits }: TraitTrackerProps) {
                         </div>
                       </motion.div>
                     </TooltipTrigger>
-                    <TooltipContent side="right" className="bg-background/95 backdrop-blur-xl border-primary/20 p-4 max-w-xs shadow-2xl">
+                    <TooltipContent 
+                      side="right" 
+                      className="bg-background/95 backdrop-blur-xl border-primary/20 p-4 max-w-xs shadow-2xl z-[100]"
+                    >
                       <div className="space-y-3">
                         <div className="flex items-center gap-2 border-b border-white/10 pb-2">
                           <Icon className="h-4 w-4 text-primary" />

@@ -23,7 +23,7 @@ export default function TeamBuilder() {
   const { data: champions, isLoading: champsLoading } = useQuery({
     queryKey: ['champions'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('champions').select('*').order('tier', { ascending: false });
+      const { data, error } = await supabase.from('champions').select('*').order('tier', { ascending: true });
       if (error) throw error;
       return data;
     }
@@ -39,6 +39,11 @@ export default function TeamBuilder() {
   });
 
   const addToTeam = (champ: any) => {
+    if (team.some(c => c.id === champ.id)) {
+      toast.error(`${champ.name} já está no seu time! No simulador usamos apenas 1 peça por personagem.`);
+      return;
+    }
+    
     if (team.length >= teamLimit) {
       toast.error(`Limite de ${teamLimit} unidades atingido!`);
       return;
@@ -147,7 +152,7 @@ export default function TeamBuilder() {
                  </div>
 
                  <div className="space-y-12">
-                    {[5, 4, 3, 2, 1].map(tier => {
+                    {[1, 2, 3, 4, 5].map(tier => {
                        const tierChamps = filteredChamps.filter(c => c.tier === tier);
                        if (tierChamps.length === 0) return null;
 
