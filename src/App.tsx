@@ -13,6 +13,7 @@ import Items from "./pages/Items.tsx";
 import PatchNotes from "./pages/PatchNotes.tsx";
 import Profile from "./pages/Profile.tsx";
 import AdminPortal from "./pages/AdminPortal.tsx";
+import Placeholder from "./pages/Placeholder.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();

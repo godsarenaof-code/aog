@@ -1,12 +1,9 @@
-import { useState, useMemo } from "react";
-import { Search, Filter, Shield, Zap, Sparkles } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
+import { champions } from "@/lib/data";
 
 const traits = [
   "Ciborgue", "Holográfico", "Ascendente", "Sindicato", "Deidade",
@@ -15,15 +12,6 @@ const traits = [
 
 export function EncyclopediaSection() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
-
-  const { data: champions = [] } = useQuery({
-    queryKey: ["champions"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("champions").select("*");
-      if (error) throw error;
-      return data;
-    },
-  });
 
   // Show only 5 featured champions on the landing page
   const featuredChampions = champions.slice(0, 5);
@@ -48,14 +36,14 @@ export function EncyclopediaSection() {
       </div>
 
       <div className="mb-8 flex flex-wrap justify-center gap-2">
-        <Badge 
+        <Badge
           className={`cursor-pointer px-4 py-2 text-sm font-display tracking-widest ${activeFilter === null ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-primary/20 hover:text-primary'}`}
           onClick={() => setActiveFilter(null)}
         >
           TODOS
         </Badge>
         {traits.map(t => (
-          <Badge 
+          <Badge
             key={t}
             className={`cursor-pointer px-4 py-2 text-sm font-display tracking-widest ${activeFilter === t ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground border-border hover:bg-primary/20 hover:text-primary'}`}
             onClick={() => setActiveFilter(t)}
@@ -66,19 +54,15 @@ export function EncyclopediaSection() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12">
-        {featuredChampions.map((champ: any) => {
+        {featuredChampions.map((champ) => {
           const isFaded = activeFilter !== null && !champ.classes.includes(activeFilter) && !champ.origins.includes(activeFilter);
           return (
-            <div 
-              key={champ.id} 
+            <div
+              key={champ.id}
               className={`panel flex flex-col items-center p-4 transition-all duration-300 ${isFaded ? 'opacity-20 grayscale scale-95' : 'hover:-translate-y-2 hover:shadow-glow'}`}
             >
               <div className={`w-24 h-24 bg-background rounded-xl border-2 mb-4 flex items-center justify-center font-display text-2xl font-bold uppercase overflow-hidden ${getTierColor(champ.tier)}`}>
-                 {champ.image_url ? (
-                   <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
-                 ) : (
-                   <span className="text-muted-foreground/30 select-none">{champ.name.substring(0, 2)}</span>
-                 )}
+                <span className="text-muted-foreground/30 select-none">{champ.name.substring(0, 2)}</span>
               </div>
               <h3 className="font-display text-lg mb-1">{champ.name}</h3>
               <div className="flex flex-wrap justify-center gap-1 mb-3">
