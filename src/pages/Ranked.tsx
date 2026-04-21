@@ -111,9 +111,14 @@ const Ranked = () => {
                     </div>
                   </div>
 
-                  <div className="text-center space-y-2">
-                     <div className={`font-display text-4xl font-black italic uppercase tracking-tighter ${displayRankConfig.color} animate-fade-in`}>
+                  <div className="text-center space-y-2 relative">
+                     <div className={`font-display text-4xl font-black italic uppercase tracking-tighter ${displayRankConfig.color} animate-fade-in flex items-center justify-center gap-3`}>
                        {selectedRank}
+                       {selectedRank === userRankInfo.name && userRankInfo.tier && (
+                         <span className="bg-white/10 px-2 py-0.5 rounded border border-white/10 text-xl not-italic shadow-glow-sm">
+                           {userRankInfo.tier}
+                         </span>
+                       )}
                      </div>
                      <div className="flex items-center justify-center gap-4 text-[10px] font-display font-black tracking-widest text-muted-foreground uppercase opacity-40">
                         PROTOCOLO ACTIVE <span className="h-1 w-1 rounded-full bg-white/20" /> CATEGORIA {selectedRank}
