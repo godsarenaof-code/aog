@@ -99,7 +99,7 @@ const Champions = () => {
             ELENCO DE LANÇAMENTO
           </div>
           <h1 className="font-display text-5xl md:text-6xl font-black leading-[1.05]">
-            <span className="text-cyan text-glow">21 DEUSES</span>
+            <span className="text-cyan text-glow">22 DEUSES</span>
             <br />
             <span className="text-foreground">PRONTOS PARA A</span>{" "}
             <span className="text-gold">ARENA</span>
@@ -109,7 +109,7 @@ const Champions = () => {
             para forjar composições devastadoras.
           </p>
           <div className="flex gap-8 pt-4 text-sm">
-            <div><div className="font-display text-2xl text-cyan">21</div><div className="text-muted-foreground">Unidades</div></div>
+            <div><div className="font-display text-2xl text-cyan">22</div><div className="text-muted-foreground">Unidades</div></div>
             <div><div className="font-display text-2xl text-cyan">5</div><div className="text-muted-foreground">Origens</div></div>
             <div><div className="font-display text-2xl text-cyan">5</div><div className="text-muted-foreground">Classes</div></div>
             <div><div className="font-display text-2xl text-gold">5</div><div className="text-muted-foreground">Tiers</div></div>
