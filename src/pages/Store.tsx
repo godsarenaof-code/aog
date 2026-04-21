@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Coins, Gem, Sparkles, Box, TrendingUp, History } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,6 +17,8 @@ const CAPSULES = [
 
 const Store = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get("tab") || "capsules");
   const [balance, setBalance] = useState({ gold: 0, essence: 0 });
   const [isLoading, setIsLoading] = useState(false);
   const [lastLoot, setLastLoot] = useState<any>(null);
@@ -105,7 +108,7 @@ const Store = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="capsules" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
            <TabsList className="bg-black/20 border border-white/5 p-1 mb-8">
               <TabsTrigger value="capsules" className="font-display text-[10px] tracking-widest uppercase">Cápsulas de Skin</TabsTrigger>
               <TabsTrigger value="currency" className="font-display text-[10px] tracking-widest uppercase">Banco de Essência</TabsTrigger>
@@ -185,7 +188,7 @@ const Store = () => {
                       <div className="font-display text-4xl font-black text-white italic">{pack.essence.toLocaleString()}</div>
                       <Button 
                         onClick={() => addEssence(pack.essence)}
-                        className="w-full mt-4 bg-cyan border border-cyan/50 text-black hover:bg-cyan/80 font-display font-black tracking-widest text-xs h-12 italic"
+                        className="w-full mt-4 bg-primary border-none text-black font-black hover:bg-primary-glow font-display tracking-widest text-[10px] h-12 italic shadow-glow-sm"
                       >
                          OBTER POR {pack.price}
                       </Button>

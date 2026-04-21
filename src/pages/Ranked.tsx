@@ -1,25 +1,32 @@
 import { AppLayout } from "@/components/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { getRankFromLp } from "@/lib/rankUtils";
+import { getRankFromLp, RANK_CONFIG } from "@/lib/rankUtils";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import { Trophy, Medal, Crown, TrendingUp, Users, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Trophy, TrendingUp, Users, ChevronRight, Hexagon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
 
 const Ranked = () => {
   const { user } = useAuth();
-  const userMmr = user?.mmr || 1000;
-  const currentRank = getRankFromLp(userMmr);
+  const userMmr = user?.mmr || 0;
+  const userRankInfo = getRankFromLp(userMmr);
+  
+  const [selectedRank, setSelectedRank] = useState(userRankInfo.name);
 
-  // Fetching Global Leaderboard
+  // Fetching Rank-Specific Leaderboard
   const { data: leaderboard, isLoading: isLoadingLeaderboard } = useQuery({
-    queryKey: ["leaderboard"],
+    queryKey: ["leaderboard", selectedRank],
     queryFn: async () => {
-      const res = await fetch("http://localhost:3001/api/user/leaderboard");
+      const res = await fetch(`http://localhost:3001/api/user/leaderboard?rank=${selectedRank}`);
       if (!res.ok) throw new Error("Erro ao buscar ranking.");
       return res.json();
     },
   });
+
+  // Encontrar a config visual do rank selecionado para o emblema central
+  const displayRankConfig = RANK_CONFIG.find(r => r.name === selectedRank) || RANK_CONFIG[0];
 
   // Calculate LP progress (0-100 placeholder relative to tier)
   const lpProgress = 65; // Example LP
@@ -43,6 +50,25 @@ const Ranked = () => {
               <p className="text-muted-foreground text-xs uppercase tracking-widest opacity-60">Sua ascensão no protocolo de deidades</p>
             </div>
 
+            {/* Elo Tabs Navigation */}
+            <div className="bg-black/40 p-1 rounded-xl border border-white/5 backdrop-blur-md overflow-x-auto no-scrollbar">
+               <Tabs value={selectedRank} onValueChange={setSelectedRank} className="w-full">
+                  <TabsList className="bg-transparent h-auto p-0 flex justify-start gap-1">
+                     {RANK_CONFIG.map((rank) => (
+                       <TabsTrigger 
+                        key={rank.name} 
+                        value={rank.name}
+                        className={`px-3 py-2 text-[9px] font-display font-black tracking-widest uppercase transition-all
+                          ${selectedRank === rank.name ? "bg-white/10 text-white shadow-glow-sm" : "text-white/30 hover:text-white/60"}
+                        `}
+                       >
+                          {rank.name}
+                       </TabsTrigger>
+                     ))}
+                  </TabsList>
+               </Tabs>
+            </div>
+
             {/* Emblem Section */}
             <div className="panel-glow p-1 w-full aspect-square max-w-[450px] mx-auto lg:mx-0 relative group">
                <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 to-accent/10 rounded-3xl -z-10" />
@@ -56,35 +82,44 @@ const Ranked = () => {
                   />
 
                   {/* Main Emblem Placeholder (Simulated with Icons) */}
-                  <motion.div 
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className={`h-48 w-48 rounded-full bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center relative shadow-glow-lg ${currentRank.color.replace('text-', 'shadow-')}`}
-                  >
-                     <Trophy className={`h-24 w-24 ${currentRank.color} drop-shadow-[0_0_15px_currentColor]`} />
-                     
-                     {/* Floating Particles */}
-                     <span className="absolute top-0 right-0 h-4 w-4 bg-cyan animate-pulse rounded-full blur-sm" />
-                     <span className="absolute bottom-4 left-4 h-3 w-3 bg-accent animate-pulse rounded-full blur-sm" />
-                  </motion.div>
+                  <AnimatePresence mode="wait">
+                    <motion.div 
+                      key={selectedRank}
+                      initial={{ scale: 0.8, opacity: 0, rotateY: 90 }}
+                      animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+                      exit={{ scale: 0.8, opacity: 0, rotateY: -90 }}
+                      transition={{ duration: 0.4 }}
+                      className={`h-48 w-48 rounded-full bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center relative shadow-glow-lg ${displayRankConfig.color.replace('text-', 'shadow-')}`}
+                    >
+                       <div className={`text-7xl ${displayRankConfig.color} drop-shadow-[0_0_20px_currentColor] select-none`}>
+                          {displayRankConfig.icon}
+                       </div>
+                       
+                       {/* Floating Particles */}
+                       <span className="absolute top-0 right-0 h-4 w-4 bg-cyan animate-pulse rounded-full blur-sm" />
+                       <span className="absolute bottom-4 left-4 h-3 w-3 bg-accent animate-pulse rounded-full blur-sm" />
+                    </motion.div>
+                  </AnimatePresence>
 
-                  <div className="mt-8 text-center space-y-3 relative z-10">
-                     <div className={`font-display text-4xl font-black italic uppercase tracking-tighter ${currentRank.color}`}>
-                       {currentRank.full}
+                  <div className="mt-8 text-center space-y-3 relative z-10 w-full">
+                     <div className={`font-display text-4xl font-black italic uppercase tracking-tighter ${displayRankConfig.color} animate-fade-in`}>
+                       {selectedRank}
                      </div>
-                     <div className="flex items-center justify-center gap-4 text-[10px] font-display font-black tracking-widest text-muted-foreground uppercase">
-                        {userMmr} MMR <span className="h-1 w-1 rounded-full bg-white/20" /> TOP AREA BR1
+                     <div className="flex items-center justify-center gap-4 text-[10px] font-display font-black tracking-widest text-muted-foreground uppercase opacity-60">
+                        RANKING DA CATEGORIA <span className="h-1 w-1 rounded-full bg-white/20" /> PROTOCOLO ACTIVE
                      </div>
                      
-                     {/* LP Progress */}
-                     <div className="w-64 space-y-2 mt-4 mx-auto">
-                        <div className="flex justify-between text-[10px] font-display font-bold uppercase tracking-wider">
-                           <span>{lpProgress} LP</span>
-                           <span className="opacity-40">100 LP</span>
-                        </div>
-                        <Progress value={lpProgress} className="h-1.5 bg-white/5" />
-                        <p className="text-[9px] text-muted-foreground uppercase italic opacity-40">Vença partidas para ascender ao próximo tier</p>
-                     </div>
+                     {/* LP Progress (Only visible if viewing current rank) */}
+                     {selectedRank === userRankInfo.name && (
+                       <div className="w-64 space-y-2 mt-4 mx-auto animate-fade-in">
+                          <div className="flex justify-between text-[10px] font-display font-bold uppercase tracking-wider">
+                             <span>STATUS ATUAL</span>
+                             <span className="text-cyan">{userRankInfo.full}</span>
+                          </div>
+                          <Progress value={lpProgress} className="h-1.5 bg-white/5" />
+                          <p className="text-[9px] text-muted-foreground uppercase italic opacity-40">VOCÊ ESTÁ NESTE RANKING</p>
+                       </div>
+                     )}
                   </div>
                </div>
             </div>

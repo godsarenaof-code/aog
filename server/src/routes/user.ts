@@ -55,10 +55,19 @@ router.get('/matches', authMiddleware, async (req: AuthRequest, res) => {
 
 // @route   GET /api/user/leaderboard
 router.get('/leaderboard', async (req, res) => {
+  const { rank } = req.query;
   try {
-    const result = await query(
-      'SELECT nickname, rank, mmr FROM users ORDER BY mmr DESC LIMIT 50'
-    );
+    let sql = 'SELECT nickname, rank, mmr FROM users';
+    let params: any[] = [];
+
+    if (rank) {
+      sql += ' WHERE rank ILIKE $1';
+      params.push(`%${rank}%`);
+    }
+
+    sql += ' ORDER BY mmr DESC LIMIT 50';
+    
+    const result = await query(sql, params);
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar ranking global.' });

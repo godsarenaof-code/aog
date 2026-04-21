@@ -3,9 +3,26 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Coins, Gem, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { Plus } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function AppLayout({ children }: { children: ReactNode }) {
+  const [balance, setBalance] = useState({ gold: 0, essence: 0 });
+
+  const fetchBalance = async () => {
+    const token = localStorage.getItem('aog_token');
+    if (!token) return;
+    const res = await fetch('http://localhost:3001/api/store/balance', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) setBalance(await res.json());
+  };
+
+  useEffect(() => {
+    fetchBalance();
+  }, []);
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -20,13 +37,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-card/80 border border-border/60">
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-card/80 border border-border/60 hover:border-accent/40 transition-colors">
                 <Coins className="h-4 w-4 text-accent" />
-                <span className="font-display text-sm">12,450</span>
+                <span className="font-display text-sm font-bold">{balance.gold.toLocaleString()}</span>
               </div>
-              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-card/80 border border-border/60">
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 pr-1 rounded-md bg-card/80 border border-border/60 hover:border-primary/40 transition-colors group">
                 <Gem className="h-4 w-4 text-primary" />
-                <span className="font-display text-sm">320</span>
+                <span className="font-display text-sm font-bold text-primary">{balance.essence.toLocaleString()}</span>
+                <Link to="/store?tab=currency">
+                  <Button size="icon" className="h-6 w-6 ml-2 bg-primary/20 hover:bg-primary text-primary hover:text-black transition-all rounded shadow-glow-sm">
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </Link>
               </div>
               <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
                 <Bell className="h-4 w-4" />

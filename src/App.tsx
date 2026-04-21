@@ -16,6 +16,8 @@ import Items from "./pages/Items.tsx";
 import PatchNotes from "./pages/PatchNotes.tsx";
 import Profile from "./pages/Profile.tsx";
 import AdminPortal from "./pages/AdminPortal.tsx";
+import TeamBuilder from "./pages/TeamBuilder.tsx";
+import Store from "./pages/Store.tsx";
 import Lore from "./pages/Lore.tsx";
 import Ranked from "./pages/Ranked.tsx";
 import Placeholder from "./pages/Placeholder.tsx";
