@@ -40,13 +40,37 @@ const Profile = () => {
       <div className="container max-w-6xl py-8 space-y-8 animate-fade-in">
         {/* Header */}
         <div className="panel-glow p-8 flex flex-col md:flex-row items-center gap-6">
-          <div className="h-28 w-28 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border-2 border-primary/60 shadow-glow grid place-items-center font-display text-4xl">
-            {rank.icon}
+          <div className="h-28 w-28 rounded-2xl bg-black/40 border-2 border-primary/60 shadow-glow grid place-items-center relative group overflow-hidden">
+            <img 
+              src={rank.imageUrl} 
+              alt={rank.name} 
+              className="w-20 h-20 object-contain drop-shadow-[0_0_15px_rgba(0,255,242,0.5)] group-hover:scale-110 transition-transform"
+            />
+            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
           <div className="flex-1 text-center md:text-left">
             <div className="text-[10px] font-display tracking-widest text-accent uppercase mb-1 font-black underline decoration-dotted">ELITE DATA PROTOCOL</div>
-            <h1 className="text-3xl font-display font-black italic uppercase tracking-tighter">{user?.nickname || 'INVOCADOR'}</h1>
-            <div className="flex items-center gap-3 mt-1">
+            
+            {/* Active Title */}
+            {statsData?.activeTitle && (
+              <div 
+                className="text-[10px] font-display font-black uppercase tracking-[0.3em] mb-1"
+                style={{ color: statsData.titleColor }}
+              >
+                {statsData.activeTitle}
+              </div>
+            )}
+
+            <div className="flex items-center justify-center md:justify-start gap-3">
+              {statsData?.clanTag && (
+                <span className="text-xl font-display font-black text-primary transition-all">
+                  [{statsData.clanTag}]
+                </span>
+              )}
+              <h1 className="text-4xl font-display font-black italic uppercase tracking-tighter">{user?.nickname || 'INVOCADOR'}</h1>
+            </div>
+
+            <div className="flex items-center justify-center md:justify-start gap-3 mt-2">
               <span className="text-[10px] font-display font-bold px-2 py-0.5 rounded bg-white/10 border border-white/10 uppercase tracking-widest text-cyan">
                 {statsData?.rank || 'Mortal'}
               </span>

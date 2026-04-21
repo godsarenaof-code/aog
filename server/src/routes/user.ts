@@ -9,8 +9,15 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const userId = req.user?.id;
     
-    // Buscar MMR e Rank atual do usuário
-    const userRes = await query('SELECT nickname, rank, mmr FROM users WHERE id = $1', [userId]);
+    // Buscar MMR, Rank, Clã e Título atual do usuário
+    const userRes = await query(`
+      SELECT u.nickname, u.rank, u.mmr, u.avatar, c.tag as clan_tag, t.name as active_title, t.color as title_color
+      FROM users u
+      LEFT JOIN clan_members cm ON cm.user_id = u.id
+      LEFT JOIN clans c ON c.id = cm.clan_id
+      LEFT JOIN titles t ON t.id = u.selected_title_id
+      WHERE u.id = $1
+    `, [userId]);
     const user = userRes.rows[0];
 
     // Calcular estatísticas do histórico de partidas
@@ -41,7 +48,10 @@ router.get('/stats', authMiddleware, async (req: AuthRequest, res) => {
       wins: parseInt(stats.wins),
       top4: parseInt(stats.top4),
       winRate: stats.total_matches > 0 ? ((stats.wins / stats.total_matches) * 100).toFixed(1) : 0,
-      top4Rate: stats.total_matches > 0 ? ((stats.top4 / stats.total_matches) * 100).toFixed(1) : 0
+      top4Rate: stats.total_matches > 0 ? ((stats.top4 / stats.total_matches) * 100).toFixed(1) : 0,
+      clanTag: user.clan_tag,
+      activeTitle: user.active_title,
+      titleColor: user.title_color
     });
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar estatísticas do usuário.' });
@@ -65,11 +75,17 @@ router.get('/matches', authMiddleware, async (req: AuthRequest, res) => {
 router.get('/leaderboard', async (req, res) => {
   const { rank, userId } = req.query; // userId opcional para contexto
   try {
-    let sql = 'SELECT nickname, rank, mmr FROM users';
+    let sql = `
+      SELECT u.nickname, u.rank, u.mmr, c.tag as clan_tag, t.name as active_title, t.color as title_color
+      FROM users u
+      LEFT JOIN clan_members cm ON cm.user_id = u.id
+      LEFT JOIN clans c ON c.id = cm.clan_id
+      LEFT JOIN titles t ON t.id = u.selected_title_id
+    `;
     let params: any[] = [];
 
     if (rank) {
-      sql += ' WHERE rank ILIKE $1';
+      sql += ' WHERE u.rank ILIKE $1';
       params.push(`%${rank}%`);
     }
 
@@ -142,6 +158,57 @@ router.post('/update-nickname', authMiddleware, async (req: AuthRequest, res) =>
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erro ao processar protocolo de alteração.' });
+  }
+});
+
+// @route   GET /api/user/titles
+router.get('/titles', authMiddleware, async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user?.id;
+    // Get all titles and check if unlocked
+    const titlesRes = await query(`
+      SELECT t.*, (ut.id IS NOT NULL) as unlocked
+      FROM titles t
+      LEFT JOIN user_titles ut ON ut.title_id = t.id AND ut.user_id = $1
+      ORDER BY t.category, t.name
+    `, [userId]);
+    res.json(titlesRes.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar catálogo de títulos.' });
+  }
+});
+
+// @route   POST /api/user/select-title
+router.post('/select-title', authMiddleware, async (req: AuthRequest, res) => {
+  const { titleId } = req.body; // titleId can be null to remove
+  const userId = req.user?.id;
+
+  try {
+    if (titleId) {
+      // Check if unlocked
+      const checkRes = await query('SELECT id FROM user_titles WHERE user_id = $1 AND title_id = $2', [userId, titleId]);
+      if (checkRes.rows.length === 0) {
+        return res.status(403).json({ error: 'Título não desbloqueado.' });
+      }
+    }
+
+    await query('UPDATE users SET selected_title_id = $1 WHERE id = $2', [titleId, userId]);
+    res.json({ message: 'Título atualizado com sucesso!' });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao selecionar título.' });
+  }
+});
+
+// @route   POST /api/user/update-avatar
+router.post('/update-avatar', authMiddleware, async (req: AuthRequest, res) => {
+  const { avatarUrl } = req.body;
+  const userId = req.user?.id;
+
+  try {
+    await query('UPDATE users SET avatar = $1 WHERE id = $2', [avatarUrl, userId]);
+    res.json({ message: 'Avatar atualizado com sucesso!', avatar: avatarUrl });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao atualizar avatar.' });
   }
 });
 

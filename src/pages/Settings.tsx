@@ -11,6 +11,17 @@ const Settings = () => {
   const [newNickname, setNewNickname] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [essence, setEssence] = useState(0);
+  const [titles, setTitles] = useState<any[]>([]);
+  const [selectedTitleId, setSelectedTitleId] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatar || "");
+
+  const avatarPresets = [
+    "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Zeus&backgroundColor=00cfba",
+    "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Hera&backgroundColor=8b5cf6",
+    "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Ares&backgroundColor=ef4444",
+    "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Athena&backgroundColor=3b82f6",
+    "https://api.dicebear.com/7.x/bottts-neutral/svg?seed=AOG&backgroundColor=f97316"
+  ];
 
   // Simulation of visual settings
   const [visualSettings, setVisualSettings] = useState({
@@ -36,9 +47,20 @@ const Settings = () => {
       if (res.ok) {
         const data = await res.json();
         setEssence(data.essence || 0);
+        setSelectedTitleId(data.selectedTitleId || null);
       }
     };
+
+    const fetchTitles = async () => {
+      const token = localStorage.getItem('aog_token');
+      const res = await fetch('http://localhost:3001/api/user/titles', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) setTitles(await res.json());
+    };
+
     fetchEssence();
+    fetchTitles();
   }, []);
 
   const handleUpdateNickname = async () => {
@@ -72,6 +94,46 @@ const Settings = () => {
       toast.error("Erro de conexão com o terminal.");
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleSelectTitle = async (titleId: string | null) => {
+    try {
+      const token = localStorage.getItem('aog_token');
+      const res = await fetch('http://localhost:3001/api/user/select-title', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ titleId })
+      });
+      if (res.ok) {
+        toast.success("Título atualizado!");
+        setSelectedTitleId(titleId);
+        window.location.reload();
+      }
+    } catch (err) {}
+  };
+
+  const handleUpdateAvatar = async (url: string | null) => {
+    try {
+      const token = localStorage.getItem('aog_token');
+      const res = await fetch('http://localhost:3001/api/user/update-avatar', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ avatarUrl: url })
+      });
+      if (res.ok) {
+        toast.success("Avatar atualizado!");
+        setAvatarUrl(url || "");
+        window.location.reload();
+      }
+    } catch (err) {
+      toast.error("Erro ao atualizar avatar.");
     }
   };
 
@@ -125,11 +187,12 @@ const Settings = () => {
                     className="space-y-8"
                   >
                     <div className="space-y-1">
-                       <h2 className="text-2xl font-display font-black italic uppercase italic tracking-tighter">PROTOCOLO DE <span className="text-primary italic">IDENTIDADE</span></h2>
-                       <p className="text-xs text-muted-foreground uppercase tracking-widest opacity-60">Gerencie sua assinatura na Arena</p>
-                    </div>
+                        <h2 className="text-2xl font-display font-black italic uppercase italic tracking-tighter">PROTOCOLO DE <span className="text-primary italic">IDENTIDADE</span></h2>
+                        <p className="text-xs text-muted-foreground uppercase tracking-widest opacity-60">Gerencie sua assinatura e presença visual na Arena</p>
+                     </div>
 
-                    <div className="grid gap-6 max-w-md">
+                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                       <div className="space-y-6">
                        <div className="space-y-3">
                           <label className="text-[10px] font-display font-black tracking-widest text-muted-foreground uppercase">Nickname Atual</label>
                           <div className="panel bg-white/5 border-white/10 p-4 font-display font-bold text-white tracking-widest bg-stripes">
@@ -184,8 +247,93 @@ const Settings = () => {
                        >
                           {isUpdating ? "SINCRONIZANDO..." : "AUTORIZAR ALTERAÇÃO"}
                        </button>
+
+                       {/* Title Selection */}
+                       <div className="space-y-4 pt-6 border-t border-white/5">
+                          <label className="text-[10px] font-display font-black tracking-widest text-muted-foreground uppercase opacity-40">Título de Honra</label>
+                          <div className="grid grid-cols-1 gap-2">
+                             <button 
+                                onClick={() => handleSelectTitle(null)}
+                                className={`text-left p-3 rounded-lg border font-display font-black text-[10px] uppercase tracking-widest transition-all ${!selectedTitleId ? 'bg-primary/10 border-primary text-primary' : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'}`}
+                             >
+                                [ NENHUM TÍTULO ]
+                             </button>
+                             {titles.map((title) => (
+                               <button 
+                                 key={title.id}
+                                 disabled={!title.unlocked}
+                                 onClick={() => handleSelectTitle(title.id)}
+                                 className={`relative text-left p-3 rounded-lg border font-display font-black text-[10px] uppercase tracking-widest transition-all ${
+                                   selectedTitleId === title.id 
+                                     ? 'bg-white/10 border-white/20' 
+                                     : title.unlocked ? 'bg-white/5 border-transparent hover:bg-white/10' : 'bg-black/40 border-transparent opacity-30 cursor-not-allowed'
+                                 }`}
+                                 style={{ color: title.unlocked ? title.color : 'inherit' }}
+                               >
+                                  {title.name}
+                                  {!title.unlocked && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-bold opacity-40">BLOQUEADO</span>}
+                               </button>
+                             ))}
+                          </div>
+                       </div>
                     </div>
-                  </motion.div>
+
+                    <div className="space-y-6">
+                       <div className="space-y-4">
+                          <label className="text-[10px] font-display font-black tracking-widest text-muted-foreground uppercase opacity-40">Protocolo de Avatar (Foto de Perfil)</label>
+                          
+                          <div className="flex flex-wrap gap-4">
+                             {/* Preview box */}
+                             <div className="h-24 w-24 rounded-2xl bg-white/5 border border-white/10 overflow-hidden shadow-glow-sm">
+                                {avatarUrl ? (
+                                  <img src={avatarUrl} className="h-full w-full object-cover" alt="Preview" />
+                                ) : (
+                                  <div className="h-full w-full grid place-items-center font-display font-black text-white/10 uppercase text-[9px] text-center p-2">NENHUM AVATAR</div>
+                                )}
+                             </div>
+                             
+                             <div className="flex-1 space-y-3">
+                                <div className="grid grid-cols-5 gap-2">
+                                   {avatarPresets.map((preset, idx) => (
+                                     <button 
+                                        key={idx}
+                                        onClick={() => handleUpdateAvatar(preset)}
+                                        className="h-10 w-10 rounded border border-transparent hover:border-primary transition-all overflow-hidden"
+                                     >
+                                        <img src={preset} className="h-full w-full object-cover" />
+                                     </button>
+                                   ))}
+                                </div>
+                                <div className="flex gap-2">
+                                   <input 
+                                      type="text" 
+                                      value={avatarUrl}
+                                      onChange={(e) => setAvatarUrl(e.target.value)}
+                                      placeholder="LINK DA IMAGEM..."
+                                      className="flex-1 bg-black/40 border border-white/10 rounded-lg p-3 font-display text-[10px] focus:border-primary transition-all tracking-widest"
+                                   />
+                                   <button 
+                                      onClick={() => handleUpdateAvatar(avatarUrl)}
+                                      className="px-4 bg-primary/20 text-primary border border-primary/20 rounded-lg font-display font-black text-[10px] tracking-widest uppercase hover:bg-primary hover:text-black transition-all"
+                                   >
+                                      SET
+                                   </button>
+                                </div>
+                                <button 
+                                   onClick={() => handleUpdateAvatar(null)}
+                                   className="text-[9px] font-display font-black text-red-500/60 hover:text-red-500 uppercase tracking-widest transition-colors flex items-center gap-2"
+                                >
+                                   // REMOVER PROTOCOLO DE IMAGEM
+                                </button>
+                             </div>
+                          </div>
+                          
+                          <p className="text-[9px] text-muted-foreground uppercase italic opacity-40 leading-relaxed">
+                            O avatar será visível em seu perfil, na barra lateral e em convites de Sindicatos. Use URLs de imagens confiáveis.
+                          </p>
+                       </div>
+                    </div>
+                  </div>
                 )}
 
                 {activeTab === "visual" && (

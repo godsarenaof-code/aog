@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.js';
 import storeRoutes from './routes/store.js';
 import gameRoutes from './routes/game.js';
 import userRoutes from './routes/user.js';
+import clanRoutes from './routes/clan.js';
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/store', storeRoutes);
 app.use('/api/game', gameRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/clans', clanRoutes);
 
 // Health Check
 app.get('/health', (req, res) => {

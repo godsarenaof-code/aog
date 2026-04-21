@@ -55,7 +55,14 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const result = await query('SELECT * FROM users WHERE email = $1', [email]);
+    const result = await query(`
+      SELECT u.*, c.tag as clan_tag, t.name as active_title, t.color as title_color
+      FROM users u
+      LEFT JOIN clan_members cm ON cm.user_id = u.id
+      LEFT JOIN clans c ON c.id = cm.clan_id
+      LEFT JOIN titles t ON t.id = u.selected_title_id
+      WHERE u.email = $1
+    `, [email]);
     if (result.rows.length === 0) {
       return res.status(400).json({ error: 'Credenciais inválidas.' });
     }
@@ -85,7 +92,15 @@ router.post('/login', async (req, res) => {
 // @desc    Obter dados do usuário atual via token
 router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
   try {
-    const result = await query('SELECT id, email, nickname, rank, mmr, avatar, created_at FROM users WHERE id = $1', [req.user?.id]);
+    const result = await query(`
+      SELECT u.id, u.email, u.nickname, u.rank, u.mmr, u.avatar, u.created_at, 
+             c.tag as clan_tag, t.name as active_title, t.color as title_color
+      FROM users u
+      LEFT JOIN clan_members cm ON cm.user_id = u.id
+      LEFT JOIN clans c ON c.id = cm.clan_id
+      LEFT JOIN titles t ON t.id = u.selected_title_id
+      WHERE u.id = $1
+    `, [req.user?.id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Usuário não encontrado.' });
     }

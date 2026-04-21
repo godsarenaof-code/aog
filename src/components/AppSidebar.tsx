@@ -1,5 +1,6 @@
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
-import { Swords, Home, Users, Trophy, User, Map, BookOpen, Settings, ShoppingCart } from "lucide-react";
+import { swords, Home, Users, Trophy, User, Map, BookOpen, Settings, ShoppingCart, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -70,6 +71,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { pathname } = useLocation();
+  const { user, logout } = useAuth();
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -89,11 +91,50 @@ export function AppSidebar() {
         <MenuSection label="META" items={metaItems} currentPath={pathname} />
         <MenuSection label="CONTA" items={accountItems} currentPath={pathname} />
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border/60 p-3">
-        {!collapsed && (
-          <div className="text-[10px] font-display tracking-widest text-muted-foreground">
-            v0.1 · PRE-ALPHA
+      <SidebarFooter className="border-t border-sidebar-border/60 p-4">
+        {!collapsed && user ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              {user.avatar ? (
+                <img 
+                  src={user.avatar} 
+                  alt={user.nickname} 
+                  className="h-9 w-9 rounded-lg object-cover border border-primary/20 shadow-glow-sm"
+                />
+              ) : (
+                <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 grid place-items-center font-display font-black text-primary text-xs shadow-glow-sm">
+                  {user.nickname.substring(0, 2)}
+                </div>
+              )}
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-1.5 overflow-hidden">
+                  {user.clan_tag && (
+                    <span className="text-[10px] font-display font-black text-primary transition-all shrink-0">
+                      [{user.clan_tag}]
+                    </span>
+                  )}
+                  <span className="font-display text-xs font-black truncate uppercase tracking-tight text-white/90">
+                    {user.nickname}
+                  </span>
+                </div>
+                <span className="text-[9px] font-display font-black text-muted-foreground uppercase opacity-40">
+                  {user.rank} // {user.mmr} MMR
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-white/5 opacity-40 hover:opacity-100 transition-opacity">
+               <span className="text-[9px] font-display font-black tracking-widest text-muted-foreground uppercase">v0.1 PRE-ALPHA</span>
+               <button onClick={logout} className="hover:text-red-500 transition-colors">
+                  <LogOut className="h-3.5 w-3.5" />
+               </button>
+            </div>
           </div>
+        ) : (
+          !collapsed && (
+            <div className="text-[10px] font-display tracking-widest text-muted-foreground">
+              v0.1 · PRE-ALPHA
+            </div>
+          )
         )}
       </SidebarFooter>
     </Sidebar>

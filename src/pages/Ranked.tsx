@@ -206,11 +206,18 @@ const Ranked = () => {
                           {index + 1}
                        </div>
                        <div className="flex flex-col">
-                          <span className={`font-display font-bold uppercase tracking-tight text-sm ${
-                            player.nickname === user?.nickname ? "text-cyan" : "text-white"
-                          }`}>
-                            {player.nickname} {player.nickname === user?.nickname && "(VOCÊ)"}
-                          </span>
+                          <div className="flex items-center gap-2">
+                             {player.clan_tag && (
+                               <span className="text-[10px] font-display font-black text-primary px-1.5 py-0.5 rounded bg-primary/5 border border-primary/10 transition-all">
+                                 {player.clan_tag}
+                               </span>
+                             )}
+                             <span className={`font-display font-bold uppercase tracking-tight text-sm ${
+                               player.nickname === user?.nickname ? "text-cyan" : "text-white"
+                             }`}>
+                               {player.nickname} {player.nickname === user?.nickname && "(VOCÊ)"}
+                             </span>
+                          </div>
                           <span className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">
                             {player.rank}
                           </span>

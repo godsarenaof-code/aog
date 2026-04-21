@@ -7,6 +7,10 @@ interface User {
   nickname: string;
   rank: string;
   mmr: number;
+  avatar?: string;
+  clan_tag?: string;
+  active_title?: string;
+  title_color?: string;
 }
 
 interface AuthContextType {
