@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Swords, Shield, Zap, Crown, Sparkles, Coins, Heart, Sword, Target, Flame } from "lucide-react";
+import { ChevronLeft, Swords, Shield, Zap, Crown, Sparkles, Coins, Sword, Target, Flame, Droplet } from "lucide-react";
 import logo from "@/assets/aog-logo.png";
 
 interface Champion {
@@ -9,6 +9,7 @@ interface Champion {
   tier: 1 | 2 | 3 | 4 | 5;
   origins: string[];
   classes: string[];
+  ability: { name: string; mana: number; effect: string };
   desc: string;
 }
 
