@@ -18,12 +18,23 @@ export default function ArenaPortal() {
   const { data: champions, isLoading } = useQuery({
     queryKey: ['champions'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('champions')
         .select('*')
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data;
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase as any).from('champions').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Deus removido.");
+      queryClient.invalidateQueries({ queryKey: ['champions'] });
     }
   });
 
@@ -43,7 +54,7 @@ export default function ArenaPortal() {
         action_image_url: null
       }));
 
-      const { error } = await supabase.from('champions').upsert(formatted, { onConflict: 'slug' });
+      const { error } = await (supabase as any).from('champions').upsert(formatted, { onConflict: 'slug' });
       if (error) throw error;
       toast.success("Migração concluída! 22 Deuses enviados ao Olimpo Digital.");
       queryClient.invalidateQueries({ queryKey: ['champions'] });
@@ -67,7 +78,7 @@ export default function ArenaPortal() {
 
   const addMutation = useMutation({
     mutationFn: async (champ: any) => {
-      const { error } = await supabase.from('champions').insert([{
+      const { error } = await (supabase as any).from('champions').insert([{
         ...champ,
         origins: champ.origins.split(',').map((s: string) => s.trim()),
         classes: champ.classes.split(',').map((s: string) => s.trim()),
