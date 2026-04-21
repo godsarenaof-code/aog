@@ -10,6 +10,11 @@ dotenv.config();
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'aog_celestial_secret_2026';
 
+// Rota base para teste
+router.get('/', (req, res) => {
+  res.json({ message: 'Arena of Gods Auth API Operacional', status: 'Celestial' });
+});
+
 // @route   POST /auth/register
 // @desc    Registrar um novo invocador
 router.post('/register', async (req, res) => {
