@@ -116,32 +116,36 @@ export default function ArenaPortal() {
 
   const upsertMutation = useMutation({
     mutationFn: async (champ: any) => {
-      const isUpdate = !!champ.id;
       const payload = {
         name: champ.name,
         slug: champ.slug,
         tier: champ.tier,
-        origins: typeof champ.origins === 'string' ? champ.origins.split(',').map((s: string) => s.trim()) : champ.origins,
-        classes: typeof champ.classes === 'string' ? champ.classes.split(',').map((s: string) => s.trim()) : champ.classes,
-        description: champ.description,
-        image_url: champ.image_url,
-        action_image_url: champ.action_image_url,
+        origins: typeof champ.origins === 'string' ? champ.origins.split(',').map((s: string) => s.trim()).filter(Boolean) : (champ.origins || []),
+        classes: typeof champ.classes === 'string' ? champ.classes.split(',').map((s: string) => s.trim()).filter(Boolean) : (champ.classes || []),
+        description: champ.description || "",
+        image_url: champ.image_url || null,
+        action_image_url: champ.action_image_url || null,
         ability: champ.ability || { name: "Habilidade do Deus", mana: 100, effect: "Efeito configurado via DB." }
       };
 
-      if (isUpdate) {
-        const { error } = await supabase.from('champions').update(payload).eq('id', champ.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from('champions').insert([payload]);
-        if (error) throw error;
-      }
+      // Using upsert on 'slug' to prevent duplicates and handle both creation/update
+      const { data, error } = await supabase
+        .from('champions')
+        .upsert(payload, { onConflict: 'slug' })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      return data;
     },
     onSuccess: () => {
-      toast.success(editingChamp ? "Deus atualizado na rede!" : "Novo campeão forjado!");
+      toast.success(editingChamp ? "Deus reconfigurado com sucesso!" : "Novo deus forjado na arena!");
       setNewChamp({ id: undefined, name: "", slug: "", tier: 1, origins: "", classes: "", description: "", image_url: "", action_image_url: "" });
       setEditingChamp(null);
       queryClient.invalidateQueries({ queryKey: ['champions'] });
+    },
+    onError: (error: any) => {
+      toast.error("Erro ao salvar: " + error.message);
     }
   });
 
@@ -205,10 +209,26 @@ export default function ArenaPortal() {
            <StatCard label="STATUS" value="ATIVO" icon={<div className="h-2 w-2 rounded-full bg-green-500" />} />
         </div>
 
-        {/* FORMULÁRIO DE ADIÇÃO */}
-        <div className="panel p-6 border-primary/20 bg-primary/5 space-y-6">
-           <div className="flex items-center gap-2 text-primary font-display text-sm tracking-widest">
-              <Plus className="h-4 w-4" /> FORJAR NOVO DEUS
+        {/* FORMULÁRIO DE ADIÇÃO / EDIÇÃO RÁPIDA */}
+        <div className={`panel p-6 border-primary/20 transition-all ${newChamp.id ? 'bg-primary/10 border-primary' : 'bg-primary/5'}`}>
+           <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2 text-primary font-display text-sm tracking-widest">
+                 {newChamp.id ? <Edit2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                 {newChamp.id ? `EDITANDO: ${newChamp.name.toUpperCase()}` : 'FORJAR NOVO DEUS'}
+              </div>
+              {newChamp.id && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => {
+                    setEditingChamp(null);
+                    setNewChamp({ id: undefined, name: "", slug: "", tier: 1, origins: "", classes: "", description: "", image_url: "", action_image_url: "" });
+                  }}
+                  className="text-[10px] font-display tracking-widest hover:text-red-500"
+                >
+                  <Trash2 className="mr-1 h-3 w-3" /> CANCELAR EDIÇÃO
+                </Button>
+              )}
            </div>
            <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
@@ -299,22 +319,24 @@ export default function ArenaPortal() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-2">
                     <Button 
-                      variant="ghost" 
+                      variant="outline" 
                       size="icon" 
-                      className="h-8 w-8 text-cyan hover:bg-cyan/10"
+                      className="h-8 w-8 text-cyan border-cyan/20 bg-cyan/5 hover:bg-cyan/10"
                       onClick={() => openEditModal(champion)}
+                      title="Editar Deus"
                     >
                       <Edit2 className="h-4 w-4" />
                     </Button>
                     <Button 
-                      variant="ghost" 
+                      variant="outline" 
                       size="icon" 
-                      className="h-8 w-8 text-red-500 hover:bg-red-500/10"
+                      className="h-8 w-8 text-red-500 border-red-500/20 bg-red-500/5 hover:bg-red-500/10"
                       onClick={() => {
                         if(confirm(`Desintegrar ${champion.name} do banco de dados?`)) deleteMutation.mutate(champion.id);
                       }}
+                      title="Deletar"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
