@@ -49,6 +49,12 @@ export default function ArenaPortal() {
   const handleMigrate = async () => {
     setIsMigrating(true);
     try {
+      // 1. Buscar deuses atuais para preservar imagens
+      const { data: existingChamps } = await supabase.from('champions').select('slug, image_url, action_image_url');
+      const imageMap = new Map();
+      existingChamps?.forEach(c => imageMap.set(c.slug, { portrait: c.image_url, action: c.action_image_url }));
+
+      // 2. Formatar dados estáticos preservando imagens se existirem
       const formatted = staticChampions.map(c => ({
         slug: c.id,
         name: c.name,
@@ -57,8 +63,8 @@ export default function ArenaPortal() {
         classes: c.classes,
         ability: c.ability,
         description: c.desc,
-        image_url: null,
-        action_image_url: null
+        image_url: imageMap.get(c.id)?.portrait || null,
+        action_image_url: imageMap.get(c.id)?.action || null
       }));
 
       const { error } = await (supabase as any).from('champions').upsert(formatted, { onConflict: 'slug' });
@@ -103,7 +109,7 @@ export default function ArenaPortal() {
   };
 
   const [newChamp, setNewChamp] = useState({
-    id: undefined, // Used for edit
+    id: undefined,
     name: "",
     slug: "",
     tier: 1,
@@ -111,7 +117,8 @@ export default function ArenaPortal() {
     classes: "",
     description: "",
     image_url: "",
-    action_image_url: ""
+    action_image_url: "",
+    ability: null as any // Armazena o objeto de habilidade
   });
 
   const upsertMutation = useMutation({
@@ -125,7 +132,7 @@ export default function ArenaPortal() {
         description: champ.description || "",
         image_url: champ.image_url || null,
         action_image_url: champ.action_image_url || null,
-        ability: champ.ability || { name: "Habilidade do Deus", mana: 100, effect: "Efeito configurado via DB." }
+        ability: champ.ability || (staticChampions.find(sc => sc.id === champ.slug)?.ability) || { name: "Habilidade do Deus", mana: 100, effect: "Efeito configurado via DB." }
       };
 
       // Using upsert on 'slug' to prevent duplicates and handle both creation/update
@@ -140,7 +147,7 @@ export default function ArenaPortal() {
     },
     onSuccess: () => {
       toast.success(editingChamp ? "Deus reconfigurado com sucesso!" : "Novo deus forjado na arena!");
-      setNewChamp({ id: undefined, name: "", slug: "", tier: 1, origins: "", classes: "", description: "", image_url: "", action_image_url: "" });
+      setNewChamp({ id: undefined, name: "", slug: "", tier: 1, origins: "", classes: "", description: "", image_url: "", action_image_url: "", ability: null });
       setEditingChamp(null);
       queryClient.invalidateQueries({ queryKey: ['champions'] });
     },
@@ -160,7 +167,8 @@ export default function ArenaPortal() {
       classes: champion.classes.join(', '),
       description: champion.description,
       image_url: champion.image_url || "",
-      action_image_url: champion.action_image_url || ""
+      action_image_url: champion.action_image_url || "",
+      ability: champion.ability // Preserva a habilidade original
     });
   };
 
