@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Swords, Shield, Zap, Crown, Sparkles, Coins, Sword, Target, Flame, Droplet } from "lucide-react";
+import { ChevronLeft, Swords, Shield, Zap, Crown, Sparkles, Coins, Sword, Target, Flame, Droplet, X } from "lucide-react";
 import logo from "@/assets/aog-logo.png";
 
 interface Champion {
@@ -25,10 +26,11 @@ const champions: Champion[] = [
   { id: "sombra", name: "Sombra", tier: 2, origins: ["Holográfico"], classes: ["Lâmina"], ability: { name: "Fase de Luz", mana: 75, effect: "Torna-se invisível por 2s e reaparece atrás do inimigo mais distante." }, desc: "Assassina holográfica especialista em alcançar carregadores." },
   { id: "barao", name: "Barão Grivas", tier: 2, origins: ["Sindicato"], classes: ["Sentinela", "Bastion"], ability: { name: "Impacto de Prestígio", mana: 85, effect: "Bate o cajado no chão, reduzindo a Vel. de Atk dos inimigos ao redor." }, desc: "Chefe do Sindicato — controla o ritmo da linha de frente." },
   { id: "lyra", name: "Lyra", tier: 2, origins: ["Ascendente"], classes: ["Atirador"], ability: { name: "Flecha de Fóton", mana: 70, effect: "Atira um feixe que atravessa o mapa, causando dano a todos no caminho." }, desc: "Sniper ascendente perfeita para inimigos enfileirados." },
+  { id: "nanobit", name: "Nano-Bit", tier: 2, origins: [], classes: ["Tecnomago", "Sentinela"], ability: { name: "Reparo Nanométrico", mana: 70, effect: "Libera enxame de nanobots que cura o aliado mais ferido em 250 HP." }, desc: "Suporte técnico — ponte entre Tecnomagos e a linha de frente." },
   // Tier 3
   { id: "astra", name: "Astra", tier: 3, origins: ["Holográfico"], classes: ["Tecnomago"], ability: { name: "Nebulosa Digital", mana: 90, effect: "Cria uma área de dano contínuo e gera 1 clone para cada inimigo morto ali." }, desc: "Conjuradora de área que escala com kills consecutivas." },
   { id: "vector", name: "Vector", tier: 3, origins: ["Ciborgue"], classes: ["Atirador"], ability: { name: "Modo Artilharia", mana: 80, effect: "Fica imóvel e ganha +100% de Vel. de Atk por 5 segundos." }, desc: "Torre de fogo cibernética para sustained damage." },
-  { id: "titan", name: "Titan", tier: 3, origins: ["Ciborgue"], classes: ["Sentinela", "Bastion"], ability: { name: "Cúpula Alpha", mana: 100, effect: "Cria uma barreira que bloqueia todos os projéteis inimigos por 3s." }, desc: "Anti-atiradores definitivo. Domina rounds com burst à distância." },
+  { id: "titan", name: "Titan", tier: 3, origins: [], classes: ["Sentinela", "Bastion"], ability: { name: "Cúpula Alpha", mana: 100, effect: "Cria uma barreira que bloqueia todos os projéteis inimigos por 3s." }, desc: "Anti-atiradores definitivo. Domina rounds com burst à distância." },
   { id: "zane", name: "Zane", tier: 3, origins: ["Ciborgue", "Sindicato"], classes: ["Lâmina"], ability: { name: "Turbilhão de Créditos", mana: 75, effect: "Gira as lâminas; se matar alguém, gera 1 ouro (máx. 2 por round)." }, desc: "A unidade mais disputada — economia + combate em um pacote." },
   { id: "cybermonk", name: "Cyber-Monk", tier: 3, origins: ["Ascendente"], classes: ["Bastion"], ability: { name: "Palma de Plasma", mana: 85, effect: "Empurra o alvo para o final do grid e o atordoa por 2.5s." }, desc: "Disruptor de posicionamento — reorganiza qualquer comp inimiga." },
   // Tier 4
@@ -66,10 +68,39 @@ const tierConfig = {
   5: { color: "text-gold", border: "border-gold/60", bg: "bg-gradient-gold/10", label: "T5" },
 } as const;
 
+const allTraits = [
+  { name: "Ciborgue", kind: "origin" as const, icon: "⚙️" },
+  { name: "Holográfico", kind: "origin" as const, icon: "👤" },
+  { name: "Sindicato", kind: "origin" as const, icon: "💰" },
+  { name: "Ascendente", kind: "origin" as const, icon: "✨" },
+  { name: "Deidade", kind: "origin" as const, icon: "⚡" },
+  { name: "Lâmina", kind: "class" as const, icon: "⚔️" },
+  { name: "Sentinela", kind: "class" as const, icon: "🛡️" },
+  { name: "Tecnomago", kind: "class" as const, icon: "🧪" },
+  { name: "Atirador", kind: "class" as const, icon: "🏹" },
+  { name: "Bastion", kind: "class" as const, icon: "🧱" },
+];
+
+const viability = [
+  { trait: "Lâminas", icon: "⚔️", count: 6, max: "2/4/6", note: "Kael, Nyx, Sombra, Zane, Draven-X, Ares. Bônus máx (6) sem margem — todos necessários ou use Espátula." },
+  { trait: "Tecnomagos", icon: "🧪", count: 6, max: "2/4", note: "Volt, Nano-Bit, Astra, Nova, Luna, Zeus-01. Bônus máx (4) é confortável — sobram 2 de margem." },
+  { trait: "Ciborgues", icon: "⚙️", count: 6, max: "2/4/6", note: "Kael, Tork, Volt, Vector, Zane, Helius. Pivote para (4) é seguro." },
+  { trait: "Sentinelas", icon: "🛡️", count: 6, max: "2/4", note: "Tork, Barão, Nano-Bit, Titan, Helius, Gaia. Bônus (4) tem 2 unidades de folga." },
+  { trait: "Bastions", icon: "🧱", count: 5, max: "2/3", note: "Pax, Barão, Titan, Cyber-Monk, Ares. Bônus máx (3) é trivial de fechar." },
+  { trait: "Atiradores", icon: "🏹", count: 4, max: "2/4", note: "M1-RA, Lyra, Vector, Luna. Bônus máx (4) requer todos — comp dedicada." },
+];
+
 const Champions = () => {
+  const [active, setActive] = useState<string | null>(null);
+
+  const filtered = useMemo(
+    () => (active ? champions.filter((c) => c.origins.includes(active) || c.classes.includes(active)) : champions),
+    [active]
+  );
+
   const grouped = [1, 2, 3, 4, 5].map((t) => ({
     tier: t as 1 | 2 | 3 | 4 | 5,
-    units: champions.filter((c) => c.tier === t),
+    units: filtered.filter((c) => c.tier === t),
   }));
 
   return (
@@ -97,7 +128,7 @@ const Champions = () => {
             ELENCO DE LANÇAMENTO
           </div>
           <h1 className="font-display text-5xl md:text-6xl font-black leading-[1.05]">
-            <span className="text-cyan text-glow">21 DEUSES</span>
+            <span className="text-cyan text-glow">22 DEUSES</span>
             <br />
             <span className="text-foreground">PRONTOS PARA A</span>{" "}
             <span className="text-gold">ARENA</span>
@@ -107,7 +138,7 @@ const Champions = () => {
             para forjar composições devastadoras.
           </p>
           <div className="flex gap-8 pt-4 text-sm">
-            <div><div className="font-display text-2xl text-cyan">21</div><div className="text-muted-foreground">Unidades</div></div>
+            <div><div className="font-display text-2xl text-cyan">22</div><div className="text-muted-foreground">Unidades</div></div>
             <div><div className="font-display text-2xl text-cyan">5</div><div className="text-muted-foreground">Origens</div></div>
             <div><div className="font-display text-2xl text-cyan">5</div><div className="text-muted-foreground">Classes</div></div>
             <div><div className="font-display text-2xl text-gold">5</div><div className="text-muted-foreground">Tiers</div></div>
@@ -166,13 +197,53 @@ const Champions = () => {
       </section>
 
       {/* CAMPEÕES POR TIER */}
-      <section className="container py-12 space-y-12">
+      <section className="container py-12 space-y-8">
         <div className="space-y-3">
           <div className="text-xs font-display tracking-[0.4em] text-accent">// ELENCO COMPLETO</div>
           <h2 className="font-display text-3xl md:text-4xl font-bold">CAMPEÕES POR <span className="text-gold">TIER</span></h2>
+          <p className="text-sm text-muted-foreground">Filtre por sinergia para ver quais unidades pertencem a cada origem ou classe.</p>
         </div>
 
-        {grouped.map(({ tier, units }) => {
+        {/* FILTRO DE SINERGIAS */}
+        <div className="panel p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="font-display text-xs tracking-[0.3em] text-primary">// FILTRAR POR SINERGIA</span>
+            {active && (
+              <button
+                onClick={() => setActive(null)}
+                className="flex items-center gap-1 text-xs font-display tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-3 w-3" /> LIMPAR
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {allTraits.map((t) => {
+              const isActive = active === t.name;
+              const isOrigin = t.kind === "origin";
+              return (
+                <button
+                  key={t.name}
+                  onClick={() => setActive(isActive ? null : t.name)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded font-display text-xs tracking-wider border transition-all ${
+                    isActive
+                      ? isOrigin
+                        ? "bg-primary/20 border-primary text-primary shadow-glow"
+                        : "bg-accent/20 border-accent text-accent shadow-glow"
+                      : isOrigin
+                        ? "border-primary/30 text-primary/70 hover:border-primary/60 hover:text-primary"
+                        : "border-accent/30 text-accent/70 hover:border-accent/60 hover:text-accent"
+                  }`}
+                >
+                  <span>{t.icon}</span>
+                  {t.name.toUpperCase()}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {grouped.filter((g) => g.units.length > 0).map(({ tier, units }) => {
           const cfg = tierConfig[tier];
           return (
             <div key={tier} className="space-y-4">
@@ -233,7 +304,36 @@ const Champions = () => {
         })}
       </section>
 
-      {/* CTA */}
+      {/* VIABILIDADE */}
+      <section className="container py-16 space-y-6">
+        <div className="space-y-3">
+          <div className="text-xs font-display tracking-[0.4em] text-accent">// CHECK DE SINERGIA</div>
+          <h2 className="font-display text-3xl md:text-4xl font-bold">ANÁLISE DE <span className="text-cyan">VIABILIDADE</span></h2>
+          <p className="text-sm text-muted-foreground max-w-2xl">
+            Quantas unidades existem por sinergia e qual a margem de pivote para fechar cada bônus máximo.
+          </p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {viability.map((v) => (
+            <div key={v.trait} className="panel p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{v.icon}</span>
+                  <span className="font-display text-lg">{v.trait}</span>
+                </div>
+                <span className="font-display text-xs tracking-widest text-cyan">{v.max}</span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="font-display text-3xl font-black text-gold">{v.count}</span>
+                <span className="text-xs font-display tracking-wider text-muted-foreground">UNIDADES</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">{v.note}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+
       <section className="container py-16">
         <div className="panel-glow p-10 text-center space-y-5 max-w-2xl mx-auto">
           <Swords className="h-10 w-10 text-primary mx-auto" />
