@@ -6,7 +6,9 @@ import {
   combinedItems, 
   rareItems, 
   divineItems, 
-  specialItems 
+  specialItems,
+  origins,
+  classes
 } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
