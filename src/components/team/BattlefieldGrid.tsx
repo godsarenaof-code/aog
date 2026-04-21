@@ -83,11 +83,11 @@ export function BattlefieldGrid({ team, onPositionChange }: BattlefieldGridProps
   return (
     <div className="space-y-8">
       {/* Battlefield Display */}
-      <div className="relative aspect-[7/8] w-full max-w-[500px] mx-auto bg-black/40 border border-primary/20 rounded-xl overflow-hidden shadow-2xl backdrop-blur-md p-2 grid grid-cols-7 grid-rows-8 gap-1">
+      <div className="relative aspect-[7/8] w-full max-w-[500px] mx-auto bg-black/60 border-2 border-primary/40 rounded-xl overflow-hidden shadow-[0_0_50px_rgba(34,211,238,0.15)] backdrop-blur-xl p-2 grid grid-cols-7 grid-rows-8 gap-1">
         {/* Decorative Grid Lines */}
-        <div className="absolute inset-0 pointer-events-none grid grid-cols-7 grid-rows-8 italic opacity-5 leading-none overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none grid grid-cols-7 grid-rows-8 italic opacity-10 leading-none overflow-hidden">
            {Array.from({ length: 56 }).map((_, i) => (
-             <div key={i} className="border-[0.5px] border-primary/20 flex items-center justify-center text-[6px]">AOG_{i}</div>
+             <div key={i} className="border-[1px] border-primary/30 flex items-center justify-center text-[6px]">AOG_{i}</div>
            ))}
         </div>
 
@@ -106,12 +106,12 @@ export function BattlefieldGrid({ team, onPositionChange }: BattlefieldGridProps
                 onClick={() => handleCellClick(x, y)}
                 className={`relative rounded-sm border transition-all duration-300 flex items-center justify-center group overflow-hidden ${
                   isEnemySide 
-                    ? "bg-red-500/5 border-red-500/10 cursor-default" 
+                    ? "bg-red-500/10 border-red-500/20 cursor-default" 
                     : unit 
-                      ? "bg-primary/10 border-primary/40 cursor-pointer hover:border-primary"
+                      ? "bg-primary/20 border-primary cursor-pointer hover:shadow-cyan-glow shadow-sm"
                       : isSelectedCell
-                        ? "bg-cyan/20 border-cyan/60 cursor-pointer animate-pulse"
-                        : "bg-primary/5 border-primary/10 cursor-pointer hover:bg-primary/10 hover:border-primary/30"
+                        ? "bg-cyan/40 border-white cursor-pointer animate-pulse shadow-glow-sm"
+                        : "bg-primary/10 border-primary/30 cursor-pointer hover:bg-primary/20 hover:border-primary"
                 }`}
               >
                 {/* Cell Coordinate Label */}

@@ -60,7 +60,7 @@ export default function Lore() {
         audioRef.current = new Audio("https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f694b.mp3?filename=sci-fi-ambience-11042.mp3");
         audioRef.current.loop = true;
       }
-      audioRef.current.volume = 0.2; // Volume fixo confortável
+      audioRef.current.volume = 0.7; // Volume aumentado para melhor audibilidade
       audioRef.current.play().catch(e => console.log("Audio play blocked"));
     } else if (audioRef.current) {
       audioRef.current.pause();
@@ -150,60 +150,49 @@ export default function Lore() {
             </motion.div>
 
             {/* Content Plate */}
-            <div className="relative z-20 h-full flex items-center justify-center px-6">
-              <div className="max-w-5xl w-full space-y-12 text-center">
-                
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="flex items-center justify-center gap-4 text-cyan/60"
-                >
-                  <div className="h-px w-8 bg-cyan/30" />
-                  <span className="text-[10px] tracking-[0.8em] font-bold uppercase">
-                    PROTOCOL A.O.G // TRANSMISSION {currentIndex + 1}
-                  </span>
-                  <div className="h-px w-8 bg-cyan/30" />
-                </motion.div>
-
-                <div className="space-y-8">
-                  <h2 className="text-6xl md:text-9xl font-black uppercase tracking-tighter leading-none italic text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40">
-                    <TypewriterGlitch 
-                      text={currentChapter.title} 
-                      speed={40} 
-                      delay={500}
-                    />
-                  </h2>
-                  
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1, duration: 1 }}
-                  >
-                    <p className="text-xl md:text-3xl text-cyan/80 font-light leading-relaxed max-w-4xl mx-auto italic">
-                      "{currentChapter.content}"
-                    </p>
-
-                    {currentIndex === chapters.length - 1 && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 2, type: "spring" }}
-                        className="mt-12 flex justify-center"
-                      >
-                        <LeadCaptureModal>
-                          <Button className="bg-cyan hover:bg-cyan/90 text-black font-display font-black tracking-[0.3em] h-16 px-12 text-lg shadow-[0_0_30px_rgba(34,211,238,0.5)] border-none group transition-all duration-500">
-                             <span className="group-hover:scale-110 transition-transform flex items-center gap-2">
-                               ACEITAR PROTOCOLO DE ACESSO <Zap className="h-5 w-5 fill-black" />
-                             </span>
-                          </Button>
-                        </LeadCaptureModal>
-                      </motion.div>
-                    )}
-                  </motion.div>
+            <div className="absolute inset-0 flex items-center justify-center p-6 z-20">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="max-w-4xl panel p-8 md:p-12 bg-black/80 backdrop-blur-xl border border-cyan/40 shadow-[0_0_30px_rgba(34,211,238,0.2)] relative"
+              >
+                <div className="absolute -top-6 left-12 flex items-center gap-4">
+                   <div className="h-12 w-12 rounded bg-cyan text-black flex items-center justify-center font-display text-xl font-black shadow-[0_0_15px_rgba(34,211,238,0.5)]">
+                      {currentIndex + 1}
+                   </div>
+                   <div className="h-px w-24 bg-cyan animate-pulse" />
                 </div>
 
-              </div>
+                <div className="space-y-6 pt-4">
+                  <div className="flex items-center gap-3 text-cyan font-display text-xs tracking-[0.4em] uppercase">
+                    <Zap className="h-4 w-4 animate-pulse" /> transmimento_ao_vivo_{currentChapter.id}
+                  </div>
+                  <h2 className="font-display text-3xl md:text-5xl font-black uppercase leading-none tracking-tighter text-white">
+                    {currentChapter.title}
+                  </h2>
+                  <p className="text-lg md:text-xl text-white/90 leading-relaxed font-light italic">
+                    "{currentChapter.content}"
+                  </p>
+
+                  {currentIndex === chapters.length - 1 && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 2, type: "spring" }}
+                      className="mt-12 flex justify-center"
+                    >
+                      <LeadCaptureModal>
+                        <Button className="bg-white hover:bg-cyan text-cyan hover:text-white font-display font-black tracking-[0.4em] h-20 px-16 text-xl shadow-[0_0_50px_rgba(34,211,238,0.8)] border-none group transition-all duration-500 rounded-none border-t-2 border-b-2 border-cyan/50">
+                           <span className="group-hover:scale-110 transition-transform flex items-center gap-3">
+                             ACEITAR PROTOCOLO DE ACESSO <Zap className="h-6 w-6 fill-current animate-pulse" />
+                           </span>
+                        </Button>
+                      </LeadCaptureModal>
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         )}
@@ -214,13 +203,13 @@ export default function Lore() {
         <div className="flex gap-6">
           <button 
             onClick={prevSlide}
-            className="h-14 w-14 rounded-full border border-cyan/40 flex items-center justify-center text-[#22d3ee] hover:bg-cyan/20 hover:shadow-cyan-glow transition-all duration-300"
+            className="h-14 w-14 rounded-full border border-cyan flex items-center justify-center text-cyan bg-cyan/10 hover:bg-cyan/20 shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all duration-300"
           >
             <ChevronLeft size={32} />
           </button>
           <button 
             onClick={nextSlide}
-            className="h-14 w-14 rounded-full border border-cyan/40 flex items-center justify-center text-[#22d3ee] hover:bg-cyan/20 hover:shadow-cyan-glow transition-all duration-300"
+            className="h-14 w-14 rounded-full border border-cyan flex items-center justify-center text-cyan bg-cyan/10 hover:bg-cyan/20 shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all duration-300"
           >
             <ChevronRight size={32} />
           </button>
