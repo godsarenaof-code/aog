@@ -149,17 +149,6 @@ export default function ArenaPortal() {
     }
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('champions').delete().eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast.success("Registro removido.");
-      queryClient.invalidateQueries({ queryKey: ['champions'] });
-    }
-  });
-
   const openEditModal = (champion: any) => {
     setEditingChamp(champion);
     setNewChamp({
