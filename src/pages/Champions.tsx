@@ -1,0 +1,248 @@
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, Swords, Shield, Zap, Crown, Sparkles, Coins, Heart, Sword, Target, Flame } from "lucide-react";
+import logo from "@/assets/aog-logo.png";
+
+interface Champion {
+  id: string;
+  name: string;
+  tier: 1 | 2 | 3 | 4 | 5;
+  origins: string[];
+  classes: string[];
+  desc: string;
+}
+
+const champions: Champion[] = [
+  // Tier 1
+  { id: "kael", name: "Kael", tier: 1, origins: ["Ciborgue"], classes: ["Lâmina"], desc: "Unidade agressiva de início, perfeita para abrir o early game com pressão." },
+  { id: "m1ra", name: "M1-RA", tier: 1, origins: ["Holográfico"], classes: ["Atirador"], desc: "Principal fonte de dano à distância na fase inicial do jogo." },
+  { id: "tork", name: "Tork", tier: 1, origins: ["Ciborgue"], classes: ["Sentinela"], desc: "Tanque padrão para segurar a linha de frente e proteger seus carregadores." },
+  { id: "vex", name: "Vex", tier: 1, origins: ["Sindicato"], classes: ["Lâmina"], desc: "Assassino oportunista que prospera quando o time perde rounds." },
+  { id: "nyx", name: "Nyx", tier: 1, origins: ["Holográfico"], classes: ["Tecnomago"], desc: "Conjuradora frágil com burst mágico de baixo custo." },
+  // Tier 2
+  { id: "orion", name: "Orion", tier: 2, origins: ["Ascendente"], classes: ["Atirador"], desc: "Atirador escalável que cresce conforme a rodada se prolonga." },
+  { id: "sera", name: "Sera", tier: 2, origins: ["Ciborgue"], classes: ["Tecnomago"], desc: "Suporte mágico com escudos de energia e cura sustentada." },
+  { id: "riven", name: "Riven", tier: 2, origins: ["Sindicato"], classes: ["Bastion"], desc: "Tanque do submundo com redução de dano desde o início." },
+  { id: "lyra", name: "Lyra", tier: 2, origins: ["Holográfico"], classes: ["Sentinela"], desc: "Cria clone defensivo que absorve ataques inimigos." },
+  // Tier 3
+  { id: "zane", name: "Zane", tier: 3, origins: ["Ciborgue", "Sindicato"], classes: ["Lâmina"], desc: "A unidade mais disputada. Mantém a economia alta enquanto luta bem." },
+  { id: "cybermonk", name: "Cyber-Monk", tier: 3, origins: ["Ascendente"], classes: ["Bastion"], desc: "Utilidade pura: tanca e escala conforme a luta demora." },
+  { id: "zeph", name: "Zeph", tier: 3, origins: ["Holográfico"], classes: ["Atirador"], desc: "Sniper de longo alcance que pune posicionamentos errados." },
+  { id: "aether", name: "Aether", tier: 3, origins: ["Ascendente"], classes: ["Tecnomago"], desc: "Mago de área que escala dano a cada segundo da rodada." },
+  // Tier 4
+  { id: "luna", name: "Luna", tier: 4, origins: ["Holográfico"], classes: ["Atirador", "Tecnomago"], desc: "Extremamente flexível. Carrega itens de dano físico ou mágico." },
+  { id: "dravenx", name: "Draven-X", tier: 4, origins: ["Sindicato"], classes: ["Lâmina"], desc: "Alto risco, alta recompensa. Sobreviver garante o bônus do Sindicato." },
+  { id: "ironclad", name: "Ironclad", tier: 4, origins: ["Ciborgue"], classes: ["Sentinela", "Bastion"], desc: "Fortaleza ambulante que protege e contra-ataca." },
+  { id: "solara", name: "Solara", tier: 4, origins: ["Ascendente"], classes: ["Tecnomago"], desc: "Conjuradora solar com explosões em cadeia devastadoras." },
+  // Tier 5
+  { id: "zeus01", name: "Zeus-01", tier: 5, origins: ["Deidade"], classes: ["Tecnomago"], desc: "Controle de grupo global. Atordoa todos os inimigos em sequência." },
+  { id: "ares", name: "Ares", tier: 5, origins: ["Deidade"], classes: ["Lâmina", "Bastion"], desc: "Um exército de um homem só. Difícil de matar e impossível de ignorar." },
+  { id: "athena", name: "Athena", tier: 5, origins: ["Deidade"], classes: ["Sentinela"], desc: "Estratégia divina: protege aliados e dita o ritmo da batalha." },
+  { id: "apollo", name: "Apollo", tier: 5, origins: ["Deidade"], classes: ["Atirador"], desc: "Carrega tardia definitivo. Cada flecha decide rounds." },
+];
+
+const origins = [
+  { name: "Holográficos", levels: "2 / 4", desc: "(2) Cria clone com 30% HP. (4) Clone causa 60% de dano." },
+  { name: "Ciborgues", levels: "2 / 4 / 6", desc: "Ganham 200/400/700 de Escudo de Energia e 15% de Dano de Ataque." },
+  { name: "Ascendentes", levels: "3 / 5", desc: "A cada 2s, ganham +5% de dano (acumula até o fim da rodada)." },
+  { name: "Sindicato", levels: "2", desc: "Vencer = +1 Ouro. Perder = próximo Roll custa 1." },
+  { name: "Deidades", levels: "1", desc: "+15% de status para cada Elo acima de Mortal. Sem bônus de grupo." },
+];
+
+const classes = [
+  { name: "Lâminas", levels: "2 / 4 / 6", desc: "(2) 15% chance de ataque duplo. (4) 30%. (6) 50% + Crítico.", icon: Sword },
+  { name: "Sentinelas", levels: "2 / 4", desc: "(2) +40 Armadura. (4) Aliados adjacentes ganham 50% dessa armadura.", icon: Shield },
+  { name: "Tecnomagos", levels: "2 / 4", desc: "(2) +20% Poder de Magia. (4) Curam 15% do dano causado por magias.", icon: Sparkles },
+  { name: "Atiradores", levels: "2 / 4", desc: "(2) +1 de Range. (4) Cada ataque aumenta Vel. Atk em 5%.", icon: Target },
+  { name: "Bastions", levels: "2 / 3", desc: "(2) 20% de Redução de Dano. (3) 40%.", icon: Flame },
+];
+
+const tierConfig = {
+  1: { color: "text-muted-foreground", border: "border-muted", bg: "bg-muted/20", label: "T1" },
+  2: { color: "text-success", border: "border-success/60", bg: "bg-success/10", label: "T2" },
+  3: { color: "text-cyan", border: "border-cyan/60", bg: "bg-cyan/10", label: "T3" },
+  4: { color: "text-accent", border: "border-accent/60", bg: "bg-accent/10", label: "T4" },
+  5: { color: "text-gold", border: "border-gold/60", bg: "bg-gradient-gold/10", label: "T5" },
+} as const;
+
+const Champions = () => {
+  const grouped = [1, 2, 3, 4, 5].map((t) => ({
+    tier: t as 1 | 2 | 3 | 4 | 5,
+    units: champions.filter((c) => c.tier === t),
+  }));
+
+  return (
+    <div className="min-h-screen overflow-x-hidden">
+      {/* NAV */}
+      <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-background/60 border-b border-border/40">
+        <div className="container flex h-16 items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <img src={logo} alt="A.O.G logo" className="h-9 w-9 object-contain drop-shadow-[0_0_10px_hsl(var(--primary)/0.6)]" />
+            <span className="font-display font-bold text-cyan text-lg">A.O.G</span>
+          </Link>
+          <Link to="/">
+            <Button variant="outline" size="sm" className="border-primary/60 text-primary hover:bg-primary/10 font-display tracking-wider">
+              <ChevronLeft className="h-4 w-4" /> VOLTAR
+            </Button>
+          </Link>
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <section className="relative pt-32 pb-12">
+        <div className="container space-y-4 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/40 bg-primary/5 text-xs font-display tracking-[0.3em] text-primary">
+            <Crown className="h-3 w-3" />
+            ELENCO DE LANÇAMENTO
+          </div>
+          <h1 className="font-display text-5xl md:text-6xl font-black leading-[1.05]">
+            <span className="text-cyan text-glow">21 DEUSES</span>
+            <br />
+            <span className="text-foreground">PRONTOS PARA A</span>{" "}
+            <span className="text-gold">ARENA</span>
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl">
+            Conheça as unidades, sinergias e estratégias do Pré-Alpha. Combine origens e classes
+            para forjar composições devastadoras.
+          </p>
+          <div className="flex gap-8 pt-4 text-sm">
+            <div><div className="font-display text-2xl text-cyan">21</div><div className="text-muted-foreground">Unidades</div></div>
+            <div><div className="font-display text-2xl text-cyan">5</div><div className="text-muted-foreground">Origens</div></div>
+            <div><div className="font-display text-2xl text-cyan">5</div><div className="text-muted-foreground">Classes</div></div>
+            <div><div className="font-display text-2xl text-gold">5</div><div className="text-muted-foreground">Tiers</div></div>
+          </div>
+        </div>
+      </section>
+
+      {/* SINERGIAS */}
+      <section className="container py-16 space-y-10">
+        <div className="space-y-3">
+          <div className="text-xs font-display tracking-[0.4em] text-accent">// MATRIZ DE SINERGIAS</div>
+          <h2 className="font-display text-3xl md:text-4xl font-bold">ORIGENS & <span className="text-cyan">CLASSES</span></h2>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          <div className="space-y-3">
+            <h3 className="font-display text-sm tracking-[0.3em] text-primary">// ORIGENS</h3>
+            <div className="space-y-2">
+              {origins.map((o) => (
+                <div key={o.name} className="panel p-4 flex items-start gap-4">
+                  <div className="h-10 w-10 rounded-md bg-gradient-primary/20 border border-primary/40 grid place-items-center shrink-0">
+                    <Zap className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline justify-between gap-2 mb-1">
+                      <span className="font-display text-base">{o.name}</span>
+                      <span className="font-display text-xs text-cyan tracking-widest">{o.levels}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{o.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-display text-sm tracking-[0.3em] text-accent">// CLASSES</h3>
+            <div className="space-y-2">
+              {classes.map((c) => (
+                <div key={c.name} className="panel p-4 flex items-start gap-4">
+                  <div className="h-10 w-10 rounded-md bg-gradient-gold/20 border border-accent/40 grid place-items-center shrink-0">
+                    <c.icon className="h-4 w-4 text-accent" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline justify-between gap-2 mb-1">
+                      <span className="font-display text-base">{c.name}</span>
+                      <span className="font-display text-xs text-accent tracking-widest">{c.levels}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{c.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CAMPEÕES POR TIER */}
+      <section className="container py-12 space-y-12">
+        <div className="space-y-3">
+          <div className="text-xs font-display tracking-[0.4em] text-accent">// ELENCO COMPLETO</div>
+          <h2 className="font-display text-3xl md:text-4xl font-bold">CAMPEÕES POR <span className="text-gold">TIER</span></h2>
+        </div>
+
+        {grouped.map(({ tier, units }) => {
+          const cfg = tierConfig[tier];
+          return (
+            <div key={tier} className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className={`font-display text-2xl font-bold ${cfg.color}`}>TIER {tier}</span>
+                <div className={`h-px flex-1 ${cfg.border} border-t`} />
+                <span className="font-display text-xs tracking-widest text-muted-foreground">
+                  {units.length} {units.length === 1 ? "UNIDADE" : "UNIDADES"}
+                </span>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {units.map((u) => (
+                  <div
+                    key={u.id}
+                    className={`panel p-5 hover:shadow-glow transition-all hover:-translate-y-1 ${cfg.border}`}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className={`h-14 w-14 rounded-md ${tier >= 4 ? "bg-gradient-gold" : "bg-gradient-primary"} grid place-items-center`}>
+                        <span className="font-display text-2xl font-black text-primary-foreground">
+                          {u.name[0]}
+                        </span>
+                      </div>
+                      <span className={`font-display text-[10px] tracking-widest px-2 py-1 rounded ${cfg.bg} ${cfg.color} flex items-center gap-1`}>
+                        <Coins className="h-3 w-3" />{tier}
+                      </span>
+                    </div>
+                    <h3 className="font-display text-lg mb-1">{u.name}</h3>
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {u.origins.map((o) => (
+                        <span key={o} className="text-[10px] font-display tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/30">
+                          {o}
+                        </span>
+                      ))}
+                      {u.classes.map((c) => (
+                        <span key={c} className="text-[10px] font-display tracking-wider px-2 py-0.5 rounded bg-accent/10 text-accent border border-accent/30">
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{u.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </section>
+
+      {/* CTA */}
+      <section className="container py-16">
+        <div className="panel-glow p-10 text-center space-y-5 max-w-2xl mx-auto">
+          <Swords className="h-10 w-10 text-primary mx-auto" />
+          <h2 className="font-display text-2xl md:text-3xl font-bold">
+            ESCOLHA SEUS <span className="text-cyan">CAMPEÕES</span>
+          </h2>
+          <p className="text-muted-foreground">
+            Entre na arena e teste suas composições no Pré-Alpha.
+          </p>
+          <Link to="/lobby">
+            <Button size="lg" className="bg-gradient-primary text-primary-foreground hover:opacity-90 shadow-glow font-display tracking-wider px-8">
+              JOGAR AGORA
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      <footer className="border-t border-border/40 py-8 text-center text-xs font-display tracking-widest text-muted-foreground">
+        © 2026 ARENA OF GODS · TODOS OS DIREITOS RESERVADOS
+      </footer>
+    </div>
+  );
+};
+
+export default Champions;

@@ -8,6 +8,7 @@ import Login from "./pages/Login.tsx";
 import Lobby from "./pages/Lobby.tsx";
 import Match from "./pages/Match.tsx";
 import Collection from "./pages/Collection.tsx";
+import Champions from "./pages/Champions.tsx";
 import Profile from "./pages/Profile.tsx";
 import Placeholder from "./pages/Placeholder.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/lobby" element={<Lobby />} />
           <Route path="/match" element={<Match />} />
           <Route path="/collection" element={<Collection />} />
+          <Route path="/champions" element={<Champions />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/ranked" element={<Placeholder title="RANKED" desc="Sistema de ranking competitivo sazonal — em construção. Suba do Aço ao Divino." />} />
           <Route path="/clans" element={<Placeholder title="CLÃS" desc="Forme alianças, dispute torneios em equipe e domine o leaderboard global." />} />
