@@ -159,15 +159,6 @@ export default function Lore() {
                   </motion.div>
                 </div>
 
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 2 }}
-                  className="flex items-center justify-center gap-3 text-[10px] tracking-[0.4em] text-cyan/30 uppercase font-mono"
-                >
-                  <Cpu className="h-3 w-3 animate-pulse" /> SYSTEM STATUS: IMMERSIVE // PAUSE_ON_HOVER: ENABLED
-                </motion.div>
-
               </div>
             </div>
           </motion.div>
