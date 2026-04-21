@@ -1,4 +1,4 @@
-import { Sword, Shield, Zap, Sparkles, Target, Flame } from "lucide-react";
+import { Sword, Shield, Zap, Sparkles, Target, Flame, Box, ZapOff, ShieldAlert, Cpu, Wind, Search } from "lucide-react";
 
 export interface Champion {
   id: string;
@@ -59,22 +59,51 @@ export const classes = [
 export interface Item {
   id: string;
   name: string;
-  type: "base" | "combined";
+  type: "base" | "combined" | "special";
   desc: string;
   recipe?: [string, string];
+  icon?: string;
 }
 
 export const baseItems: Item[] = [
-  { id: "espada", name: "Espada", type: "base", desc: "+10 de Dano de Ataque." },
-  { id: "placa", name: "Placa de Titânio", type: "base", desc: "+20 de Armadura." },
-  { id: "cristal", name: "Cristal de Mana", type: "base", desc: "+15 de Mana Inicial." },
+  { id: "lamina_base", name: "Lâmina de Plasma", type: "base", desc: "+15 Dano de Ataque.", icon: "⚔️" },
+  { id: "placa_base", name: "Placa de Titânio", type: "base", desc: "+20 Armadura.", icon: "🛡️" },
+  { id: "chip_base", name: "Chip de Precisão", type: "base", desc: "+15% Velocidade de Ataque.", icon: "🏹" },
+  { id: "cristal_base", name: "Cristal de Éter", type: "base", desc: "+20 Poder de Habilidade.", icon: "🔮" },
+  { id: "capa_base", name: "Capa de Refração", type: "base", desc: "+20 Resistência Mágica.", icon: "🧥" },
+  { id: "bota_base", name: "Bota de Impulso", type: "base", desc: "+10% Esquiva / +15 Mana Inicial.", icon: "👢" },
 ];
 
 export const combinedItems: Item[] = [
-  { id: "lamina_suprema", name: "Lâmina Suprema", type: "combined", recipe: ["espada", "placa"], desc: "Aumenta o Dano de Ataque em 20% e concede 10 de Armadura." },
-  { id: "lamina_sangrenta", name: "Lâmina Sangrenta", type: "combined", recipe: ["espada", "espada"], desc: "Ataques curam em 15% do dano causado." },
-  { id: "armadura_reativa", name: "Armadura Reativa", type: "combined", recipe: ["placa", "placa"], desc: "Reflete 10% do dano recebido." },
-  { id: "orbe_paradoxo", name: "Orbe do Paradoxo", type: "combined", recipe: ["cristal", "cristal"], desc: "Unidade inicia o combate com 50% do mana máximo." },
-  { id: "lamina_tecnomago", name: "Lâmina do Tecnomago", type: "combined", recipe: ["espada", "cristal"], desc: "Ataques concedem +5 de poder mágico base." },
-  { id: "escudo_cibernetico", name: "Escudo Cibernético", type: "combined", recipe: ["placa", "cristal"], desc: "Ganha um escudo igual a 20% do max HP." },
+  { id: "lamina_suprema", name: "Lâmina Suprema", type: "combined", recipe: ["lamina_base", "lamina_base"], desc: "+40 ATK. Ataques causam 5% da vida máx do alvo como dano real.", icon: "⚔️⚔️" },
+  { id: "muralha_ferro", name: "Muralha de Ferro", type: "combined", recipe: ["placa_base", "placa_base"], desc: "+50 ARM. Reflete 20% do dano físico recebido como dano mágico.", icon: "🛡️🛡️" },
+  { id: "hyper_link", name: "Hyper-Link", type: "combined", recipe: ["chip_base", "chip_base"], desc: "+40% Vel. ATK. Cada 3º ataque causa um choque em área.", icon: "🏹🏹" },
+  { id: "nucleo_arcano", name: "Núcleo Arcano", type: "combined", recipe: ["cristal_base", "cristal_base"], desc: "+40 AP. Recupera 25% da mana total após cada conjuração.", icon: "🔮🔮" },
+  { id: "manto_nevoa", name: "Manto da Névoa", type: "combined", recipe: ["capa_base", "capa_base"], desc: "+50 RM. Cura o portador em 2% da vida máx por segundo.", icon: "🧥🧥" },
+  { id: "passo_quantico", name: "Passo Quântico", type: "combined", recipe: ["bota_base", "bota_base"], desc: "+30 Mana Inicial. No início da luta, teleporta para o tile mais seguro.", icon: "👢👢" },
+  { id: "furia_rapida", name: "Fúria Rápida", type: "combined", recipe: ["lamina_base", "chip_base"], desc: "Ataques acumulam 6% de Vel. ATK (infinito na rodada).", icon: "⚔️🏹" },
+  { id: "gume_executor", name: "Gume do Executor", type: "combined", recipe: ["lamina_base", "placa_base"], desc: "Concede 25% de Roubo de Vida Físico.", icon: "⚔️🛡️" },
+  { id: "coracao_sombrio", name: "Coração Sombrio", type: "combined", recipe: ["lamina_base", "cristal_base"], desc: "Concede 25% de Vampirismo Universal.", icon: "⚔️🔮" },
+  { id: "quebra_sistemas", name: "Quebra-Sistemas", type: "combined", recipe: ["lamina_base", "capa_base"], desc: "Ataques reduzem a Armadura do alvo em 40% por 5 segundos.", icon: "⚔️🧥" },
+  { id: "lamina_impulso", name: "Lâmina de Impulso", type: "combined", recipe: ["lamina_base", "bota_base"], desc: "Salta no alvo mais distante e ganha +50% Crit.", icon: "⚔️👢" },
+  { id: "armadura_espinhosa", name: "Armadura Espinhosa", type: "combined", recipe: ["placa_base", "chip_base"], desc: "Ganha 10 de Armadura para cada inimigo que estiver te atacando.", icon: "🛡️🏹" },
+  { id: "placa_nanobots", name: "Placa de Nanobots", type: "combined", recipe: ["placa_base", "cristal_base"], desc: "Ao usar a habilidade, ganha um escudo de 400 HP por 4s.", icon: "🛡️🔮" },
+  { id: "muralha_arcana", name: "Muralha Arcana", type: "combined", recipe: ["placa_base", "capa_base"], desc: "Reduz em 30% todo dano recebido de habilidades.", icon: "🛡️🧥" },
+  { id: "estabilizador", name: "Estabilizador", type: "combined", recipe: ["placa_base", "bota_base"], desc: "Torna o portador imune a atordoamento e controles de grupo.", icon: "🛡️👢" },
+  { id: "arco_fotons", name: "Arco de Fótons", type: "combined", recipe: ["chip_base", "cristal_base"], desc: "Ataques básicos causam 40 de dano mágico adicional.", icon: "🏹🔮" },
+  { id: "manto_vidro", name: "Manto de Vidro", type: "combined", recipe: ["chip_base", "capa_base"], desc: "Ao sofrer dano, ganha +20% de Esquiva por 3 segundos.", icon: "🏹🧥" },
+  { id: "radar_ativo", name: "Radar Ativo", type: "combined", recipe: ["chip_base", "bota_base"], desc: "Aumenta o alcance de ataque (Range) em +2 Tiles.", icon: "🏹👢" },
+  { id: "capa_antimateria", name: "Capa de Antimatéria", type: "combined", recipe: ["cristal_base", "capa_base"], desc: "Habilidades reduzem a Resistência Mágica do inimigo em 40%.", icon: "🔮🧥" },
+  { id: "sobrecarga", name: "Sobrecarga", type: "combined", recipe: ["cristal_base", "bota_base"], desc: "A primeira habilidade da luta causa 50% de dano adicional.", icon: "🔮👢" },
+  { id: "filtro_energia", name: "Filtro de Energia", type: "combined", recipe: ["capa_base", "bota_base"], desc: "Ganha 15 de mana toda vez que esquiver de um ataque.", icon: "🧥👢" },
+];
+
+export const specialItems: Item[] = [
+  { 
+    id: "essencia_divina", 
+    name: "Essência Divina", 
+    type: "special", 
+    desc: "Ao ser equipada em um campeão com um Item Completo, o transforma em Divino (status 2x + Aura de 15%).",
+    icon: "✨" 
+  },
 ];
