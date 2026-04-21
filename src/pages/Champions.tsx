@@ -21,11 +21,7 @@ const tierConfig = {
   5: { color: "text-gold", border: "border-gold/60", bg: "bg-gradient-gold/10", label: "T5" },
 } as const;
 
-type Trait = { name: string; kind: "origin" | "class"; icon: any; levels?: string; desc: string };
-const allTraits: Trait[] = [
-  ...origins.map((o) => ({ name: o.name, kind: "origin" as const, icon: o.icon, levels: o.levels, desc: o.desc })),
-  ...classes.map((c) => ({ name: c.name, kind: "class" as const, icon: c.icon, levels: c.levels, desc: c.desc })),
-];
+type Trait = { id: string; name: string; type: "origin" | "class"; icon: any; levels?: string; description: string };
 
 const renderIcon = (icon: any, className = "h-4 w-4") => {
   if (!icon) return null;
@@ -48,6 +44,16 @@ const Champions = () => {
     }
   });
 
+  const { data: dbTraits, isLoading: traitsLoading } = useQuery({
+    queryKey: ['traits'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('traits').select('*');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const allTraits: Trait[] = dbTraits || [];
   const champions = Array.isArray(dbChampions) ? dbChampions : [];
 
   const filtered = useMemo(() => {
@@ -67,13 +73,9 @@ const Champions = () => {
   }));
 
   const activeTrait = useMemo(() => {
-    if (!active) return null;
-    const o = origins.find((x) => x.name === active);
-    if (o) return { ...o, kind: "origin" as const };
-    const c = classes.find((x) => x.name === active);
-    if (c) return { ...c, kind: "class" as const };
-    return null;
-  }, [active]);
+    if (!active || !dbTraits) return null;
+    return dbTraits.find((x: any) => x.name === active) || null;
+  }, [active, dbTraits]);
 
   return (
     <div className="min-h-screen overflow-x-hidden pb-12">
@@ -93,8 +95,8 @@ const Champions = () => {
           </p>
           <div className="flex gap-8 pt-4 text-sm">
             <div><div className="font-display text-2xl text-cyan">{champions.length}</div><div className="text-muted-foreground uppercase text-[10px] tracking-widest">Unidades</div></div>
-            <div><div className="font-display text-2xl text-cyan">{origins.length}</div><div className="text-muted-foreground uppercase text-[10px] tracking-widest">Origens</div></div>
-            <div><div className="font-display text-2xl text-cyan">{classes.length}</div><div className="text-muted-foreground uppercase text-[10px] tracking-widest">Classes</div></div>
+            <div><div className="font-display text-2xl text-cyan">{dbTraits?.filter((t: any) => t.type === 'origin').length || 0}</div><div className="text-muted-foreground uppercase text-[10px] tracking-widest">Origens</div></div>
+            <div><div className="font-display text-2xl text-cyan">{dbTraits?.filter((t: any) => t.type === 'class').length || 0}</div><div className="text-muted-foreground uppercase text-[10px] tracking-widest">Classes</div></div>
           </div>
         </div>
       </section>
@@ -134,7 +136,7 @@ const Champions = () => {
               <div className="flex flex-wrap gap-2">
                 {allTraits.map((t) => {
                   const isActive = active === t.name;
-                  const isOrigin = t.kind === "origin";
+                  const isOrigin = t.type === "origin";
                   return (
                     <button
                       key={t.name}
@@ -158,16 +160,16 @@ const Champions = () => {
             </div>
 
             {activeTrait && (
-              <div className={`panel p-5 border-2 ${activeTrait.kind === "origin" ? "border-primary/60 bg-primary/5" : "border-accent/60 bg-accent/5"}`}>
+              <div className={`panel p-5 border-2 ${activeTrait.type === "origin" ? "border-primary/60 bg-primary/5" : "border-accent/60 bg-accent/5"}`}>
                 <div className="flex items-start gap-4">
                   <div className="text-4xl shrink-0">{renderIcon(activeTrait.icon, "h-10 w-10")}</div>
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <h3 className={`font-display text-2xl ${activeTrait.kind === "origin" ? "text-primary" : "text-accent"}`}>
+                      <h3 className={`font-display text-2xl ${activeTrait.type === "origin" ? "text-primary" : "text-accent"}`}>
                         {activeTrait.name.toUpperCase()}
                       </h3>
                       <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-muted/30 text-muted-foreground">
-                        {activeTrait.kind === "origin" ? "ORIGEM" : "CLASSE"}
+                        {activeTrait.type === "origin" ? "ORIGEM" : "CLASSE"}
                       </span>
                       {activeTrait.levels && (
                         <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-cyan/10 text-cyan border border-cyan/30">
@@ -178,7 +180,7 @@ const Champions = () => {
                         {filtered.length} {filtered.length === 1 ? "UNIDADE DISPONÍVEL" : "UNIDADES DISPONÍVEIS"}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{activeTrait.desc}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{activeTrait.description}</p>
                   </div>
                 </div>
               </div>

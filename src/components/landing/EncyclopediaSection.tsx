@@ -12,14 +12,21 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const traits = [
-  "Ciborgue", "Holográfico", "Ascendente", "Sindicato", "Deidade",
-  "Lâmina", "Sentinela", "Tecnomago", "Atirador", "Bastion"
-];
-
 export function EncyclopediaSection() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [selectedChamp, setSelectedChamp] = useState<any | null>(null);
+
+  // Fetch Traits (Origins/Classes) from Supabase
+  const { data: traitsData } = useQuery({
+    queryKey: ['traits'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('traits').select('name');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const traits = traitsData?.map(t => t.name) || [];
 
   // Fetch Champions from Supabase
   const { data: championsData, isLoading } = useQuery({

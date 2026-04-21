@@ -65,6 +65,18 @@ export default function ArenaPortal() {
     }
   });
 
+  const { data: traits, isLoading: traitsLoading } = useQuery({
+    queryKey: ['traits'],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from('traits')
+        .select('*')
+        .order('type', { ascending: true });
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await (supabase as any).from('champions').delete().eq('id', id);
@@ -138,6 +150,57 @@ export default function ArenaPortal() {
       setIsMigrating(false);
     }
   };
+
+  const handleMigrateTraits = async () => {
+    setIsMigrating(true);
+    try {
+      const allTraits = [
+        ...origins.map(o => ({ ...o, type: 'origin' })),
+        ...classes.map(c => ({ ...c, type: 'class' }))
+      ];
+
+      const formatted = allTraits.map(t => ({
+        name: t.name,
+        type: t.type,
+        description: t.desc,
+        levels: t.levels,
+        icon: typeof t.icon === 'string' ? t.icon : '✨' // Se for ícone do Lucide (componente), usa fallback
+      }));
+
+      const { error } = await (supabase as any).from('traits').upsert(formatted, { onConflict: 'name' });
+      if (error) throw error;
+      toast.success("Sinergias estabelecidas no Olho de Agamotto!");
+      queryClient.invalidateQueries({ queryKey: ['traits'] });
+    } catch (e: any) {
+      toast.error("Falha na convergência de sinergias: " + e.message);
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
+  const upsertTraitMutation = useMutation({
+    mutationFn: async (trait: any) => {
+      const { error } = await (supabase as any).from('traits').upsert(trait, { onConflict: 'name' });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Sinergia atualizada!");
+      setNewTrait({ id: undefined, name: "", type: "origin", description: "", levels: "", icon: "" });
+      setEditingTrait(null);
+      queryClient.invalidateQueries({ queryKey: ['traits'] });
+    }
+  });
+
+  const deleteTraitMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase as any).from('traits').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Sinergia removida.");
+      queryClient.invalidateQueries({ queryKey: ['traits'] });
+    }
+  });
 
   const upsertItemMutation = useMutation({
     mutationFn: async (item: any) => {
@@ -229,7 +292,17 @@ export default function ArenaPortal() {
     divine_upgrade_slug: ""
   });
 
+  const [newTrait, setNewTrait] = useState({
+    id: undefined,
+    name: "",
+    type: "origin" as "origin" | "class",
+    description: "",
+    levels: "",
+    icon: ""
+  });
+
   const [editingItem, setEditingItem] = useState<any | null>(null);
+  const [editingTrait, setEditingTrait] = useState<any | null>(null);
 
   const upsertMutation = useMutation({
     mutationFn: async (champ: any) => {
@@ -287,26 +360,33 @@ export default function ArenaPortal() {
       <Navbar />
       
       <main className="container pt-32 space-y-12 animate-fade-in">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-border/40 pb-8">
-           <div>
-              <div className="inline-flex items-center gap-2 px-2 py-1 rounded bg-accent/20 text-accent text-[10px] font-display tracking-widest mb-2 border border-accent/30">
-                 <ShieldCheck className="h-3 w-3" /> ACESSO RESTRITO :: PORTAL DE COMANDO
-              </div>
-              <h1 className="font-display text-4xl font-black uppercase tracking-tighter">Portal de <span className="text-cyan">Gestão</span></h1>
-              <p className="text-muted-foreground text-sm mt-1 uppercase font-display tracking-wider">Controle Central da Arena of Gods</p>
-           </div>
-           
-           <div className="flex items-center gap-4">
-              <Button 
-                onClick={activeTab === "champions" ? handleMigrate : handleMigrateItems} 
-                className="bg-purple-600 hover:bg-purple-700 text-white font-display tracking-widest"
-                disabled={isMigrating}
-              >
-                <Database className="mr-2 h-4 w-4" /> 
-                {isMigrating ? "PROCESSANDO..." : activeTab === "champions" ? "SINCRONIZAR DEUSES" : "SINCRONIZAR ARSENAL"}
-              </Button>
-           </div>
-        </div>
+         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-border/40 pb-8">
+            <div>
+               <div className="inline-flex items-center gap-2 px-2 py-1 rounded bg-accent/20 text-accent text-[10px] font-display tracking-widest mb-2 border border-accent/30">
+                  <ShieldCheck className="h-3 w-3" /> ACESSO RESTRITO :: PORTAL DE COMANDO
+               </div>
+               <h1 className="font-display text-4xl font-black uppercase tracking-tighter">Portal de <span className="text-cyan">Gestão</span></h1>
+               <p className="text-muted-foreground text-sm mt-1 uppercase font-display tracking-wider">Controle Central da Arena of Gods</p>
+            </div>
+            
+            <div className="flex items-center gap-4">
+               <Button 
+                 onClick={
+                   activeTab === "champions" ? handleMigrate : 
+                   activeTab === "items" ? handleMigrateItems : 
+                   handleMigrateTraits
+                 } 
+                 className="bg-purple-600 hover:bg-purple-700 text-white font-display tracking-widest"
+                 disabled={isMigrating}
+               >
+                 <Database className="mr-2 h-4 w-4" /> 
+                 {isMigrating ? "PROCESSANDO..." : 
+                  activeTab === "champions" ? "SINCRONIZAR DEUSES" : 
+                  activeTab === "items" ? "SINCRONIZAR ARSENAL" : 
+                  "SINCRONIZAR SINERGIAS"}
+               </Button>
+            </div>
+         </div>
 
         <Tabs defaultValue="champions" onValueChange={setActiveTab} className="w-full space-y-8">
           <TabsList className="bg-muted/20 border border-border/40 p-1">
@@ -314,7 +394,10 @@ export default function ArenaPortal() {
               <User className="mr-2 h-3 w-3" /> DEUSES
             </TabsTrigger>
             <TabsTrigger value="items" className="data-[state=active]:bg-accent data-[state=active]:text-black font-display tracking-widest text-[10px]">
-              <Hammer className="mr-2 h-3 w-3" /> ARSENAL (ITENS)
+              <Hammer className="mr-2 h-3 w-3" /> ARSENAL
+            </TabsTrigger>
+            <TabsTrigger value="traits" className="data-[state=active]:bg-purple-500 data-[state=active]:text-black font-display tracking-widest text-[10px]">
+              <Sparkles className="mr-2 h-3 w-3" /> SINERGIAS
             </TabsTrigger>
           </TabsList>
 
@@ -596,6 +679,142 @@ export default function ArenaPortal() {
                   </div>
                 ))}
               </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="traits" className="space-y-12 mt-0">
+            {/* ESTATÍSTICAS SINERGIAS */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+               <StatCard label="ORIGENS" value={traits?.filter((t: any) => t.type === 'origin').length || 0} icon={<Globe className="text-purple-400 h-4 w-4" />} />
+               <StatCard label="CLASSES" value={traits?.filter((t: any) => t.type === 'class').length || 0} icon={<Sword className="text-cyan h-4 w-4" />} />
+               <StatCard label="ATIVAS NO DB" value={traits?.length || 0} icon={<Zap className="text-primary h-4 w-4" />} />
+               <StatCard label="STATUS" value="ESTÁVEL" icon={<div className="h-2 w-2 rounded-full bg-green-500" />} />
+            </div>
+
+            {/* FORMULÁRIO DE SINERGIAS */}
+            <div className={`panel p-6 border-purple-500/20 transition-all ${editingTrait ? 'bg-purple-500/10 border-purple-500' : 'bg-purple-500/5'}`}>
+               <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-2 text-purple-400 font-display text-sm tracking-widest">
+                     {editingTrait ? <Edit2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                     {editingTrait ? `RECONFIGURANDO: ${newTrait.name.toUpperCase()}` : 'CRIAR NOVA SINERGIA'}
+                  </div>
+                  {editingTrait && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => {
+                        setEditingTrait(null);
+                        setNewTrait({ id: undefined, name: "", type: "origin", description: "", levels: "", icon: "" });
+                      }}
+                      className="text-[10px] font-display tracking-widest hover:text-red-500"
+                    >
+                      <Trash2 className="mr-1 h-3 w-3" /> CANCELAR EDIÇÃO
+                    </Button>
+                  )}
+               </div>
+
+               <div className="grid md:grid-cols-3 gap-6">
+                 <div className="space-y-4">
+                    <div className="space-y-2">
+                       <Label className="text-[10px] tracking-widest">NOME DA SINERGIA</Label>
+                       <Input value={newTrait.name} onChange={e => setNewTrait({...newTrait, name: e.target.value})} placeholder="Ex: Ciborgue" className="bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[10px] tracking-widest">TIPO</Label>
+                      <Select 
+                        value={newTrait.type} 
+                        onValueChange={(val) => setNewTrait({...newTrait, type: val as any})}
+                      >
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="origin">ORIGEM (RAÇA/CLÃ)</SelectItem>
+                          <SelectItem value="class">CLASSE (FUNÇÃO)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                 </div>
+
+                 <div className="space-y-4">
+                    <div className="space-y-2">
+                       <Label className="text-[10px] tracking-widest">NÍVEIS DE ATIVAÇÃO</Label>
+                       <Input value={newTrait.levels} onChange={e => setNewTrait({...newTrait, levels: e.target.value})} placeholder="Ex: 2 / 4 / 6" className="bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="text-[10px] tracking-widest">ÍCONE (EMOJI)</Label>
+                       <Input value={newTrait.icon} onChange={e => setNewTrait({...newTrait, icon: e.target.value})} placeholder="Ex: 👤" className="bg-background" />
+                    </div>
+                 </div>
+
+                 <div className="space-y-2">
+                    <Label className="text-[10px] tracking-widest">EFEITO DA SINERGIA</Label>
+                    <Textarea value={newTrait.description} onChange={e => setNewTrait({...newTrait, description: e.target.value})} placeholder="Descreva os bônus ganhos..." className="bg-background h-full min-h-[105px]" />
+                 </div>
+               </div>
+
+               <Button 
+                  onClick={() => upsertTraitMutation.mutate(newTrait)}
+                  disabled={upsertTraitMutation.isPending || !newTrait.name}
+                  className="w-full mt-8 bg-purple-600 hover:bg-purple-700 text-white font-display font-bold tracking-widest h-12"
+               >
+                  {upsertTraitMutation.isPending ? "PROCESSANDO..." : editingTrait ? "ATUALIZAR SINERGIA" : "ESTABELECER CONEXÃO"}
+               </Button>
+            </div>
+
+            {/* LISTAGEM DE SINERGIAS */}
+            <div className="grid md:grid-cols-2 gap-8">
+               {/* ORIGENS */}
+               <div className="space-y-4">
+                  <h3 className="font-display text-sm tracking-[0.2em] text-purple-400 uppercase flex items-center gap-2">
+                    <Globe className="h-4 w-4" /> Origens Catalogadas
+                  </h3>
+                  <div className="grid gap-3">
+                    {traitsLoading ? (
+                      <div className="h-20 animate-pulse bg-muted/20 rounded border border-border/40" />
+                    ) : traits?.filter((t: any) => t.type === 'origin').map((trait: any) => (
+                      <div key={trait.id} className="panel p-4 flex items-center justify-between group hover:border-purple-500/40 transition-all bg-card/40">
+                         <div className="flex items-center gap-4">
+                            <div className="text-3xl filter drop-shadow-[0_0_8px_rgba(168,85,247,0.4)]">{trait.icon}</div>
+                            <div>
+                               <div className="font-display font-bold tracking-widest uppercase text-sm">{trait.name}</div>
+                               <div className="text-[9px] text-purple-300 font-display uppercase tracking-widest">Níveis: {trait.levels}</div>
+                            </div>
+                         </div>
+                         <div className="flex gap-2">
+                            <button onClick={() => { setEditingTrait(trait); setNewTrait(trait); window.scrollTo({top: 400, behavior: 'smooth'}) }} className="h-8 w-8 rounded border border-purple-500/20 flex items-center justify-center text-purple-400 hover:bg-purple-500 hover:text-white transition-all"><Edit2 className="h-4 w-4" /></button>
+                            <button onClick={() => { if(confirm("Apagar sinergia?")) deleteTraitMutation.mutate(trait.id) }} className="h-8 w-8 rounded border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all"><Trash2 className="h-4 w-4" /></button>
+                         </div>
+                      </div>
+                    ))}
+                  </div>
+               </div>
+
+               {/* CLASSES */}
+               <div className="space-y-4">
+                  <h3 className="font-display text-sm tracking-[0.2em] text-cyan uppercase flex items-center gap-2">
+                    <Sword className="h-4 w-4" /> Classes Catalogadas
+                  </h3>
+                  <div className="grid gap-3">
+                     {traitsLoading ? (
+                      <div className="h-20 animate-pulse bg-muted/20 rounded border border-border/40" />
+                    ) : traits?.filter((t: any) => t.type === 'class').map((trait: any) => (
+                      <div key={trait.id} className="panel p-4 flex items-center justify-between group hover:border-cyan/40 transition-all bg-card/40">
+                         <div className="flex items-center gap-4">
+                            <div className="text-3xl filter drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">{trait.icon}</div>
+                            <div>
+                               <div className="font-display font-bold tracking-widest uppercase text-sm">{trait.name}</div>
+                               <div className="text-[9px] text-cyan font-display uppercase tracking-widest">Níveis: {trait.levels}</div>
+                            </div>
+                         </div>
+                         <div className="flex gap-2">
+                            <button onClick={() => { setEditingTrait(trait); setNewTrait(trait); window.scrollTo({top: 400, behavior: 'smooth'}) }} className="h-8 w-8 rounded border border-cyan/20 flex items-center justify-center text-cyan hover:bg-cyan hover:text-black transition-all"><Edit2 className="h-4 w-4" /></button>
+                            <button onClick={() => { if(confirm("Apagar sinergia?")) deleteTraitMutation.mutate(trait.id) }} className="h-8 w-8 rounded border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all"><Trash2 className="h-4 w-4" /></button>
+                         </div>
+                      </div>
+                    ))}
+                  </div>
+               </div>
             </div>
           </TabsContent>
         </Tabs>
