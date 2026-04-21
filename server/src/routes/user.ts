@@ -55,7 +55,7 @@ router.get('/matches', authMiddleware, async (req: AuthRequest, res) => {
 
 // @route   GET /api/user/leaderboard
 router.get('/leaderboard', async (req, res) => {
-  const { rank } = req.query;
+  const { rank, userId } = req.query; // userId opcional para contexto
   try {
     let sql = 'SELECT nickname, rank, mmr FROM users';
     let params: any[] = [];
@@ -65,10 +65,23 @@ router.get('/leaderboard', async (req, res) => {
       params.push(`%${rank}%`);
     }
 
-    sql += ' ORDER BY mmr DESC LIMIT 50';
+    sql += ' ORDER BY mmr DESC LIMIT 100';
     
     const result = await query(sql, params);
-    res.json(result.rows);
+    
+    let userContext = null;
+    if (userId) {
+      const posRes = await query(
+        'SELECT COUNT(*) + 1 as position FROM users WHERE mmr > (SELECT mmr FROM users WHERE id = $1)',
+        [userId]
+      );
+      userContext = posRes.rows[0];
+    }
+
+    res.json({
+      leaderboard: result.rows,
+      userPosition: userContext ? parseInt(userContext.position) : null
+    });
   } catch (err) {
     res.status(500).json({ error: 'Erro ao buscar ranking global.' });
   }

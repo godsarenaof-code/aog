@@ -16,14 +16,17 @@ const Ranked = () => {
   const [selectedRank, setSelectedRank] = useState(userRankInfo.name);
 
   // Fetching Rank-Specific Leaderboard
-  const { data: leaderboard, isLoading: isLoadingLeaderboard } = useQuery({
+  const { data: leaderboardData, isLoading: isLoadingLeaderboard } = useQuery({
     queryKey: ["leaderboard", selectedRank],
     queryFn: async () => {
-      const res = await fetch(`http://localhost:3001/api/user/leaderboard?rank=${selectedRank}`);
+      const res = await fetch(`http://localhost:3001/api/user/leaderboard?rank=${selectedRank}&userId=${user?.id}`);
       if (!res.ok) throw new Error("Erro ao buscar ranking.");
       return res.json();
     },
   });
+
+  const leaderboard = leaderboardData?.leaderboard || [];
+  const globalPosition = leaderboardData?.userPosition;
 
   // Encontrar a config visual do rank selecionado para o emblema central
   const displayRankConfig = RANK_CONFIG.find(r => r.name === selectedRank) || RANK_CONFIG[0];
@@ -50,66 +53,73 @@ const Ranked = () => {
               <p className="text-muted-foreground text-xs uppercase tracking-widest opacity-60">Sua ascensão no protocolo de deidades</p>
             </div>
 
-            {/* Elo Tabs Navigation */}
-            <div className="bg-black/40 p-1 rounded-xl border border-white/5 backdrop-blur-md overflow-x-auto no-scrollbar">
-               <Tabs value={selectedRank} onValueChange={setSelectedRank} className="w-full">
-                  <TabsList className="bg-transparent h-auto p-0 flex justify-start gap-1">
+            {/* Selection Hub: Vertical List + Emblem */}
+            <div className="flex flex-col md:flex-row items-center gap-8 bg-black/40 p-6 rounded-3xl border border-white/5 backdrop-blur-xl">
+               
+               {/* Vertical Rank List */}
+               <div className="w-full md:w-48 space-y-2">
+                  <div className="text-[10px] font-display font-black text-muted-foreground uppercase tracking-[0.2em] mb-4 opacity-40">Categorias de Elo</div>
+                  <div className="space-y-1.5 max-h-[400px] overflow-y-auto pr-2 no-scrollbar">
                      {RANK_CONFIG.map((rank) => (
-                       <TabsTrigger 
-                        key={rank.name} 
-                        value={rank.name}
-                        className={`px-3 py-2 text-[9px] font-display font-black tracking-widest uppercase transition-all
-                          ${selectedRank === rank.name ? "bg-white/10 text-white shadow-glow-sm" : "text-white/30 hover:text-white/60"}
+                       <button
+                        key={rank.name}
+                        onClick={() => setSelectedRank(rank.name)}
+                        className={`w-full group relative flex items-center gap-3 p-3 rounded-xl transition-all border border-transparent
+                          ${selectedRank === rank.name 
+                            ? "bg-white/10 text-white border-white/10 shadow-glow-sm" 
+                            : "text-white/30 hover:bg-white/5 hover:text-white/60"}
                         `}
                        >
-                          {rank.name}
-                       </TabsTrigger>
+                          {selectedRank === rank.name && (
+                            <motion.div layoutId="activeRank" className="absolute left-0 w-1 h-6 bg-cyan rounded-full" />
+                          )}
+                          <span className="text-xl group-hover:scale-110 transition-transform">{rank.icon}</span>
+                          <span className="text-[10px] font-display font-black tracking-widest uppercase text-left">{rank.name}</span>
+                       </button>
                      ))}
-                  </TabsList>
-               </Tabs>
-            </div>
+                  </div>
+               </div>
 
-            {/* Emblem Section */}
-            <div className="panel-glow p-1 w-full aspect-square max-w-[450px] mx-auto lg:mx-0 relative group">
-               <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 to-accent/10 rounded-3xl -z-10" />
-               <div className="h-full w-full rounded-[20px] bg-black/60 backdrop-blur-3xl flex flex-col items-center justify-center p-8 border border-white/5 relative overflow-hidden">
-                  
-                  {/* Rotating Background Ring */}
-                  <motion.div 
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                    className="absolute inset-0 border-2 border-dashed border-white/5 rounded-full scale-75 opacity-20"
-                  />
+               {/* Right Side: Large Animated Emblem */}
+               <div className="flex-1 w-full flex flex-col items-center justify-center space-y-6">
+                  <div className="panel-glow p-1 w-full aspect-square max-w-[320px] relative group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan/10 to-accent/10 rounded-3xl -z-10" />
+                    <div className="h-full w-full rounded-[20px] bg-black/60 backdrop-blur-3xl flex flex-col items-center justify-center p-8 border border-white/5 relative overflow-hidden">
+                        
+                        {/* Rotating Background Ring */}
+                        <motion.div 
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                          className="absolute inset-0 border-2 border-dashed border-white/5 rounded-full scale-75 opacity-20"
+                        />
 
-                  {/* Main Emblem Placeholder (Simulated with Icons) */}
-                  <AnimatePresence mode="wait">
-                    <motion.div 
-                      key={selectedRank}
-                      initial={{ scale: 0.8, opacity: 0, rotateY: 90 }}
-                      animate={{ scale: 1, opacity: 1, rotateY: 0 }}
-                      exit={{ scale: 0.8, opacity: 0, rotateY: -90 }}
-                      transition={{ duration: 0.4 }}
-                      className={`h-48 w-48 rounded-full bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center relative shadow-glow-lg ${displayRankConfig.color.replace('text-', 'shadow-')}`}
-                    >
-                       <div className={`text-7xl ${displayRankConfig.color} drop-shadow-[0_0_20px_currentColor] select-none`}>
-                          {displayRankConfig.icon}
-                       </div>
-                       
-                       {/* Floating Particles */}
-                       <span className="absolute top-0 right-0 h-4 w-4 bg-cyan animate-pulse rounded-full blur-sm" />
-                       <span className="absolute bottom-4 left-4 h-3 w-3 bg-accent animate-pulse rounded-full blur-sm" />
-                    </motion.div>
-                  </AnimatePresence>
+                        {/* Main Emblem Placeholder */}
+                        <AnimatePresence mode="wait">
+                          <motion.div 
+                            key={selectedRank}
+                            initial={{ scale: 0.8, opacity: 0, rotateY: 90 }}
+                            animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+                            exit={{ scale: 0.8, opacity: 0, rotateY: -90 }}
+                            transition={{ duration: 0.4 }}
+                            className={`h-32 w-32 rounded-full bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center relative shadow-glow-lg ${displayRankConfig.color.replace('text-', 'shadow-')}`}
+                          >
+                             <div className={`text-6xl ${displayRankConfig.color} drop-shadow-[0_0_20px_currentColor] select-none`}>
+                                {displayRankConfig.icon}
+                             </div>
+                          </motion.div>
+                        </AnimatePresence>
+                    </div>
+                  </div>
 
-                  <div className="mt-8 text-center space-y-3 relative z-10 w-full">
+                  <div className="text-center space-y-2">
                      <div className={`font-display text-4xl font-black italic uppercase tracking-tighter ${displayRankConfig.color} animate-fade-in`}>
                        {selectedRank}
                      </div>
-                     <div className="flex items-center justify-center gap-4 text-[10px] font-display font-black tracking-widest text-muted-foreground uppercase opacity-60">
-                        RANKING DA CATEGORIA <span className="h-1 w-1 rounded-full bg-white/20" /> PROTOCOLO ACTIVE
+                     <div className="flex items-center justify-center gap-4 text-[10px] font-display font-black tracking-widest text-muted-foreground uppercase opacity-40">
+                        PROTOCOLO ACTIVE <span className="h-1 w-1 rounded-full bg-white/20" /> CATEGORIA {selectedRank}
                      </div>
                      
-                     {/* LP Progress (Only visible if viewing current rank) */}
+                     {/* LP Progress (Only if current rank) */}
                      {selectedRank === userRankInfo.name && (
                        <div className="w-64 space-y-2 mt-4 mx-auto animate-fade-in">
                           <div className="flex justify-between text-[10px] font-display font-bold uppercase tracking-wider">
@@ -117,7 +127,6 @@ const Ranked = () => {
                              <span className="text-cyan">{userRankInfo.full}</span>
                           </div>
                           <Progress value={lpProgress} className="h-1.5 bg-white/5" />
-                          <p className="text-[9px] text-muted-foreground uppercase italic opacity-40">VOCÊ ESTÁ NESTE RANKING</p>
                        </div>
                      )}
                   </div>
@@ -183,10 +192,14 @@ const Ranked = () => {
                           {index + 1}
                        </div>
                        <div className="flex flex-col">
-                          <span className={`font-display font-bold uppercase tracking-tight text-sm ${index === 0 ? "text-cyan" : "text-white"}`}>
-                            {player.nickname}
+                          <span className={`font-display font-bold uppercase tracking-tight text-sm ${
+                            player.nickname === user?.nickname ? "text-cyan" : "text-white"
+                          }`}>
+                            {player.nickname} {player.nickname === user?.nickname && "(VOCÊ)"}
                           </span>
-                          <span className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">{player.rank}</span>
+                          <span className="text-[9px] text-muted-foreground uppercase font-black tracking-widest">
+                            {player.rank}
+                          </span>
                        </div>
                     </div>
 
@@ -202,6 +215,28 @@ const Ranked = () => {
               )}
             </div>
             
+            {/* PINNED: User Position Footer */}
+            {globalPosition && (
+               <div className="mt-8 border-t border-white/10 pt-6">
+                  <div className="text-[10px] font-display font-black tracking-widest text-muted-foreground mb-4 uppercase opacity-40">Seu Lugar na Arena</div>
+                  <div className="panel p-5 bg-primary/5 border-primary/20 flex items-center justify-between shadow-glow-sm">
+                     <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center font-display font-black text-primary">
+                           {globalPosition}º
+                        </div>
+                        <div className="flex flex-col">
+                           <span className="font-display font-bold uppercase text-white">{user?.nickname}</span>
+                           <span className="text-[9px] text-primary uppercase font-black tracking-widest">{userRankInfo.full}</span>
+                        </div>
+                     </div>
+                     <div className="text-right">
+                        <div className="text-[10px] font-display font-black text-white/40 uppercase"> MMR ATUAL</div>
+                        <div className="font-display font-black text-primary text-xl">{userMmr}</div>
+                     </div>
+                  </div>
+               </div>
+            )}
+
             <div className="pt-8 flex justify-center">
                <button className="text-[10px] font-display font-black tracking-widest text-muted-foreground hover:text-cyan border-b border-white/10 pb-1 uppercase transition-colors">
                   Carregar Mais Participantes
