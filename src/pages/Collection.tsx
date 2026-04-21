@@ -93,7 +93,7 @@ const Collection = () => {
 
       toast.success(data.message);
       setSelectedRerollIds([]);
-      fetchSkins();
+      fetchData();
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -115,7 +115,7 @@ const Collection = () => {
       });
       if (res.ok) {
         toast.success("Skin equipada!");
-        fetchSkins();
+        fetchData();
       }
     } catch (err) {
       toast.error("Erro ao equipar.");
@@ -151,7 +151,7 @@ const Collection = () => {
           ))}
         </div>
 
-        {tab === 3 ? (
+        {tab === 3 && (
           <div className="space-y-12">
             {/* Oficina de Recombinação de Código (Triangular) */}
             <div className="relative h-[400px] w-full flex items-center justify-center overflow-hidden rounded-3xl border border-white/5 bg-black/40 backdrop-blur-3xl group">
@@ -278,29 +278,44 @@ const Collection = () => {
                     </motion.div>
                   );
                 })}
-              </div>
-            </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {units.map((u, i) => (
-              <div
-                key={i}
-                className={`panel p-3 transition-all ${u.owned ? "hover:border-primary/60 hover:shadow-glow" : "opacity-40 grayscale"}`}
-              >
-                <div className={`aspect-square rounded mb-2 grid place-items-center ${u.cost >= 4 ? "bg-gradient-gold" : "bg-gradient-primary"}`}>
-                  <span className="font-display text-3xl font-bold text-primary-foreground/90">{u.name[0]}</span>
+        )}
+        {tab === 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            {champions.map((unit) => (
+              <div key={unit.id} className={`panel p-4 group cursor-pointer hover:border-primary/40 transition-all ${unit.tier === 5 ? 'border-amber-500/30' : ''}`}>
+                <div className="aspect-[3/4] rounded-lg bg-black/40 border border-white/5 mb-4 overflow-hidden relative">
+                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                   <div className="absolute top-2 right-2 h-5 w-5 rounded bg-black/60 flex items-center justify-center text-[10px] font-black">{unit.tier}</div>
+                   <div className="absolute inset-0 flex items-center justify-center opacity-10 font-display text-4xl font-black">{unit.name[0]}</div>
                 </div>
-                <div className="font-display text-sm">{u.name}</div>
-                <div className="flex items-center justify-between mt-1">
-                  <span className="text-[10px] text-muted-foreground tracking-wider">{u.trait}</span>
-                  <span className="flex items-center gap-1 text-xs text-accent font-display">
-                    <Coins className="h-3 w-3" />{u.cost}
-                  </span>
+                <div className="text-xs font-display tracking-widest uppercase opacity-40 mb-1">{unit.classes?.[0] || 'Unidade'}</div>
+                <div className="font-display font-bold text-base truncate">{unit.name}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab === 1 && (
+          <div className="flex flex-col gap-4">
+            {traits.map((trait) => (
+              <div key={trait.id} className="panel p-6 flex flex-col md:flex-row md:items-start gap-6 border-white/5 hover:border-cyan/20 transition-all">
+                <div className="h-12 w-12 rounded-lg bg-white/5 flex items-center justify-center shrink-0 border border-white/10 group-hover:border-cyan/30">
+                  <Sparkles className="h-6 w-6 text-cyan" />
+                </div>
+                <div className="space-y-4 flex-1">
+                  <div>
+                    <h3 className="font-display text-xl font-bold uppercase">{trait.name}</h3>
+                    <p className="text-muted-foreground text-xs leading-relaxed max-w-2xl mt-1 italic">{trait.description}</p>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
+        )}
+
+        {tab === 2 && (
+          <div className="py-20 text-center opacity-30 text-[10px] font-display tracking-[0.5em] uppercase">Módulo de Itens em desenvolvimento...</div>
         )}
       </div>
     </AppLayout>
