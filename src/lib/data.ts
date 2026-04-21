@@ -41,19 +41,19 @@ export const champions: Champion[] = [
 ];
 
 export const origins = [
-  { name: "Holográficos", levels: "2 / 4", desc: "(2) Cria clone com 30% HP. (4) Clone causa 60% de dano.", icon: "👤" },
-  { name: "Ciborgues", levels: "2 / 4 / 6", desc: "Ganham 200/400/700 de Escudo de Energia e 15% de Dano de Ataque.", icon: "⚙️" },
-  { name: "Ascendentes", levels: "3 / 5", desc: "A cada 2s, ganham +5% de dano (acumula até o fim da rodada).", icon: "✨" },
+  { name: "Holográfico", levels: "2 / 4", desc: "(2) Cria clone com 30% HP. (4) Clone causa 60% de dano.", icon: "👤" },
+  { name: "Ciborgue", levels: "2 / 4 / 6", desc: "Ganham 200/400/700 de Escudo de Energia e 15% de Dano de Ataque.", icon: "⚙️" },
+  { name: "Ascendente", levels: "3 / 5", desc: "A cada 2s, ganham +5% de dano (acumula até o fim da rodada).", icon: "✨" },
   { name: "Sindicato", levels: "2", desc: "Vencer = +1 Ouro. Perder = próximo Roll custa 1.", icon: "💰" },
-  { name: "Deidades", levels: "1", desc: "+15% de status para cada Elo acima de Mortal.", icon: "⚡" },
+  { name: "Deidade", levels: "1", desc: "+15% de status para cada Elo acima de Mortal.", icon: "⚡" },
 ];
 
 export const classes = [
-  { name: "Lâminas", levels: "2 / 4 / 6", desc: "(2) 15% chance de ataque duplo. (4) 30%. (6) 50% + Crítico.", icon: Sword },
-  { name: "Sentinelas", levels: "2 / 4", desc: "(2) +40 Armadura. (4) Aliados adjacentes ganham 50% dessa armadura.", icon: Shield },
-  { name: "Tecnomagos", levels: "2 / 4", desc: "(2) +20% Poder de Magia. (4) Curam 15% do dano causado por magias.", icon: Sparkles },
-  { name: "Atiradores", levels: "2 / 4", desc: "(2) +1 de Range. (4) Cada ataque aumenta Vel. Atk em 5%.", icon: Target },
-  { name: "Bastions", levels: "2 / 3", desc: "(2) 20% de Redução de Dano. (3) 40%.", icon: Flame },
+  { name: "Lâmina", levels: "2 / 4 / 6", desc: "(2) 15% chance de ataque duplo. (4) 30%. (6) 50% + Crítico.", icon: Sword },
+  { name: "Sentinela", levels: "2 / 4", desc: "(2) +40 Armadura. (4) Aliados adjacentes ganham 50% dessa armadura.", icon: Shield },
+  { name: "Tecnomago", levels: "2 / 4", desc: "(2) +20% Poder de Magia. (4) Curam 15% do dano causado por magias.", icon: Sparkles },
+  { name: "Atirador", levels: "2 / 4", desc: "(2) +1 de Range. (4) Cada ataque aumenta Vel. Atk em 5%.", icon: Target },
+  { name: "Bastion", levels: "2 / 3", desc: "(2) 20% de Redução de Dano. (3) 40%.", icon: Flame },
 ];
 
 export interface Item {
