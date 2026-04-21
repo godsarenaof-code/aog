@@ -304,7 +304,36 @@ const Champions = () => {
         })}
       </section>
 
-      {/* CTA */}
+      {/* VIABILIDADE */}
+      <section className="container py-16 space-y-6">
+        <div className="space-y-3">
+          <div className="text-xs font-display tracking-[0.4em] text-accent">// CHECK DE SINERGIA</div>
+          <h2 className="font-display text-3xl md:text-4xl font-bold">ANÁLISE DE <span className="text-cyan">VIABILIDADE</span></h2>
+          <p className="text-sm text-muted-foreground max-w-2xl">
+            Quantas unidades existem por sinergia e qual a margem de pivote para fechar cada bônus máximo.
+          </p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {viability.map((v) => (
+            <div key={v.trait} className="panel p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{v.icon}</span>
+                  <span className="font-display text-lg">{v.trait}</span>
+                </div>
+                <span className="font-display text-xs tracking-widest text-cyan">{v.max}</span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="font-display text-3xl font-black text-gold">{v.count}</span>
+                <span className="text-xs font-display tracking-wider text-muted-foreground">UNIDADES</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">{v.note}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+
       <section className="container py-16">
         <div className="panel-glow p-10 text-center space-y-5 max-w-2xl mx-auto">
           <Swords className="h-10 w-10 text-primary mx-auto" />
