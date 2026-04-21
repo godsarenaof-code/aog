@@ -2,6 +2,8 @@ import { Trophy, TrendingUp, Crown, Swords } from "lucide-react";
 import { getRankFromLp } from "@/lib/rankUtils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import AppLayout from "@/components/AppLayout";
+import { useAuth } from "@/contexts/AuthContext";
 
 const stats = [
   { label: "Top 4", value: "63%", icon: Trophy, color: "accent" },
@@ -19,15 +21,17 @@ const matches = [
 ];
 
 const Profile = () => {
-  // Simulação de dados do usuário (em um app real viria do DB)
-  const userLp = 450; // Exemplo: Divino
-  const rank = getRankFromLp(userLp);
+  const { user } = useAuth();
+  
+  // Usar MMR do usuário ou 1000 como base
+  const userMmr = user?.mmr || 1000;
+  const rank = getRankFromLp(userMmr);
 
   const stats = [
     { label: "Top 4", value: "63%", icon: Trophy, color: "accent" },
     { label: "Vitórias", value: "147", icon: Crown, color: "primary" },
     { label: "Partidas", value: "412", icon: Swords, color: "primary" },
-    { label: "LP Atual", value: userLp.toString(), icon: TrendingUp, color: "accent" },
+    { label: "MMR Atual", value: userMmr.toString(), icon: TrendingUp, color: "accent" },
   ];
 
   return (
@@ -40,9 +44,9 @@ const Profile = () => {
           </div>
           <div className="flex-1 text-center md:text-left">
             <div className={`text-xs font-display tracking-[0.3em] font-black ${rank.color} uppercase`}>
-              {rank.full}
+              {user?.rank || rank.full}
             </div>
-            <h1 className="font-display text-4xl font-black mt-1 uppercase tracking-tighter italic">Aether_Prime</h1>
+            <h1 className="font-display text-4xl font-black mt-1 uppercase tracking-tighter italic">{user?.nickname || "INVOCADOR"}</h1>
             <p className="text-muted-foreground text-[10px] tracking-widest uppercase mt-1">Invocador desde 2026 · Servidor BR</p>
           </div>
           <div className="text-right">

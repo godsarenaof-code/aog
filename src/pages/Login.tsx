@@ -5,15 +5,35 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import logo from "@/assets/aog-logo.png";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login, register } = useAuth();
   const [mode, setMode] = useState<"login" | "register">("login");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    nickname: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(mode === "login" ? "Acesso autorizado, Invocador." : "Conta criada. Bem-vindo à Arena.");
-    navigate("/lobby");
+    setIsSubmitting(true);
+
+    try {
+      if (mode === "login") {
+        await login(formData.email, formData.password);
+      } else {
+        await register(formData.email, formData.password, formData.nickname);
+      }
+      navigate("/lobby");
+    } catch (error) {
+      // O erro já é tratado no context com toast
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -46,19 +66,46 @@ const Login = () => {
             {mode === "register" && (
               <div className="space-y-2">
                 <Label htmlFor="name" className="font-display text-xs tracking-widest">NOME DE INVOCADOR</Label>
-                <Input id="name" required placeholder="Aether_01" className="bg-card/60 border-border/60 font-body" />
+                <Input 
+                  id="name" 
+                  required 
+                  placeholder="Aether_01" 
+                  className="bg-card/60 border-border/60 font-body"
+                  value={formData.nickname}
+                  onChange={e => setFormData({ ...formData, nickname: e.target.value })}
+                />
               </div>
             )}
             <div className="space-y-2">
               <Label htmlFor="email" className="font-display text-xs tracking-widest">EMAIL</Label>
-              <Input id="email" type="email" required placeholder="invocador@aog.gg" className="bg-card/60 border-border/60 font-body" />
+              <Input 
+                id="email" 
+                type="email" 
+                required 
+                placeholder="invocador@aog.gg" 
+                className="bg-card/60 border-border/60 font-body"
+                value={formData.email}
+                onChange={e => setFormData({ ...formData, email: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="font-display text-xs tracking-widest">SENHA</Label>
-              <Input id="password" type="password" required placeholder="••••••••" className="bg-card/60 border-border/60 font-body" />
+              <Input 
+                id="password" 
+                type="password" 
+                required 
+                placeholder="••••••••" 
+                className="bg-card/60 border-border/60 font-body"
+                value={formData.password}
+                onChange={e => setFormData({ ...formData, password: e.target.value })}
+              />
             </div>
-            <Button type="submit" className="w-full bg-gradient-primary text-primary-foreground shadow-glow font-display tracking-widest">
-              {mode === "login" ? "ENTRAR" : "CRIAR CONTA"}
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="w-full bg-gradient-primary text-primary-foreground shadow-glow font-display tracking-widest"
+            >
+              {isSubmitting ? "PROCESSANDO..." : (mode === "login" ? "ENTRAR" : "CRIAR CONTA")}
             </Button>
           </form>
 
