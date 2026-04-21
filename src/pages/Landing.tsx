@@ -5,7 +5,7 @@ import logo from "@/assets/aog-logo.png";
 
 const features = [
   { icon: Swords, title: "Combate Auto", desc: "Posicione, sinergize e veja seu time conquistar a Arena dos Deuses." },
-  { icon: Zap, title: "Sinergias Únicas", desc: "Mais de 40 traços futuristas com builds infinitas." },
+  { icon: Zap, title: "Sinergias Únicas", desc: "10 traços (5 Origens + 5 Classes) com builds infinitas." },
   { icon: Trophy, title: "Ranked Sazonal", desc: "Suba do Aço ao Divino. Recompensas exclusivas a cada temporada." },
   { icon: Users, title: "Clãs & Eventos", desc: "Forme alianças, dispute torneios semanais e domine o leaderboard." },
 ];
@@ -29,6 +29,7 @@ const Landing = () => {
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm font-display tracking-widest text-muted-foreground">
             <a href="#features" className="hover:text-primary transition-colors">FEATURES</a>
+            <Link to="/champions" className="hover:text-primary transition-colors">PERSONAGENS</Link>
             <a href="#roadmap" className="hover:text-primary transition-colors">ROADMAP</a>
             <Link to="/lobby" className="hover:text-primary transition-colors">JOGAR</Link>
           </div>
@@ -72,8 +73,8 @@ const Landing = () => {
               </a>
             </div>
             <div className="flex gap-8 pt-6 text-sm">
-              <div><div className="font-display text-2xl text-cyan">40+</div><div className="text-muted-foreground">Sinergias</div></div>
-              <div><div className="font-display text-2xl text-cyan">120</div><div className="text-muted-foreground">Unidades</div></div>
+              <div><div className="font-display text-2xl text-cyan">10</div><div className="text-muted-foreground">Sinergias</div></div>
+              <div><div className="font-display text-2xl text-cyan">21</div><div className="text-muted-foreground">Unidades</div></div>
               <div><div className="font-display text-2xl text-cyan">8</div><div className="text-muted-foreground">Jogadores</div></div>
             </div>
           </div>
