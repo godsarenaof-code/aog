@@ -79,7 +79,7 @@ const Settings = () => {
     { id: "perfil", label: "Identidade", icon: User },
     { id: "visual", label: "Protocolo Visual", icon: Palette },
     { id: "audio", label: "Frequência de Áudio", icon: Volume2 },
-    { id: "seguranca", label: "Criptografia", icon: ShieldCheck },
+    { id: "seguranca", label: "Segurança", icon: ShieldCheck },
   ];
 
   return (
@@ -160,7 +160,7 @@ const Settings = () => {
                              <span className="text-[10px] font-display font-black tracking-widest uppercase">Diretriz Temporal</span>
                           </div>
                           <p className="text-[10px] leading-relaxed text-muted-foreground uppercase font-bold tracking-tight">
-                             A alteração de nickname é um processo crítico. Você pode realizar uma alteração a cada <span className="text-white">30 dias</span>.
+                             Limite de uma alteração a cada <span className="text-white">30 dias</span>.
                           </p>
                           <div className="flex items-center justify-between pt-2 border-t border-white/5">
                              <div className="flex items-center gap-2">
@@ -213,10 +213,10 @@ const Settings = () => {
                                <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-tight opacity-40">{setting.desc}</div>
                             </div>
                             <div 
-                              className={`h-5 w-10 p-1 rounded-full bg-white/10 transition-colors relative`}
+                              className={`h-6 w-12 p-1 rounded-full transition-all duration-300 relative cursor-pointer ${setting.active ? "bg-primary/20" : "bg-white/10"}`}
                               onClick={() => setVisualSettings(prev => ({ ...prev, [setting.id]: !prev[setting.id as keyof typeof visualSettings] }))}
                             >
-                               <div className={`h-3 w-3 rounded-full transition-all ${setting.active ? "bg-cyan translate-x-5 shadow-[0_0_10px_#00cfba]" : "bg-white/20 translate-x-0"}`} />
+                               <div className={`h-4 w-4 rounded-full transition-all duration-300 ${setting.active ? "bg-primary translate-x-6 shadow-[0_0_15px_hsl(var(--primary))]" : "bg-white/20 translate-x-0"}`} />
                             </div>
                          </div>
                        ))}
@@ -269,10 +269,6 @@ const Settings = () => {
                 )}
              </AnimatePresence>
 
-             {/* Footer Info */}
-             <div className="absolute bottom-8 left-8 flex items-center gap-4 text-[ surveillance font-display opacity-10 text-[9px] font-black tracking-widest uppercase pointer-events-none">
-                CONFIG :: KERNEL_v1.0.4 <span className="h-1 w-1 rounded-full bg-white" /> STATUS :: STABLE
-             </div>
           </div>
         </div>
       </div>
