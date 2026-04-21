@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom";
-import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, Crown, Sparkles, Coins, Droplet, X } from "lucide-react";
-import logo from "@/assets/aog-logo.png";
-import { champions, origins, classes } from "@/lib/data";
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Search, Filter, Shield, Zap, Sparkles, ChevronRight, Info, Crown, Coins, Droplet, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const tierConfig = {
   1: { color: "text-muted-foreground", border: "border-muted", bg: "bg-muted/20", label: "T1" },
@@ -20,16 +21,27 @@ const allTraits = [
 ];
 
 const Champions = () => {
-  const [active, setActive] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
-  const filtered = useMemo(
-    () => (active ? champions.filter((c) => c.origins.includes(active) || c.classes.includes(active)) : champions),
-    [active]
-  );
+  const { data: dbChampions = [], isLoading } = useQuery({
+    queryKey: ['champions'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('champions').select('*');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const filteredChampions = dbChampions.filter(champ => {
+    const matchesSearch = champ.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = !activeFilter || champ.origins?.includes(activeFilter) || champ.classes?.includes(activeFilter);
+    return matchesSearch && matchesFilter;
+  });
 
   const grouped = [1, 2, 3, 4, 5].map((t) => ({
     tier: t as 1 | 2 | 3 | 4 | 5,
-    units: filtered.filter((c) => c.tier === t),
+    units: filteredChampions.filter((c) => c.tier === t),
   }));
 
   const activeTrait = useMemo(() => {

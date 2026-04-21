@@ -12,7 +12,7 @@ import Champions from "./pages/Champions.tsx";
 import Items from "./pages/Items.tsx";
 import PatchNotes from "./pages/PatchNotes.tsx";
 import Profile from "./pages/Profile.tsx";
-import Placeholder from "./pages/Placeholder.tsx";
+import AdminPortal from "./pages/AdminPortal.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -38,6 +38,7 @@ const App = () => (
           <Route path="/roadmap" element={<Placeholder title="ROADMAP" desc="Confira as próximas atualizações, eventos e features planejadas para o A.O.G." />} />
           <Route path="/patch-notes-old" element={<Placeholder title="PATCH NOTES" desc="Histórico completo de alterações." />} />
           <Route path="/settings" element={<Placeholder title="AJUSTES" desc="Configurações de conta, áudio, vídeo e gameplay." />} />
+          <Route path="/arena-portal-gestao" element={<AdminPortal />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

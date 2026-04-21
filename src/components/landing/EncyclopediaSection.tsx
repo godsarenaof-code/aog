@@ -1,14 +1,29 @@
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { useState, useMemo } from "react";
+import { Search, Filter, Shield, Zap, Sparkles } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { champions, classes } from "@/lib/data";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
 
-const classesList = classes.map(c => c.name);
+const traits = [
+  "Ciborgue", "Holográfico", "Ascendente", "Sindicato", "Deidade",
+  "Lâmina", "Sentinela", "Tecnomago", "Atirador", "Bastion"
+];
 
 export function EncyclopediaSection() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  const { data: champions = [] } = useQuery({
+    queryKey: ["champions"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("champions").select("*");
+      if (error) throw error;
+      return data;
+    },
+  });
 
   // Show only 5 featured champions on the landing page
   const featuredChampions = champions.slice(0, 5);
@@ -39,38 +54,42 @@ export function EncyclopediaSection() {
         >
           TODOS
         </Badge>
-        {classesList.map(cls => (
+        {traits.map(t => (
           <Badge 
-            key={cls}
-            className={`cursor-pointer px-4 py-2 text-sm font-display tracking-widest ${activeFilter === cls ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground border-border hover:bg-primary/20 hover:text-primary'}`}
-            onClick={() => setActiveFilter(cls)}
+            key={t}
+            className={`cursor-pointer px-4 py-2 text-sm font-display tracking-widest ${activeFilter === t ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground border-border hover:bg-primary/20 hover:text-primary'}`}
+            onClick={() => setActiveFilter(t)}
           >
-            {cls.toUpperCase()}
+            {t.toUpperCase()}
           </Badge>
         ))}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12">
-        {featuredChampions.map((champ) => {
+        {featuredChampions.map((champ: any) => {
           const isFaded = activeFilter !== null && !champ.classes.includes(activeFilter) && !champ.origins.includes(activeFilter);
           return (
             <div 
               key={champ.id} 
               className={`panel flex flex-col items-center p-4 transition-all duration-300 ${isFaded ? 'opacity-20 grayscale scale-95' : 'hover:-translate-y-2 hover:shadow-glow'}`}
             >
-              <div className={`w-20 h-20 bg-background rounded-full border-2 mb-4 flex items-center justify-center font-display text-2xl font-bold uppercase overflow-hidden ${getTierColor(champ.tier)}`}>
-                 <span className="text-muted-foreground/30 select-none">{champ.name.substring(0, 2)}</span>
+              <div className={`w-24 h-24 bg-background rounded-xl border-2 mb-4 flex items-center justify-center font-display text-2xl font-bold uppercase overflow-hidden ${getTierColor(champ.tier)}`}>
+                 {champ.image_url ? (
+                   <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
+                 ) : (
+                   <span className="text-muted-foreground/30 select-none">{champ.name.substring(0, 2)}</span>
+                 )}
               </div>
               <h3 className="font-display text-lg mb-1">{champ.name}</h3>
               <div className="flex flex-wrap justify-center gap-1 mb-3">
-                {[...champ.origins, ...champ.classes].map(c => (
+                {[...(champ.origins || []), ...(champ.classes || [])].map((c: string) => (
                   <span key={c} className="text-[10px] uppercase font-display bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20">
                     {c}
                   </span>
                 ))}
               </div>
               <p className="text-xs text-muted-foreground text-center line-clamp-2 mt-auto border-t border-border/40 pt-2 w-full">
-                {champ.ability.name}
+                {champ.ability?.name || "Habilidade Desconhecida"}
               </p>
             </div>
           );
@@ -80,7 +99,7 @@ export function EncyclopediaSection() {
       <div className="flex justify-center">
         <Link to="/champions">
           <Button variant="outline" size="lg" className="border-cyan/40 text-cyan hover:bg-cyan/10 font-display tracking-[0.2em] group">
-            VER TODOS OS 22 CAMPEÕES
+            VER TODOS OS CAMPEÕES
             <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Button>
         </Link>

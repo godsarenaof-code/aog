@@ -1,0 +1,226 @@
+import { useState, useEffect } from "react";
+import { Navbar } from "@/components/Navbar";
+import { champions as staticChampions } from "@/lib/data";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { Database, ShieldCheck, Upload, Database as DbIcon, Trash2, Edit2, Plus, Zap } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+export default function ArenaPortal() {
+  const queryClient = useQueryClient();
+  const [isMigrating, setIsMigrating] = useState(false);
+  
+  // Fetch Champions from Supabase
+  const { data: champions, isLoading } = useQuery({
+    queryKey: ['champions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('champions')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Migration Logic: Pushes static data to DB
+  const handleMigrate = async () => {
+    setIsMigrating(true);
+    try {
+      const formatted = staticChampions.map(c => ({
+        slug: c.id,
+        name: c.name,
+        tier: c.tier,
+        origins: c.origins,
+        classes: c.classes,
+        ability: c.ability,
+        description: c.desc,
+        image_url: null,
+        action_image_url: null
+      }));
+
+      const { error } = await supabase.from('champions').upsert(formatted, { onConflict: 'slug' });
+      if (error) throw error;
+      toast.success("Migração concluída! 22 Deuses enviados ao Olimpo Digital.");
+      queryClient.invalidateQueries({ queryKey: ['champions'] });
+    } catch (e: any) {
+      toast.error("Erro na migração: " + e.message);
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
+  const [newChamp, setNewChamp] = useState({
+    name: "",
+    slug: "",
+    tier: 1,
+    origins: "",
+    classes: "",
+    description: "",
+    image_url: "",
+    action_image_url: ""
+  });
+
+  const addMutation = useMutation({
+    mutationFn: async (champ: any) => {
+      const { error } = await supabase.from('champions').insert([{
+        ...champ,
+        origins: champ.origins.split(',').map((s: string) => s.trim()),
+        classes: champ.classes.split(',').map((s: string) => s.trim()),
+        ability: { name: "Habilidade do Deus", mana: 100, effect: "Efeito devastador configurado via DB." }
+      }]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Novo campeão forjado!");
+      setNewChamp({ name: "", slug: "", tier: 1, origins: "", classes: "", description: "", image_url: "", action_image_url: "" });
+      queryClient.invalidateQueries({ queryKey: ['champions'] });
+    }
+  });
+
+  return (
+    <div className="min-h-screen pb-24 bg-background">
+      <Navbar />
+      
+      <main className="container pt-32 space-y-12 animate-fade-in">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-border/40 pb-8">
+           <div>
+              <div className="inline-flex items-center gap-2 px-2 py-1 rounded bg-accent/20 text-accent text-[10px] font-display tracking-widest mb-2 border border-accent/30">
+                 <ShieldCheck className="h-3 w-3" /> ACESSO RESTRITO :: PORTAL DE COMANDO
+              </div>
+              <h1 className="font-display text-4xl font-black uppercase tracking-tighter">Gestão de <span className="text-cyan">Deuses</span></h1>
+              <p className="text-muted-foreground text-sm mt-1 uppercase font-display tracking-wider">Interface de Controle da Arena of Gods</p>
+           </div>
+           
+           <div className="flex items-center gap-4">
+              <Button 
+                onClick={handleMigrate} 
+                className="bg-purple-600 hover:bg-purple-700 text-white font-display tracking-widest"
+                disabled={isMigrating}
+              >
+                <DbIcon className="mr-2 h-4 w-4" /> 
+                {isMigrating ? "MIGRANDO..." : "IMPORTAR STATIC DATA"}
+              </Button>
+           </div>
+        </div>
+
+        {/* ESTATÍSTICAS RÁPIDAS */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+           <StatCard label="CADASTRADOS" value={champions?.length || 0} icon={<DbIcon className="text-cyan h-4 w-4" />} />
+           <StatCard label="TIER 5" value={champions?.filter((c: any) => c.tier === 5).length || 0} icon={<Zap className="text-gold h-4 w-4" />} />
+           <StatCard label="COM IMAGEM" value={champions?.filter((c: any) => c.image_url || c.action_image_url).length || 0} icon={<Upload className="text-primary h-4 w-4" />} />
+           <StatCard label="STATUS" value="ATIVO" icon={<div className="h-2 w-2 rounded-full bg-green-500" />} />
+        </div>
+
+        {/* FORMULÁRIO DE ADIÇÃO */}
+        <div className="panel p-6 border-primary/20 bg-primary/5 space-y-6">
+           <div className="flex items-center gap-2 text-primary font-display text-sm tracking-widest">
+              <Plus className="h-4 w-4" /> FORJAR NOVO DEUS
+           </div>
+           <div className="grid md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                 <Label className="text-[10px] tracking-widest">NOME DO DEUS</Label>
+                 <Input value={newChamp.name} onChange={e => setNewChamp({...newChamp, name: e.target.value})} placeholder="Ex: Kael" className="bg-background" />
+              </div>
+              <div className="space-y-2">
+                 <Label className="text-[10px] tracking-widest">SLUG (ID ÚNICO)</Label>
+                 <Input value={newChamp.slug} onChange={e => setNewChamp({...newChamp, slug: e.target.value.toLowerCase()})} placeholder="ex: kael" className="bg-background" />
+              </div>
+              <div className="space-y-2">
+                 <Label className="text-[10px] tracking-widest">TIER (1-5)</Label>
+                 <Input type="number" min="1" max="5" value={newChamp.tier} onChange={e => setNewChamp({...newChamp, tier: parseInt(e.target.value)})} className="bg-background" />
+              </div>
+              <div className="space-y-2">
+                 <Label className="text-[10px] tracking-widest">ORIGENS (SEPARADAS POR VÍRGULA)</Label>
+                 <Input value={newChamp.origins} onChange={e => setNewChamp({...newChamp, origins: e.target.value})} placeholder="Ciborgue, Sindicato" className="bg-background" />
+              </div>
+              <div className="space-y-2">
+                 <Label className="text-[10px] tracking-widest">CLASSES (SEPARADAS POR VÍRGULA)</Label>
+                 <Input value={newChamp.classes} onChange={e => setNewChamp({...newChamp, classes: e.target.value})} placeholder="Lâmina, Sentinela" className="bg-background" />
+              </div>
+              <div className="space-y-2">
+                 <Label className="text-[10px] tracking-widest">URL DO RETRATO (OPCIONAL)</Label>
+                 <Input value={newChamp.image_url} onChange={e => setNewChamp({...newChamp, image_url: e.target.value})} placeholder="https://..." className="bg-background" />
+              </div>
+           </div>
+           <div className="space-y-2">
+              <Label className="text-[10px] tracking-widest">DESCRIÇÃO E HISTÓRIA</Label>
+              <Textarea value={newChamp.description} onChange={e => setNewChamp({...newChamp, description: e.target.value})} placeholder="Descrição do deus..." className="bg-background" />
+           </div>
+           <Button 
+            className="w-full bg-primary text-black font-display font-bold tracking-[0.2em]"
+            onClick={() => addMutation.mutate(newChamp)}
+            disabled={!newChamp.name || !newChamp.slug}
+           >
+              REGISTRAR NA ETERNIDADE
+           </Button>
+        </div>
+
+        {/* LISTA DE CAMPEÕES */}
+        <div className="space-y-4">
+           <div className="flex items-center justify-between px-4 text-[10px] font-display text-muted-foreground tracking-[0.3em] uppercase">
+             <span>LISTAGEM ATUAL</span>
+             <span>OPÇÕES</span>
+           </div>
+           
+           <div className="grid gap-3">
+              {isLoading ? (
+                <div className="py-20 text-center animate-pulse font-display text-muted-foreground">SINCRONIZANDO COM A REDE...</div>
+              ) : champions?.map((champion: any) => (
+                <div key={champion.id} className="panel p-4 flex items-center justify-between group hover:border-primary/40 transition-all">
+                  <div className="flex items-center gap-4">
+                    <div className={`h-12 w-12 rounded border flex items-center justify-center font-display text-xl ${champion.tier === 5 ? 'border-gold bg-gold/5 text-gold' : 'border-border bg-card'}`}>
+                      {champion.image_url ? (
+                        <img src={champion.image_url} className="h-full w-full object-cover rounded" />
+                      ) : (
+                        champion.name.substring(0, 2).toUpperCase()
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-display font-bold uppercase tracking-widest">{champion.name}</h4>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-display tracking-widest">TIER {champion.tier}</span>
+                        <span className="text-[9px] text-muted-foreground uppercase">{champion.origins.join(', ')}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-cyan hover:bg-cyan/10">
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-red-500 hover:bg-red-500/10"
+                      onClick={() => deleteMutation.mutate(champion.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+           </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function StatCard({ label, value, icon }: { label: string, value: string | number, icon: React.ReactNode }) {
+  return (
+    <div className="panel p-4 border-border/40 bg-card/50 flex items-center justify-between">
+      <div className="space-y-1">
+        <div className="text-[10px] font-display text-muted-foreground tracking-widest uppercase">{label}</div>
+        <div className="text-xl font-display font-black text-white">{value}</div>
+      </div>
+      <div className="h-10 w-10 rounded border border-border/20 flex items-center justify-center bg-background">
+        {icon}
+      </div>
+    </div>
+  );
+}
