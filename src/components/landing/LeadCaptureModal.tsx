@@ -28,7 +28,7 @@ export function LeadCaptureModal({ children }: LeadCaptureModalProps) {
     try {
       const { error } = await supabase.from("pre_registrations").insert([
         { name, email, referral_source: referral }
-      ]);
+      ] as any);
       
       if (error) {
         if (error.code === '23505') {

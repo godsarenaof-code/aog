@@ -14,7 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      pre_registrations: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          name: string | null
+          referral_source: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          name?: string | null
+          referral_source?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string | null
+          referral_source?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
