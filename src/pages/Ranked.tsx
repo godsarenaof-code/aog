@@ -76,7 +76,7 @@ const Ranked = () => {
                           <img 
                             src={rank.imageUrl} 
                             alt={rank.name}
-                            className="w-10 h-10 group-hover:scale-110 transition-transform object-contain drop-shadow-sm"
+                            className="w-10 h-10 group-hover:scale-110 transition-transform object-contain"
                           />
                           <span className="text-[10px] font-display font-black tracking-widest uppercase text-left">{rank.name}</span>
                        </button>
@@ -110,7 +110,7 @@ const Ranked = () => {
                              <img 
                                 src={displayRankConfig.imageUrl} 
                                 alt={selectedRank}
-                                className={`w-full h-full object-contain scale-[1.2] drop-shadow-[0_0_40px_currentColor] ${displayRankConfig.color.replace('text-', 'text-shadow-')}`}
+                                className={`w-full h-full object-contain scale-110 drop-shadow-[0_0_40px_currentColor] ${displayRankConfig.color.replace('text-', 'text-shadow-')}`}
                              />
                              
                              {/* Aura Effect */}
