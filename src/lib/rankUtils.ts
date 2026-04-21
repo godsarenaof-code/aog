@@ -7,27 +7,28 @@ export interface RankInfo {
   maxLp: number;
   hasSubtiers: boolean;
   color: string;
+  imageUrl: string;
 }
 
 export const RANK_CONFIG: RankInfo[] = [
   // Tiers com subníveis (IV - I)
   // Assumindo que cada subnível precisa de 25 LP (aprox. 3-4 vitórias)
-  { name: 'Mortal', icon: '🌑', minLp: -400, maxLp: -301, hasSubtiers: true, color: 'text-slate-400' },
-  { name: 'Ascendente', icon: '🔥', minLp: -300, maxLp: -201, hasSubtiers: true, color: 'text-orange-500' },
-  { name: 'Iluminado', icon: '⚡', minLp: -200, maxLp: -101, hasSubtiers: true, color: 'text-yellow-400' },
-  { name: 'Arcano', icon: '🌀', minLp: -100, maxLp: -1, hasSubtiers: true, color: 'text-purple-500' },
+  { name: 'Mortal', icon: '🌑', minLp: -400, maxLp: -301, hasSubtiers: true, color: 'text-slate-400', imageUrl: '/assets/ranks/mortal.png' },
+  { name: 'Ascendente', icon: '🔥', minLp: -300, maxLp: -201, hasSubtiers: true, color: 'text-orange-500', imageUrl: '/assets/ranks/ascendente.png' },
+  { name: 'Iluminado', icon: '⚡', minLp: -200, maxLp: -101, hasSubtiers: true, color: 'text-yellow-400', imageUrl: '/assets/ranks/iluminado.png' },
+  { name: 'Arcano', icon: '🌀', minLp: -100, maxLp: -1, hasSubtiers: true, color: 'text-purple-500', imageUrl: '/assets/ranks/arcano.png' },
   
   // Tiers por pontos (Como solicitado: 0-300, 301-430, 431+)
-  { name: 'Celestial', icon: '👁️', minLp: 0, maxLp: 300, hasSubtiers: false, color: 'text-cyan-400' },
-  { name: 'Transcendente', icon: '🌌', minLp: 301, maxLp: 430, hasSubtiers: false, color: 'text-indigo-400' },
-  { name: 'Divino', icon: '👑', minLp: 431, maxLp: 999999, hasSubtiers: false, color: 'text-amber-400' },
+  { name: 'Celestial', icon: '👁️', minLp: 0, maxLp: 300, hasSubtiers: false, color: 'text-cyan-400', imageUrl: '/assets/ranks/celestial.png' },
+  { name: 'Transcendente', icon: '🌌', minLp: 301, maxLp: 430, hasSubtiers: false, color: 'text-indigo-400', imageUrl: '/assets/ranks/transcendente.png' },
+  { name: 'Divino', icon: '👑', minLp: 431, maxLp: 999999, hasSubtiers: false, color: 'text-amber-400', imageUrl: '/assets/ranks/divino.png' },
 ];
 
 export function getRankFromLp(lp: number) {
   const rank = RANK_CONFIG.find(r => lp >= r.minLp && lp <= r.maxLp) || RANK_CONFIG[0];
   
   if (!rank.hasSubtiers) {
-    return { name: rank.name, icon: rank.icon, full: rank.name, color: rank.color };
+    return { name: rank.name, icon: rank.icon, full: rank.name, color: rank.color, imageUrl: rank.imageUrl };
   }
 
   // Lógica para subníveis (IV, III, II, I)

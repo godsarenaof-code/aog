@@ -73,7 +73,12 @@ const Ranked = () => {
                           {selectedRank === rank.name && (
                             <motion.div layoutId="activeRank" className="absolute left-0 w-1 h-6 bg-cyan rounded-full" />
                           )}
-                          <span className="text-xl group-hover:scale-110 transition-transform">{rank.icon}</span>
+                          <img 
+                            src={rank.imageUrl} 
+                            alt={rank.name}
+                            className="w-8 h-8 group-hover:scale-110 transition-transform object-contain"
+                            onerror="this.style.display='none'"
+                          />
                           <span className="text-[10px] font-display font-black tracking-widest uppercase text-left">{rank.name}</span>
                        </button>
                      ))}
@@ -93,7 +98,7 @@ const Ranked = () => {
                           className="absolute inset-0 border-2 border-dashed border-white/5 rounded-full scale-75 opacity-20"
                         />
 
-                        {/* Main Emblem Placeholder */}
+                        {/* Main Emblem Image Area */}
                         <AnimatePresence mode="wait">
                           <motion.div 
                             key={selectedRank}
@@ -101,11 +106,16 @@ const Ranked = () => {
                             animate={{ scale: 1, opacity: 1, rotateY: 0 }}
                             exit={{ scale: 0.8, opacity: 0, rotateY: -90 }}
                             transition={{ duration: 0.4 }}
-                            className={`h-32 w-32 rounded-full bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center relative shadow-glow-lg ${displayRankConfig.color.replace('text-', 'shadow-')}`}
+                            className={`h-48 w-48 relative flex items-center justify-center`}
                           >
-                             <div className={`text-6xl ${displayRankConfig.color} drop-shadow-[0_0_20px_currentColor] select-none`}>
-                                {displayRankConfig.icon}
-                             </div>
+                             <img 
+                                src={displayRankConfig.imageUrl} 
+                                alt={selectedRank}
+                                className={`w-full h-full object-contain drop-shadow-[0_0_30px_currentColor] ${displayRankConfig.color.replace('text-', 'text-shadow-')}`}
+                             />
+                             
+                             {/* Aura Effect */}
+                             <div className={`absolute inset-0 blur-3xl opacity-20 -z-10 rounded-full ${displayRankConfig.color.replace('text-', 'bg-')}`} />
                           </motion.div>
                         </AnimatePresence>
                     </div>
