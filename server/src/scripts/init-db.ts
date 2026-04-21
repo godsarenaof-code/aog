@@ -28,6 +28,8 @@ async function init() {
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
 
+    ALTER TABLE public.skins ADD COLUMN IF NOT EXISTS hp_bonus INTEGER DEFAULT 0;
+
     -- 3. Saldos e Inventário
     CREATE TABLE IF NOT EXISTS public.user_balances (
       user_id UUID PRIMARY KEY REFERENCES public.users(id) ON DELETE CASCADE,
@@ -63,12 +65,8 @@ async function init() {
       FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user_setup();
 
     -- 5. Seeding Skins (Exemplos)
-    INSERT INTO public.skins (champion_id, name, rarity, damage_bonus)
-    SELECT id, 'Kael do Vazio', 'Raro', 10 FROM public.champions WHERE name ILIKE '%Kael%' LIMIT 1
-    ON CONFLICT DO NOTHING;
-
-    INSERT INTO public.skins (champion_id, name, rarity, damage_bonus)
-    SELECT id, 'Kael Soberano', 'Épico', 18 FROM public.champions WHERE name ILIKE '%Kael%' LIMIT 1
+    INSERT INTO public.skins (champion_id, name, rarity, damage_bonus, hp_bonus)
+    SELECT id, 'Kael Protocolo Zero', 'Épico', 12, 10 FROM public.champions WHERE name ILIKE '%Kael%' LIMIT 1
     ON CONFLICT DO NOTHING;
 
     INSERT INTO public.skins (champion_id, name, rarity, damage_bonus)

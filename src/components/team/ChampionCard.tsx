@@ -109,10 +109,15 @@ export const ChampionCard: React.FC<ChampionCardProps> = ({ champion, onClick, c
 
              {/* Stats Grid */}
              <div className="grid grid-cols-3 gap-2">
-                <div className="bg-white/5 rounded-lg p-2 border border-white/5 flex flex-col items-center">
+                <div className="bg-white/5 rounded-lg p-2 border border-white/5 flex flex-col items-center relative overflow-hidden group/stat">
                    <Heart className="h-3 w-3 text-red-500 mb-1" />
-                   <span className="text-xs font-display font-bold">{champion.hp || 700}</span>
+                   <span className="text-xs font-display font-bold">
+                     {Math.round((champion.hp || 700) * (1 + (champion.equippedSkin?.hp_bonus || 0) / 100))}
+                   </span>
                    <span className="text-[8px] text-muted-foreground uppercase tracking-widest">HP</span>
+                   {champion.equippedSkin?.hp_bonus > 0 && (
+                      <div className="absolute top-0 right-0 bg-blue-500 text-[6px] px-1 font-black">+{champion.equippedSkin.hp_bonus}%</div>
+                   )}
                 </div>
                  <div className="bg-white/5 rounded-lg p-2 border border-white/5 flex flex-col items-center relative overflow-hidden group/stat">
                     <Sword className="h-3 w-3 text-orange-500 mb-1" />

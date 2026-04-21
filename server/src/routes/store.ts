@@ -22,6 +22,21 @@ router.get('/balance', authMiddleware, async (req: AuthRequest, res) => {
   }
 });
 
+// @route   GET /api/store/skins (CATALOGO COMPLETO)
+router.get('/skins', async (req, res) => {
+  try {
+    const result = await query(
+      `SELECT s.*, c.name as champion_name 
+       FROM skins s 
+       JOIN champions c ON s.champion_id = c.id 
+       ORDER BY s.rarity DESC`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar catálogo.' });
+  }
+});
+
 // @route   GET /api/store/my-skins
 router.get('/my-skins', authMiddleware, async (req: AuthRequest, res) => {
   try {
@@ -124,48 +139,70 @@ router.post('/reroll', authMiddleware, async (req: AuthRequest, res) => {
 
     // 1. Verificar se o usuário possui todas as skins selecionadas e coletar raridades
     const invRes = await query(
-      'SELECT us.skin_id, s.rarity FROM user_skins us JOIN skins s ON us.skin_id = s.id WHERE us.user_id = $1 AND us.skin_id = ANY($2)',
+      'SELECT us.skin_id, s.rarity, s.champion_id FROM user_skins us JOIN skins s ON us.skin_id = s.id WHERE us.user_id = $1 AND us.skin_id = ANY($2)',
       [req.user?.id, skinIds]
     );
 
-    if (invRes.rows.length < 1) { // Simplificação: a query ANY pode retornar menos que 3 se forem duplicatas do mesmo id
+    if (invRes.rows.length < 1) { 
        await query('ROLLBACK');
        return res.status(400).json({ error: 'Skins não encontradas no inventário.' });
     }
+
+    // Identificar se todas as skins são do mesmo campeão
+    const champIds = Array.from(new Set(invRes.rows.map(r => r.champion_id)));
+    const sameChampionId = champIds.length === 1 ? champIds[0] : null;
 
     // Calcular raridade baseada nos ingredientes
     const rarities = invRes.rows.map(r => r.rarity);
     const weightMap: Record<string, number> = { 'Comum': 1, 'Raro': 2, 'Épico': 3, 'Divino': 4 };
     const maxRarityValue = Math.max(...rarities.map(r => weightMap[r]));
     
-    // Chance de subir de nível
+    // Chance de subir de nível (aumentada se for o mesmo campeão)
+    const bonusChance = sameChampionId ? 0.5 : 0.8; // Se mesmo champ, chance de subir é maior (1.0 - 0.5 = 50% vs 20%)
     const draw = Math.random();
     let targetRarityValue = maxRarityValue;
-    if (draw > 0.7 && maxRarityValue < 4) {
+    if (draw > bonusChance && maxRarityValue < 4) {
       targetRarityValue += 1;
     }
 
     const rarityNames = ['Comum', 'Raro', 'Épico', 'Divino'];
     const targetRarity = rarityNames[targetRarityValue - 1];
 
-    // 2. Consumir as skins (decrementando count ou removendo linha)
+    // 3. Sortear nova skin da raridade alvo (favorecendo o mesmo campeão se houver bônus)
+    let poolQuery = 'SELECT * FROM skins WHERE rarity = $1';
+    let queryParams = [targetRarity];
+    
+    if (sameChampionId) {
+      const samePool = await query('SELECT * FROM skins WHERE rarity = $1 AND champion_id = $2', [targetRarity, sameChampionId]);
+      if (samePool.rows.length > 0) {
+        // 70% de chance de vir o mesmo campeão se ele tiver skin na raridade alvo
+        if (Math.random() < 0.7) {
+          const selectedSkin = samePool.rows[Math.floor(Math.random() * samePool.rows.length)];
+          return finalizeReroll(req, res, skinIds, selectedSkin);
+        }
+      }
+    }
+
+    const pool = await query('SELECT * FROM skins WHERE rarity = $1', [targetRarity]);
+    const selectedSkin = pool.rows[Math.floor(Math.random() * pool.rows.length)];
+    return finalizeReroll(req, res, skinIds, selectedSkin);
+
+  } catch (err) {
+    await query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ error: 'Erro no processo de Reroll.' });
+  }
+});
+
+async function finalizeReroll(req: AuthRequest, res: any, skinIds: string[], selectedSkin: any) {
+    // 2. Consumir as skins
     for (const sid of skinIds) {
-       const checkCount = await query('SELECT count FROM user_skins WHERE user_id = $1 AND skin_id = $2', [req.user?.id, sid]);
-       if (!checkCount.rows[0] || checkCount.rows[0].count <= 0) {
-         await query('ROLLBACK');
-         return res.status(400).json({ error: 'Saldo de skins insuficiente para fusão.' });
-       }
        await query('UPDATE user_skins SET count = count - 1 WHERE user_id = $1 AND skin_id = $2', [req.user?.id, sid]);
     }
     
-    // Limpar linhas com count 0
     await query('DELETE FROM user_skins WHERE user_id = $1 AND count <= 0', [req.user?.id]);
 
-    // 3. Sortear nova skin da raridade alvo
-    const pool = await query('SELECT * FROM skins WHERE rarity = $1', [targetRarity]);
-    const selectedSkin = pool.rows[Math.floor(Math.random() * pool.rows.length)];
-
-    // 4. Adicionar nova skin ao inventário
+    // 4. Adicionar nova skin
     await query(
       `INSERT INTO user_skins (user_id, skin_id, count) 
        VALUES ($1, $2, 1) 
@@ -175,13 +212,7 @@ router.post('/reroll', authMiddleware, async (req: AuthRequest, res) => {
 
     await query('COMMIT');
     res.json({ skin: selectedSkin, message: `Fusão concluída! Você recebeu: ${selectedSkin.name}` });
-
-  } catch (err) {
-    await query('ROLLBACK');
-    console.error(err);
-    res.status(500).json({ error: 'Erro no processo de Reroll.' });
-  }
-});
+}
 
 // @route   POST /api/store/equip-skin
 router.post('/equip-skin', authMiddleware, async (req: AuthRequest, res) => {

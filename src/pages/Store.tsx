@@ -8,10 +8,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CAPSULES = [
-  { id: 'basic', name: 'Cápsula Básica', cost: 500, currency: 'gold', color: 'text-muted-foreground', border: 'border-white/10', bg: 'bg-white/5', icon: Box, desc: 'Chance de Skins Comuns e Raras.' },
-  { id: 'advanced', name: 'Cápsula Avançada', cost: 150, currency: 'essence', color: 'text-primary', border: 'border-primary/20', bg: 'bg-primary/5', icon: Sparkles, desc: '95% de chance de Raro ou superior.' },
-  { id: 'mythic', name: 'Cápsula Mística', cost: 450, currency: 'essence', color: 'text-accent', border: 'border-accent/30', bg: 'bg-accent/5', icon: Sparkles, desc: 'Foco em Épicas e Divinas.' },
-  { id: 'divine', name: 'Cápsula Divina', cost: 900, currency: 'essence', color: 'text-cyan shadow-glow-sm', border: 'border-cyan/40', bg: 'bg-cyan/5', icon: Sparkles, desc: '100% garantido Pelas de nível Divino.' },
+  { id: 'basic', name: 'Unidade de Extração (Bronze)', cost: 500, currency: 'gold', color: 'text-orange-400', border: 'border-orange-900/30', bg: 'bg-orange-950/20', icon: Box, desc: 'Design industrial com luzes foscas. Ideal para fragmentos de nível básico.' },
+  { id: 'advanced', name: 'Unidade de Extração (Ciano)', cost: 150, currency: 'essence', color: 'text-cyan', border: 'border-cyan/20', bg: 'bg-cyan/5', icon: Sparkles, desc: 'Estrutura cromada com luzes ciano. Maior pureza nos dados extraídos.' },
+  { id: 'mythic', name: 'Unidade de Extração (Roxa)', cost: 450, currency: 'essence', color: 'text-purple-400', border: 'border-purple-500/30', bg: 'bg-purple-950/20', icon: Sparkles, desc: 'Unidade flutuante que emana energia escura. Fragmentos Místicos e Épicos.' },
+  { id: 'divine', name: 'Unidade de Extração (Dourada)', cost: 900, currency: 'essence', color: 'text-amber-400', border: 'border-amber-500/40', bg: 'bg-amber-500/10', icon: Sparkles, desc: 'Tecnologia das Deidades em ouro e luz branca. Garantia de Firmware Divino.' },
 ];
 
 const Store = () => {
@@ -77,9 +77,9 @@ const Store = () => {
       <div className="container max-w-6xl py-8 space-y-8 animate-fade-in relative">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="text-xs font-display tracking-[0.4em] text-accent font-black">// STORE</div>
-            <h1 className="font-display text-4xl font-black mt-2 italic uppercase tracking-tighter">LOJA DE <span className="text-cyan text-glow">CÁPSULAS</span></h1>
-            <p className="text-muted-foreground text-xs uppercase tracking-widest mt-1">Obtenha skins exclusivas para seus heróis favoritos</p>
+            <div className="text-xs font-display tracking-[0.4em] text-accent font-black">// DATA EXTRACTION</div>
+            <h1 className="font-display text-4xl font-black mt-2 italic uppercase tracking-tighter">UNIDADES DE <span className="text-cyan text-glow">EXTRAÇÃO</span></h1>
+            <p className="text-muted-foreground text-xs uppercase tracking-widest mt-1">Recupere firmwares de deuses antigos e heróis lendários</p>
           </div>
 
           <div className="flex gap-4 p-4 bg-black/40 border border-white/5 rounded-xl backdrop-blur-xl">
@@ -159,7 +159,8 @@ const Store = () => {
                    </div>
                    <h3 className="font-display text-3xl font-black uppercase italic tracking-tighter">{lastLoot.name}</h3>
                    <div className="px-4 py-1 rounded-full bg-white/10 text-[10px] font-display tracking-widest uppercase border border-white/10">
-                      Raridade: <span className="text-cyan">{lastLoot.rarity}</span> · Bônus: <span className="text-emerald-400">+{lastLoot.damage_bonus}% ATK</span>
+                      Firmware: <span className="text-cyan">{lastLoot.rarity}</span> · 
+                      Bonus: <span className="text-emerald-400">+{lastLoot.damage_bonus || 0} ATK</span> / <span className="text-blue-400">+{lastLoot.hp_bonus || 0}% HP</span>
                    </div>
                    <Button variant="ghost" onClick={() => setLastLoot(null)} className="text-[9px] font-display tracking-[0.3em] font-black opacity-40 hover:opacity-100 transition-opacity underline decoration-dotted">
                      FECHAR RECOMPENSA
