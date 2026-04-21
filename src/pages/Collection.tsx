@@ -6,12 +6,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
-const units = Array.from({ length: 18 }).map((_, i) => ({
-  name: ["Vex", "Nyx", "Orion", "Sera", "Kael", "Lyra", "Zeph", "Riven", "Aether"][i % 9] + " " + ((i % 3) + 1),
-  cost: (i % 5) + 1,
-  trait: ["Cibernético", "Arcano", "Vanguarda", "Caçador", "Místico"][i % 5],
-  owned: i < 11,
-}));
+// Os dados agora são buscados via API em fetchData()
 
 const tabs = ["Unidades", "Sinergias", "Itens", "Firmwares"];
 
@@ -38,17 +33,28 @@ const RerollSlot = ({ id, onRemove }: { id?: string; onRemove: () => void }) => 
 const Collection = () => {
   const [tab, setTab] = useState(0);
   const [allSkins, setAllSkins] = useState<any[]>([]);
+  const [champions, setChampions] = useState<any[]>([]);
+  const [traits, setTraits] = useState<any[]>([]);
   const [mySkins, setMySkins] = useState<any[]>([]);
   const [selectedRerollIds, setSelectedRerollIds] = useState<string[]>([]);
   const [isRerolling, setIsRerolling] = useState(false);
 
   const fetchData = async () => {
     const token = localStorage.getItem('aog_token');
-    if (!token) return;
     
     // Buscar todas as skins do catálogo
-    const allRes = await fetch('http://localhost:3001/api/store/skins'); 
-    if (allRes.ok) setAllSkins(await allRes.json());
+    const allSkinsRes = await fetch('http://localhost:3001/api/store/skins'); 
+    if (allSkinsRes.ok) setAllSkins(await allSkinsRes.json());
+
+    // Buscar campeões reais
+    const champsRes = await fetch('http://localhost:3001/api/game/champions');
+    if (champsRes.ok) setChampions(await champsRes.json());
+
+    // Buscar sinergias reais
+    const traitsRes = await fetch('http://localhost:3001/api/game/traits');
+    if (traitsRes.ok) setTraits(await traitsRes.json());
+
+    if (!token) return;
 
     // Buscar skins do usuário
     const res = await fetch('http://localhost:3001/api/store/my-skins', {
@@ -58,8 +64,8 @@ const Collection = () => {
   };
 
   useEffect(() => {
-    if (tab === 3) fetchData();
-  }, [tab]);
+    fetchData();
+  }, []);
 
   const toggleRerollSelection = (skinId: string) => {
     if (selectedRerollIds.includes(skinId)) {

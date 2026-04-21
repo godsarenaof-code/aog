@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Swords, Zap, Trophy, Users, Play } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const modes = [
   { icon: Swords, title: "Partida Normal", desc: "8 jogadores · Sem ranking", color: "primary", to: "/match" },
@@ -16,16 +17,19 @@ const news = [
   { tag: "DEV BLOG", title: "Como projetamos o sistema de runas", date: "Há 1 semana" },
 ];
 
-const Lobby = () => (
-  <AppLayout>
-    <div className="container max-w-7xl py-8 space-y-8 animate-fade-in">
-      <div>
-        <div className="text-xs font-display tracking-[0.4em] text-accent">// LOBBY</div>
-        <h1 className="font-display text-4xl font-bold mt-2">
-          BEM-VINDO, <span className="text-cyan">INVOCADOR</span>
-        </h1>
-        <p className="text-muted-foreground mt-1">Selecione um modo e mergulhe na Arena.</p>
-      </div>
+const Lobby = () => {
+  const { user } = useAuth();
+  
+  return (
+    <AppLayout>
+      <div className="container max-w-7xl py-8 space-y-8 animate-fade-in">
+        <div>
+          <div className="text-xs font-display tracking-[0.4em] text-accent font-black uppercase tracking-widest">// LOBBY</div>
+          <h1 className="font-display text-4xl font-black mt-2 italic uppercase tracking-tighter">
+            BEM-VINDO, <span className="text-cyan text-glow">{user?.nickname || 'INVOCADOR'}</span>
+          </h1>
+          <p className="text-muted-foreground mt-1 text-xs uppercase tracking-widest opacity-60">Selecione um modo e comece sua jornada para a divindade.</p>
+        </div>
 
       {/* Quick play */}
       <div className="panel-glow p-8 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -72,6 +76,7 @@ const Lobby = () => (
       </div>
     </div>
   </AppLayout>
-);
+  );
+};
 
 export default Lobby;
