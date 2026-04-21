@@ -55,7 +55,9 @@ const Profile = () => {
           </div>
           <div className="text-right">
             <div className="text-xs font-display tracking-widest text-muted-foreground uppercase opacity-60">Ranking Global</div>
-            <div className="font-display text-3xl text-cyan font-black italic">#1,247</div>
+            <div className="font-display text-3xl text-cyan font-black italic">
+              #{statsData?.globalPosition || '--'}
+            </div>
           </div>
         </div>
 
