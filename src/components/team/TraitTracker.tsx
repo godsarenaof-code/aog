@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
-import { Globe, Sword, Shield, Target, Sparkles, Flame, Zap } from "lucide-react";
+import { Globe, Sword, Shield, Target, Sparkles, Flame, Zap, Skull, Wind } from "lucide-react";
 
 interface TraitTrackerProps {
   team: any[];
@@ -19,6 +19,8 @@ const traitIcons: Record<string, any> = {
   "Tecnomago": Sparkles,
   "Atirador": Target,
   "Bastion": Flame,
+  "Assassino": Skull,
+  "Velocidade": Wind,
 };
 
 export function TraitTracker({ team, traits }: TraitTrackerProps) {
@@ -64,12 +66,12 @@ export function TraitTracker({ team, traits }: TraitTrackerProps) {
     if (activeLevel === 0) return { bg: "bg-muted", text: "text-muted-foreground", border: "border-muted" };
     
     if (activeLevel === totalLevels) {
-      if (totalLevels >= 4) return { bg: "bg-purple-500", text: "text-white", border: "border-purple-400", shadow: "shadow-[0_0_15px_rgba(168,85,247,0.4)]" };
-      return { bg: "bg-amber-500", text: "text-black", border: "border-amber-400", shadow: "shadow-[0_0_15px_rgba(245,158,11,0.4)]" };
+      if (totalLevels >= 4) return { bg: "bg-purple-500", text: "text-white", border: "border-purple-400", shadow: "shadow-[0_0_20px_rgba(168,85,247,0.6)]", glow: "celestial-glow-purple" };
+      return { bg: "bg-amber-500", text: "text-black", border: "border-amber-400", shadow: "shadow-[0_0_20px_rgba(245,158,11,0.6)]", glow: "celestial-glow-gold" };
     }
     
-    if (activeLevel >= 2) return { bg: "bg-slate-300", text: "text-black", border: "border-slate-200" };
-    return { bg: "bg-orange-700", text: "text-white", border: "border-orange-600" };
+    if (activeLevel >= 2) return { bg: "bg-slate-300", text: "text-black", border: "border-slate-200", glow: "celestial-glow-silver" };
+    return { bg: "bg-orange-700", text: "text-white", border: "border-orange-600", glow: "celestial-glow-bronze" };
   };
 
   return (
@@ -102,32 +104,42 @@ export function TraitTracker({ team, traits }: TraitTrackerProps) {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   key={trait.name}
-                  className={`panel p-3 border-l-4 transition-all ${isActive ? 'bg-card/40' : 'opacity-60'} ${
-                    trait.activeLevel === trait.totalLevels ? 'border-l-amber-500' : 
+                  className={`panel p-3 border-l-4 relative overflow-hidden transition-all ${isActive ? 'bg-card/40' : 'opacity-60'} ${
+                    trait.activeLevel === trait.totalLevels ? 'border-l-amber-500 shadow-glow-amber' : 
                     isActive ? 'border-l-primary' : 'border-l-muted'
-                  } ${shadow || ''}`}
+                  } ${shadow || ''} ${isActive ? 'animate-fade-in' : ''}`}
                 >
-                  <div className="flex items-center justify-between gap-3">
+                  {/* Celestial Glow Effect Background */}
+                  {isActive && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 0.15 }}
+                      className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none"
+                    />
+                  )}
+                  
+                  <div className="flex items-center justify-between gap-3 relative z-10">
                     <div className="flex items-center gap-3">
-                      <div className={`h-8 w-8 rounded flex items-center justify-center transition-colors ${bg} ${text} ${shadow ? 'animate-pulse' : ''}`}>
-                        <Icon className="h-4 w-4" />
+                      <div className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-500 ${bg} ${text} ${isActive ? 'scale-110 shadow-lg' : ''}`}>
+                        <Icon className="h-5 w-5" />
                       </div>
                       <div>
-                        <div className="font-display text-[11px] font-bold tracking-widest uppercase">
+                        <div className="font-display text-[11px] font-black tracking-widest uppercase flex items-center gap-2">
                           {trait.name}
+                          {isActive && <span className="h-1.5 w-1.5 rounded-full bg-primary animate-ping" />}
                         </div>
-                        <div className="flex gap-1 mt-1">
+                        <div className="flex gap-1 mt-1.5">
                           {trait.levels.map((level: number, i: number) => {
                              const isLevelActive = trait.count >= level;
                              const isLast = i + 1 === trait.totalLevels;
                              return (
                                <div 
                                  key={i}
-                                 className={`h-1.5 w-4 rounded-full transition-all ${
+                                 className={`h-1 w-5 rounded-full transition-all duration-500 ${
                                    isLevelActive 
-                                     ? (isLast ? (trait.totalLevels >= 4 ? 'bg-purple-500' : 'bg-amber-500') : 'bg-primary') 
-                                     : 'bg-muted/40'
-                                 } ${isLevelActive && isLast ? 'shadow-[0_0_5px_currentColor]' : ''}`}
+                                     ? (isLast ? (trait.totalLevels >= 4 ? 'bg-purple-500' : 'bg-amber-500') : 'bg-primary shadow-[0_0_8px_rgba(var(--primary),0.6)]') 
+                                     : 'bg-muted/30'
+                                 }`}
                                />
                              );
                           })}
@@ -135,8 +147,9 @@ export function TraitTracker({ team, traits }: TraitTrackerProps) {
                       </div>
                     </div>
                     <div className="text-right">
-                       <div className={`font-display text-lg font-black ${trait.activeLevel === trait.totalLevels ? 'text-amber-500' : isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                       <div className={`font-display text-base font-black ${trait.activeLevel === trait.totalLevels ? 'text-amber-500' : isActive ? 'text-primary' : 'text-muted-foreground'}`}>
                          {trait.count}
+                         <span className="text-[10px] opacity-40 ml-1">/ {trait.levels[trait.activeLevel] || trait.levels[trait.totalLevels - 1]}</span>
                        </div>
                     </div>
                   </div>

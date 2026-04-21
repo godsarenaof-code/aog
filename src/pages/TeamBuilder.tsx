@@ -12,6 +12,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { BattlefieldGrid } from "@/components/team/BattlefieldGrid";
+import { ChampionCard } from "@/components/team/ChampionCard";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { PROGRESSION } from "@/lib/rankUtils";
 
 export default function TeamBuilder() {
   const [team, setTeam] = useState<any[]>([]);
@@ -90,6 +103,38 @@ export default function TeamBuilder() {
           </div>
           
           <div className="flex gap-4">
+             <AlertDialog>
+                <AlertDialogTrigger asChild>
+                   <Button 
+                     variant="outline" 
+                     className="border-red-500/50 hover:bg-red-500/10 font-display tracking-widest text-[10px] text-red-500"
+                   >
+                      <Trash2 className="mr-2 h-3 w-3" /> DESISTIR (FF)
+                   </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-background/95 backdrop-blur-xl border-red-500/20">
+                   <AlertDialogHeader>
+                      <AlertDialogTitle className="font-display text-xl uppercase tracking-widest text-red-500">Confirmar Desistência?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-muted-foreground">
+                         Ao desistir agora, você perderá <span className="text-red-500 font-bold font-display">{Math.abs(PROGRESSION.FORFEIT)} Pontos (LP)</span>. 
+                         Deseja mesmo abandonar a arena?
+                      </AlertDialogDescription>
+                   </AlertDialogHeader>
+                   <AlertDialogFooter>
+                      <AlertDialogCancel className="bg-transparent border-white/10 font-display tracking-widest text-[10px]">CANCELAR</AlertDialogCancel>
+                      <AlertDialogAction 
+                        onClick={() => {
+                          clearTeam();
+                          toast.error(`Você desistiu e perdeu ${Math.abs(PROGRESSION.FORFEIT)} LP.`);
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white font-display tracking-widest text-[10px]"
+                      >
+                        CONFIRMAR DESISTÊNCIA
+                      </AlertDialogAction>
+                   </AlertDialogFooter>
+                </AlertDialogContent>
+             </AlertDialog>
+
              <Button 
                variant="outline" 
                className="border-primary/20 hover:bg-primary/10 font-display tracking-widest text-[10px]"
@@ -165,42 +210,14 @@ export default function TeamBuilder() {
                             </div>
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
-                               {tierChamps.map((champ: any) => {
-                                  const styles = getTierColor(champ.tier);
-                                  const isT5 = champ.tier === 5;
-                                  
-                                  return (
-                                    <motion.button
-                                      whileHover={{ y: -5, scale: 1.02 }}
-                                      whileTap={{ scale: 0.95 }}
-                                      key={champ.id}
-                                      onClick={() => addToTeam(champ)}
-                                      className={`panel p-3 text-left group border transition-all duration-300 ${styles} ${
-                                        isT5 ? 'shadow-[0_0_20px_rgba(245,158,11,0.2)]' : ''
-                                      }`}
-                                    >
-                                       <div className="flex items-start justify-between mb-3">
-                                          <div className={`h-12 w-12 rounded border-2 shadow-inner overflow-hidden flex items-center justify-center bg-background ${styles} ${isT5 ? 'border-amber-500/50' : ''}`}>
-                                             {champ.image_url ? (
-                                                <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center font-display font-black opacity-30">{champ.name[0]}</div>
-                                             )}
-                                          </div>
-                                          <div className={`text-[10px] font-display font-black ${isT5 ? 'text-amber-500' : ''}`}>{champ.tier}G</div>
-                                       </div>
-                                       <h4 className={`font-display text-xs font-bold truncate uppercase tracking-widest ${isT5 ? 'text-amber-500' : ''}`}>{champ.name}</h4>
-                                       <div className="flex flex-wrap gap-1 mt-2">
-                                          {[...(champ.origins || []), ...(champ.classes || [])].slice(0, 2).map((t: string) => (
-                                             <span key={t} className="text-[7.5px] font-display font-bold tracking-widest bg-black/40 px-1.5 py-0.5 border border-white/10 rounded uppercase opacity-80">
-                                                {t}
-                                             </span>
-                                          ))}
-                                       </div>
-                                    </motion.button>
-                                  );
-                               })}
-                            </div>
+                                {tierChamps.map((champ: any) => (
+                                  <ChampionCard 
+                                    key={champ.id} 
+                                    champion={champ} 
+                                    onClick={() => addToTeam(champ)} 
+                                  />
+                                ))}
+                             </div>
                          </div>
                        );
                     })}

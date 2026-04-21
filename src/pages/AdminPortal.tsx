@@ -389,6 +389,9 @@ export default function ArenaPortal() {
     description: "",
     image_url: "",
     action_image_url: "",
+    hp: 700,
+    attack: 120,
+    speed: 1.3,
     ability: null as any
   });
 
@@ -436,6 +439,9 @@ export default function ArenaPortal() {
         description: champ.description || "",
         image_url: champ.image_url || null,
         action_image_url: champ.action_image_url || null,
+        hp: parseInt(champ.hp) || 0,
+        attack: parseInt(champ.attack) || 0,
+        speed: parseFloat(champ.speed) || 1.0,
         ability: champ.ability || (staticChampions.find(sc => sc.id === champ.slug)?.ability) || { name: "Habilidade do Deus", mana: 100, effect: "Efeito configurado via DB." }
       };
 
@@ -451,7 +457,7 @@ export default function ArenaPortal() {
     },
     onSuccess: () => {
       toast.success(editingChamp ? "Deus reconfigurado com sucesso!" : "Novo deus forjado na arena!");
-      setNewChamp({ id: undefined, name: "", slug: "", tier: 1, origins: "", classes: "", description: "", image_url: "", action_image_url: "", ability: null });
+      setNewChamp({ id: undefined, name: "", slug: "", tier: 1, origins: "", classes: "", description: "", image_url: "", action_image_url: "", hp: 700, attack: 120, speed: 1.3, ability: null });
       setEditingChamp(null);
       queryClient.invalidateQueries({ queryKey: ['champions'] });
     },
@@ -472,6 +478,9 @@ export default function ArenaPortal() {
       description: champion.description,
       image_url: champion.image_url || "",
       action_image_url: champion.action_image_url || "",
+      hp: champion.hp || 700,
+      attack: champion.attack || 120,
+      speed: champion.speed || 1.3,
       ability: champion.ability // Preserva a habilidade original
     });
   };
@@ -591,6 +600,21 @@ export default function ArenaPortal() {
                 }}
                 isUploading={isUploading}
               />
+
+              <div className="space-y-2">
+                 <Label className="text-[10px] tracking-widest text-red-400">PONTOS DE VIDA (HP)</Label>
+                 <Input type="number" value={newChamp.hp} onChange={e => setNewChamp({...newChamp, hp: parseInt(e.target.value)})} className="bg-background border-red-500/20" />
+              </div>
+
+              <div className="space-y-2">
+                 <Label className="text-[10px] tracking-widest text-orange-400">PODER DE ATAQUE (ATK)</Label>
+                 <Input type="number" value={newChamp.attack} onChange={e => setNewChamp({...newChamp, attack: parseInt(e.target.value)})} className="bg-background border-orange-500/20" />
+              </div>
+
+              <div className="space-y-2">
+                 <Label className="text-[10px] tracking-widest text-cyan-400">VELOCIDADE (MS)</Label>
+                 <Input type="number" step="0.1" value={newChamp.speed} onChange={e => setNewChamp({...newChamp, speed: parseFloat(e.target.value)})} className="bg-background border-cyan-500/20" />
+              </div>
 
               <div className="space-y-2">
                  <Label className="text-[10px] tracking-widest">ORIGENS (VÍRGULA)</Label>
