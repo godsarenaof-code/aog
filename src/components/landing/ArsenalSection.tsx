@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowRight, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 // Mock das combinations (apenas um exemplo funcional do PRD)
 const components = ["Espada", "Placa de Titânio", "Cristal de Mana"];
@@ -79,6 +81,15 @@ export function ArsenalSection() {
           )}
         </div>
 
+      </div>
+
+      <div className="flex justify-center mt-12">
+        <Link to="/items">
+          <Button variant="outline" size="lg" className="border-accent/40 text-accent hover:bg-accent/10 font-display tracking-[0.2em] group">
+            VER TODOS OS ITENS E RECEITAS
+            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </Link>
       </div>
     </section>
   );

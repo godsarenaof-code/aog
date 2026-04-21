@@ -1,0 +1,80 @@
+import { Sword, Shield, Zap, Sparkles, Target, Flame } from "lucide-react";
+
+export interface Champion {
+  id: string;
+  name: string;
+  tier: 1 | 2 | 3 | 4 | 5;
+  origins: string[];
+  classes: string[];
+  ability: { name: string; mana: number; effect: string };
+  desc: string;
+}
+
+export const champions: Champion[] = [
+  // Tier 1
+  { id: "kael", name: "Kael", tier: 1, origins: ["Ciborgue"], classes: ["Lâmina"], ability: { name: "Corte Biônico", mana: 60, effect: "Causa 200% de dano físico e aplica sangramento por 3s." }, desc: "Lâmina ciborgue que abre o early game com pressão constante." },
+  { id: "m1ra", name: "M1-RA", tier: 1, origins: ["Holográfico"], classes: ["Atirador"], ability: { name: "Disparo Espelhado", mana: 50, effect: "O próximo tiro ricocheteia em 2 inimigos próximos." }, desc: "Principal fonte de dano à distância na fase inicial." },
+  { id: "tork", name: "Tork", tier: 1, origins: ["Ciborgue"], classes: ["Sentinela"], ability: { name: "Protocolo Escudo", mana: 70, effect: "Ganha um escudo de 300 HP e atordoa o alvo atual por 1s." }, desc: "Tanque padrão para segurar a linha de frente." },
+  { id: "nyx", name: "Nyx", tier: 1, origins: ["Sindicato"], classes: ["Lâmina"], ability: { name: "Golpe de Sorte", mana: 65, effect: "Salta no inimigo com menos vida e causa dano crítico garantido." }, desc: "Assassina do submundo que executa alvos enfraquecidos." },
+  { id: "pax", name: "Pax", tier: 1, origins: ["Ascendente"], classes: ["Bastion"], ability: { name: "Meditação Atômica", mana: 80, effect: "Cura 15% da vida máxima e ganha 20 de Armadura (acumulativo)." }, desc: "Monge ascendente que escala defensivamente a cada uso." },
+  // Tier 2
+  { id: "volt", name: "Volt", tier: 2, origins: ["Ciborgue"], classes: ["Tecnomago"], ability: { name: "Corrente Curta", mana: 60, effect: "Dispara um raio que reduz a mana do alvo em 20 e causa dano mágico." }, desc: "Anti-mago: silencia conjuradores enquanto causa dano." },
+  { id: "sombra", name: "Sombra", tier: 2, origins: ["Holográfico"], classes: ["Lâmina"], ability: { name: "Fase de Luz", mana: 75, effect: "Torna-se invisível por 2s e reaparece atrás do inimigo mais distante." }, desc: "Assassina holográfica especialista em alcançar carregadores." },
+  { id: "barao", name: "Barão Grivas", tier: 2, origins: ["Sindicato"], classes: ["Sentinela", "Bastion"], ability: { name: "Impacto de Prestígio", mana: 85, effect: "Bate o cajado no chão, reduzindo a Vel. de Atk dos inimigos ao redor." }, desc: "Chefe do Sindicato — controla o ritmo da linha de frente." },
+  { id: "lyra", name: "Lyra", tier: 2, origins: ["Ascendente"], classes: ["Atirador"], ability: { name: "Flecha de Fóton", mana: 70, effect: "Atira um feixe que atravessa o mapa, causando dano a todos no caminho." }, desc: "Sniper ascendente perfeita para inimigos enfileirados." },
+  { id: "nanobit", name: "Nano-Bit", tier: 2, origins: [], classes: ["Tecnomago", "Sentinela"], ability: { name: "Reparo Nanométrico", mana: 70, effect: "Libera enxame de nanobots que cura o aliado mais ferido em 250 HP." }, desc: "Suporte técnico — ponte entre Tecnomagos e a linha de frente." },
+  // Tier 3
+  { id: "astra", name: "Astra", tier: 3, origins: ["Holográfico"], classes: ["Tecnomago"], ability: { name: "Nebulosa Digital", mana: 90, effect: "Cria uma área de dano contínuo e gera 1 clone para cada inimigo morto ali." }, desc: "Conjuradora de área que escala com kills consecutivas." },
+  { id: "vector", name: "Vector", tier: 3, origins: ["Ciborgue"], classes: ["Atirador"], ability: { name: "Modo Artilharia", mana: 80, effect: "Fica imóvel e ganha +100% de Vel. de Atk por 5 segundos." }, desc: "Torre de fogo cibernética para sustained damage." },
+  { id: "titan", name: "Titan", tier: 3, origins: [], classes: ["Sentinela", "Bastion"], ability: { name: "Cúpula Alpha", mana: 100, effect: "Cria uma barreira que bloqueia todos os projéteis inimigos por 3s." }, desc: "Anti-atiradores definitivo. Domina rounds com burst à distância." },
+  { id: "zane", name: "Zane", tier: 3, origins: ["Ciborgue", "Sindicato"], classes: ["Lâmina"], ability: { name: "Turbilhão de Créditos", mana: 75, effect: "Gira as lâminas; se matar alguém, gera 1 ouro (máx. 2 por round)." }, desc: "A unidade mais disputada — economia + combate em um pacote." },
+  { id: "cybermonk", name: "Cyber-Monk", tier: 3, origins: ["Ascendente"], classes: ["Bastion"], ability: { name: "Palma de Plasma", mana: 85, effect: "Empurra o alvo para o final do grid e o atordoa por 2.5s." }, desc: "Disruptor de posicionamento — reorganiza qualquer comp inimiga." },
+  // Tier 4
+  { id: "nova", name: "Nova", tier: 4, origins: ["Ascendente"], classes: ["Tecnomago"], ability: { name: "Colapso Estelar", mana: 120, effect: "Invoca um meteoro com dano massivo em área e queima 50% da mana dos atingidos." }, desc: "Wipe mágico que silencia conjuradores inimigos no impacto." },
+  { id: "helius", name: "Helius", tier: 4, origins: ["Ciborgue"], classes: ["Sentinela"], ability: { name: "Núcleo de Fusão", mana: 110, effect: "Explode em energia, curando aliados e causando dano (baseado na vida máx dele)." }, desc: "Tank-suporte híbrido — quanto mais HP, mais devastador." },
+  { id: "luna", name: "Luna", tier: 4, origins: ["Holográfico"], classes: ["Atirador", "Tecnomago"], ability: { name: "Lua Binária", mana: 90, effect: "Alterna tiros físicos (azul) e mágicos (roxo), ignorando 40% das resistências." }, desc: "Carregadora flexível — escala com itens AD ou AP." },
+  { id: "dravenx", name: "Draven-X", tier: 4, origins: ["Sindicato"], classes: ["Lâmina"], ability: { name: "Lâmina de Retorno", mana: 80, effect: "Lança um disco com dano na ida e volta. Dano aumenta a cada retorno pego." }, desc: "Alto risco, alta recompensa do Sindicato." },
+  // Tier 5
+  { id: "zeus01", name: "Zeus-01", tier: 5, origins: ["Deidade"], classes: ["Tecnomago"], ability: { name: "Julgamento Binário", mana: 150, effect: "Relâmpagos caem em todos os inimigos. Inimigos acima de 80% de HP são atordoados." }, desc: "IA divina de controle global — pune comps de tank stacking." },
+  { id: "ares", name: "Ares", tier: 5, origins: ["Deidade"], classes: ["Lâmina", "Bastion"], ability: { name: "Ira de Marte", mana: 130, effect: "Entra em frenesi: 100% de roubo de vida e ataques causam dano em área." }, desc: "Um exército de um homem só. Impossível de ignorar." },
+  { id: "gaia", name: "Gaia", tier: 5, origins: ["Deidade"], classes: ["Sentinela"], ability: { name: "Reforma da Terra", mana: 140, effect: "Transforma o chão em nanobots que regeneram 100% da vida de um aliado por segundo." }, desc: "Cura divina — mantém o carry vivo contra qualquer burst." },
+];
+
+export const origins = [
+  { name: "Holográficos", levels: "2 / 4", desc: "(2) Cria clone com 30% HP. (4) Clone causa 60% de dano.", icon: "👤" },
+  { name: "Ciborgues", levels: "2 / 4 / 6", desc: "Ganham 200/400/700 de Escudo de Energia e 15% de Dano de Ataque.", icon: "⚙️" },
+  { name: "Ascendentes", levels: "3 / 5", desc: "A cada 2s, ganham +5% de dano (acumula até o fim da rodada).", icon: "✨" },
+  { name: "Sindicato", levels: "2", desc: "Vencer = +1 Ouro. Perder = próximo Roll custa 1.", icon: "💰" },
+  { name: "Deidades", levels: "1", desc: "+15% de status para cada Elo acima de Mortal.", icon: "⚡" },
+];
+
+export const classes = [
+  { name: "Lâminas", levels: "2 / 4 / 6", desc: "(2) 15% chance de ataque duplo. (4) 30%. (6) 50% + Crítico.", icon: Sword },
+  { name: "Sentinelas", levels: "2 / 4", desc: "(2) +40 Armadura. (4) Aliados adjacentes ganham 50% dessa armadura.", icon: Shield },
+  { name: "Tecnomagos", levels: "2 / 4", desc: "(2) +20% Poder de Magia. (4) Curam 15% do dano causado por magias.", icon: Sparkles },
+  { name: "Atiradores", levels: "2 / 4", desc: "(2) +1 de Range. (4) Cada ataque aumenta Vel. Atk em 5%.", icon: Target },
+  { name: "Bastions", levels: "2 / 3", desc: "(2) 20% de Redução de Dano. (3) 40%.", icon: Flame },
+];
+
+export interface Item {
+  id: string;
+  name: string;
+  type: "base" | "combined";
+  desc: string;
+  recipe?: [string, string];
+}
+
+export const baseItems: Item[] = [
+  { id: "espada", name: "Espada", type: "base", desc: "+10 de Dano de Ataque." },
+  { id: "placa", name: "Placa de Titânio", type: "base", desc: "+20 de Armadura." },
+  { id: "cristal", name: "Cristal de Mana", type: "base", desc: "+15 de Mana Inicial." },
+];
+
+export const combinedItems: Item[] = [
+  { id: "lamina_suprema", name: "Lâmina Suprema", type: "combined", recipe: ["espada", "placa"], desc: "Aumenta o Dano de Ataque em 20% e concede 10 de Armadura." },
+  { id: "lamina_sangrenta", name: "Lâmina Sangrenta", type: "combined", recipe: ["espada", "espada"], desc: "Ataques curam em 15% do dano causado." },
+  { id: "armadura_reativa", name: "Armadura Reativa", type: "combined", recipe: ["placa", "placa"], desc: "Reflete 10% do dano recebido." },
+  { id: "orbe_paradoxo", name: "Orbe do Paradoxo", type: "combined", recipe: ["cristal", "cristal"], desc: "Unidade inicia o combate com 50% do mana máximo." },
+  { id: "lamina_tecnomago", name: "Lâmina do Tecnomago", type: "combined", recipe: ["espada", "cristal"], desc: "Ataques concedem +5 de poder mágico base." },
+  { id: "escudo_cibernetico", name: "Escudo Cibernético", type: "combined", recipe: ["placa", "cristal"], desc: "Ganha um escudo igual a 20% do max HP." },
+];

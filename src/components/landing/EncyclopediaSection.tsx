@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { champions, classes } from "@/lib/data";
+import { ChevronRight } from "lucide-react";
 
-const champions = [
-  { id: "kael", name: "Kael", tier: 1, classes: ["Ciborgue", "Lâmina"], ability: "Corte Biônico (Dano + Sangramento)" },
-  { id: "zane", name: "Zane", tier: 3, classes: ["Ciborgue", "Lâmina", "Sindicato"], ability: "Turbilhão de Créditos" },
-  { id: "luna", name: "Luna", tier: 4, classes: ["Holográfico", "Atirador", "Tecnomago"], ability: "Lua Binária" },
-  { id: "zeus", name: "Zeus-01", tier: 5, classes: ["Deidade", "Tecnomago"], ability: "Julgamento Binário" },
-];
-
-const classesList = ["Ciborgue", "Lâmina", "Tecnomago", "Holográfico", "Sindicato", "Atirador", "Deidade"];
+const classesList = classes.map(c => c.name);
 
 export function EncyclopediaSection() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  // Show only 5 featured champions on the landing page
+  const featuredChampions = champions.slice(0, 5);
 
   const getTierColor = (tier: number) => {
     switch (tier) {
@@ -50,9 +50,9 @@ export function EncyclopediaSection() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-        {champions.map((champ) => {
-          const isFaded = activeFilter !== null && !champ.classes.includes(activeFilter);
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12">
+        {featuredChampions.map((champ) => {
+          const isFaded = activeFilter !== null && !champ.classes.includes(activeFilter) && !champ.origins.includes(activeFilter);
           return (
             <div 
               key={champ.id} 
@@ -63,18 +63,27 @@ export function EncyclopediaSection() {
               </div>
               <h3 className="font-display text-lg mb-1">{champ.name}</h3>
               <div className="flex flex-wrap justify-center gap-1 mb-3">
-                {champ.classes.map(c => (
+                {[...champ.origins, ...champ.classes].map(c => (
                   <span key={c} className="text-[10px] uppercase font-display bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20">
                     {c}
                   </span>
                 ))}
               </div>
               <p className="text-xs text-muted-foreground text-center line-clamp-2 mt-auto border-t border-border/40 pt-2 w-full">
-                {champ.ability}
+                {champ.ability.name}
               </p>
             </div>
           );
         })}
+      </div>
+
+      <div className="flex justify-center">
+        <Link to="/champions">
+          <Button variant="outline" size="lg" className="border-cyan/40 text-cyan hover:bg-cyan/10 font-display tracking-[0.2em] group">
+            VER TODOS OS 22 CAMPEÕES
+            <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </Link>
       </div>
     </section>
   );
