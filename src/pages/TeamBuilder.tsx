@@ -13,17 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { BattlefieldGrid } from "@/components/team/BattlefieldGrid";
 import { ChampionCard } from "@/components/team/ChampionCard";
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { PROGRESSION } from "@/lib/rankUtils";
 
 export default function TeamBuilder() {
@@ -103,38 +92,6 @@ export default function TeamBuilder() {
           </div>
           
           <div className="flex gap-4">
-             <AlertDialog>
-                <AlertDialogTrigger asChild>
-                   <Button 
-                     variant="outline" 
-                     className="border-red-500/50 hover:bg-red-500/10 font-display tracking-widest text-[10px] text-red-500"
-                   >
-                      <Trash2 className="mr-2 h-3 w-3" /> DESISTIR (FF)
-                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="bg-background/95 backdrop-blur-xl border-red-500/20">
-                   <AlertDialogHeader>
-                      <AlertDialogTitle className="font-display text-xl uppercase tracking-widest text-red-500">Confirmar Desistência?</AlertDialogTitle>
-                      <AlertDialogDescription className="text-muted-foreground">
-                         Ao desistir agora, você perderá <span className="text-red-500 font-bold font-display">{Math.abs(PROGRESSION.FORFEIT)} Pontos (LP)</span>. 
-                         Deseja mesmo abandonar a arena?
-                      </AlertDialogDescription>
-                   </AlertDialogHeader>
-                   <AlertDialogFooter>
-                      <AlertDialogCancel className="bg-transparent border-white/10 font-display tracking-widest text-[10px]">CANCELAR</AlertDialogCancel>
-                      <AlertDialogAction 
-                        onClick={() => {
-                          clearTeam();
-                          toast.error(`Você desistiu e perdeu ${Math.abs(PROGRESSION.FORFEIT)} LP.`);
-                        }}
-                        className="bg-red-500 hover:bg-red-600 text-white font-display tracking-widest text-[10px]"
-                      >
-                        CONFIRMAR DESISTÊNCIA
-                      </AlertDialogAction>
-                   </AlertDialogFooter>
-                </AlertDialogContent>
-             </AlertDialog>
-
              <Button 
                variant="outline" 
                className="border-primary/20 hover:bg-primary/10 font-display tracking-widest text-[10px]"
