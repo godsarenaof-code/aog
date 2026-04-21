@@ -2,7 +2,7 @@ import { Trophy, TrendingUp, Crown, Swords } from "lucide-react";
 import { getRankFromLp } from "@/lib/rankUtils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import AppLayout from "@/components/AppLayout";
+import { AppLayout } from "@/components/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
 
 const stats = [
