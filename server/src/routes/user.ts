@@ -53,4 +53,16 @@ router.get('/matches', authMiddleware, async (req: AuthRequest, res) => {
   }
 });
 
+// @route   GET /api/user/leaderboard
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const result = await query(
+      'SELECT nickname, rank, mmr FROM users ORDER BY mmr DESC LIMIT 50'
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar ranking global.' });
+  }
+});
+
 export default router;

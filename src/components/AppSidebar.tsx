@@ -17,8 +17,7 @@ import logo from "@/assets/aog-logo.png";
 
 const playItems = [
   { title: "Lobby", url: "/lobby", icon: Home },
-  { title: "Combate", url: "/match", icon: Swords },
-  { title: "Ranked", url: "/ranked", icon: Trophy },
+  { title: "Ranqueado", url: "/ranked", icon: Trophy },
 ];
 
 const metaItems = [

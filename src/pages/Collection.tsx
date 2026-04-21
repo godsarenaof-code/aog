@@ -278,6 +278,8 @@ const Collection = () => {
                     </motion.div>
                   );
                 })}
+              </div>
+            </div>
           </div>
         )}
         {tab === 0 && (
