@@ -1,4 +1,4 @@
-import { Sword, Shield, Zap, Sparkles, Target, Flame, Box, ZapOff, ShieldAlert, Cpu, Wind, Search } from "lucide-react";
+import { Sword, Shield, Zap, Sparkles, Target, Flame, Box, ZapOff, ShieldAlert, Cpu, Wind, Search, Heart, Skull, Ghost, Crown } from "lucide-react";
 
 export interface Champion {
   id: string;
@@ -56,13 +56,17 @@ export const classes = [
   { name: "Bastion", levels: "2 / 3", desc: "(2) 20% de Redução de Dano. (3) 40%.", icon: Flame },
 ];
 
+export type ItemType = "base" | "combined" | "special" | "divine" | "rare";
+
 export interface Item {
   id: string;
   name: string;
-  type: "base" | "combined" | "special";
+  type: ItemType;
   desc: string;
   recipe?: [string, string];
   icon?: string;
+  stats?: { [key: string]: string | number };
+  divineUpgradeId?: string;
 }
 
 export const baseItems: Item[] = [
@@ -75,27 +79,58 @@ export const baseItems: Item[] = [
 ];
 
 export const combinedItems: Item[] = [
-  { id: "lamina_suprema", name: "Lâmina Suprema", type: "combined", recipe: ["lamina_base", "lamina_base"], desc: "+40 ATK. Ataques causam 5% da vida máx do alvo como dano real.", icon: "⚔️⚔️" },
-  { id: "muralha_ferro", name: "Muralha de Ferro", type: "combined", recipe: ["placa_base", "placa_base"], desc: "+50 ARM. Reflete 20% do dano físico recebido como dano mágico.", icon: "🛡️🛡️" },
-  { id: "hyper_link", name: "Hyper-Link", type: "combined", recipe: ["chip_base", "chip_base"], desc: "+40% Vel. ATK. Cada 3º ataque causa um choque em área.", icon: "🏹🏹" },
-  { id: "nucleo_arcano", name: "Núcleo Arcano", type: "combined", recipe: ["cristal_base", "cristal_base"], desc: "+40 AP. Recupera 25% da mana total após cada conjuração.", icon: "🔮🔮" },
-  { id: "manto_nevoa", name: "Manto da Névoa", type: "combined", recipe: ["capa_base", "capa_base"], desc: "+50 RM. Cura o portador em 2% da vida máx por segundo.", icon: "🧥🧥" },
-  { id: "passo_quantico", name: "Passo Quântico", type: "combined", recipe: ["bota_base", "bota_base"], desc: "+30 Mana Inicial. No início da luta, teleporta para o tile mais seguro.", icon: "👢👢" },
-  { id: "furia_rapida", name: "Fúria Rápida", type: "combined", recipe: ["lamina_base", "chip_base"], desc: "Ataques acumulam 6% de Vel. ATK (infinito na rodada).", icon: "⚔️🏹" },
-  { id: "gume_executor", name: "Gume do Executor", type: "combined", recipe: ["lamina_base", "placa_base"], desc: "Concede 25% de Roubo de Vida Físico.", icon: "⚔️🛡️" },
-  { id: "coracao_sombrio", name: "Coração Sombrio", type: "combined", recipe: ["lamina_base", "cristal_base"], desc: "Concede 25% de Vampirismo Universal.", icon: "⚔️🔮" },
-  { id: "quebra_sistemas", name: "Quebra-Sistemas", type: "combined", recipe: ["lamina_base", "capa_base"], desc: "Ataques reduzem a Armadura do alvo em 40% por 5 segundos.", icon: "⚔️🧥" },
-  { id: "lamina_impulso", name: "Lâmina de Impulso", type: "combined", recipe: ["lamina_base", "bota_base"], desc: "Salta no alvo mais distante e ganha +50% Crit.", icon: "⚔️👢" },
-  { id: "armadura_espinhosa", name: "Armadura Espinhosa", type: "combined", recipe: ["placa_base", "chip_base"], desc: "Ganha 10 de Armadura para cada inimigo que estiver te atacando.", icon: "🛡️🏹" },
-  { id: "placa_nanobots", name: "Placa de Nanobots", type: "combined", recipe: ["placa_base", "cristal_base"], desc: "Ao usar a habilidade, ganha um escudo de 400 HP por 4s.", icon: "🛡️🔮" },
-  { id: "muralha_arcana", name: "Muralha Arcana", type: "combined", recipe: ["placa_base", "capa_base"], desc: "Reduz em 30% todo dano recebido de habilidades.", icon: "🛡️🧥" },
-  { id: "estabilizador", name: "Estabilizador", type: "combined", recipe: ["placa_base", "bota_base"], desc: "Torna o portador imune a atordoamento e controles de grupo.", icon: "🛡️👢" },
-  { id: "arco_fotons", name: "Arco de Fótons", type: "combined", recipe: ["chip_base", "cristal_base"], desc: "Ataques básicos causam 40 de dano mágico adicional.", icon: "🏹🔮" },
-  { id: "manto_vidro", name: "Manto de Vidro", type: "combined", recipe: ["chip_base", "capa_base"], desc: "Ao sofrer dano, ganha +20% de Esquiva por 3 segundos.", icon: "🏹🧥" },
-  { id: "radar_ativo", name: "Radar Ativo", type: "combined", recipe: ["chip_base", "bota_base"], desc: "Aumenta o alcance de ataque (Range) em +2 Tiles.", icon: "🏹👢" },
-  { id: "capa_antimateria", name: "Capa de Antimatéria", type: "combined", recipe: ["cristal_base", "capa_base"], desc: "Habilidades reduzem a Resistência Mágica do inimigo em 40%.", icon: "🔮🧥" },
-  { id: "sobrecarga", name: "Sobrecarga", type: "combined", recipe: ["cristal_base", "bota_base"], desc: "A primeira habilidade da luta causa 50% de dano adicional.", icon: "🔮👢" },
-  { id: "filtro_energia", name: "Filtro de Energia", type: "combined", recipe: ["capa_base", "bota_base"], desc: "Ganha 15 de mana toda vez que esquiver de um ataque.", icon: "🧥👢" },
+  { id: "lamina_suprema", name: "Lâmina Suprema", type: "combined", recipe: ["lamina_base", "lamina_base"], desc: "+40 ATK. Ataques causam 5% da vida máx do alvo como dano real.", icon: "⚔️⚔️", divineUpgradeId: "lamina_deuses" },
+  { id: "muralha_ferro", name: "Muralha de Ferro", type: "combined", recipe: ["placa_base", "placa_base"], desc: "+50 ARM. Reflete 20% do dano físico recebido como dano mágico.", icon: "🛡️🛡️", divineUpgradeId: "egide_divina" },
+  { id: "hyper_link", name: "Hyper-Link", type: "combined", recipe: ["chip_base", "chip_base"], desc: "+40% Vel. ATK. Cada 3º ataque causa um choque em área.", icon: "🏹🏹", divineUpgradeId: "tempestade_divina" },
+  { id: "nucleo_arcano", name: "Núcleo Arcano", type: "combined", recipe: ["cristal_base", "cristal_base"], desc: "+40 AP. Recupera 25% da mana total após cada conjuração.", icon: "🔮🔮", divineUpgradeId: "nucleo_celestial" },
+  { id: "manto_nevoa", name: "Manto da Névoa", type: "combined", recipe: ["capa_base", "capa_base"], desc: "+50 RM. Cura o portador em 2% da vida máx por segundo.", icon: "🧥🧥", divineUpgradeId: "veu_eternidade" },
+  { id: "passo_quantico", name: "Passo Quântico", type: "combined", recipe: ["bota_base", "bota_base"], desc: "+30 Mana Inicial. No início da luta, teleporta para o tile mais seguro.", icon: "👢👢", divineUpgradeId: "salto_dimensional" },
+  { id: "furia_rapida", name: "Fúria Rápida", type: "combined", recipe: ["lamina_base", "chip_base"], desc: "Ataques acumulam 6% de Vel. ATK (infinito na rodada).", icon: "⚔️🏹", divineUpgradeId: "frenesi_divino" },
+  { id: "gume_executor", name: "Gume do Executor", type: "combined", recipe: ["lamina_base", "placa_base"], desc: "Concede 25% de Roubo de Vida Físico.", icon: "⚔️🛡️", divineUpgradeId: "gume_redencao" },
+  { id: "coracao_sombrio", name: "Coração Sombrio", type: "combined", recipe: ["lamina_base", "cristal_base"], desc: "Concede 25% de Vampirismo Universal.", icon: "⚔️🔮", divineUpgradeId: "coracao_gaia" },
+  { id: "quebra_sistemas", name: "Quebra-Sistemas", type: "combined", recipe: ["lamina_base", "capa_base"], desc: "Ataques reduzem a Armadura do alvo em 40% por 5 segundos.", icon: "⚔️🧥", divineUpgradeId: "aniquilador_codigo" },
+  { id: "lamina_impulso", name: "Lâmina de Impulso", type: "combined", recipe: ["lamina_base", "bota_base"], desc: "Salta no alvo mais distante e ganha +50% Crit.", icon: "⚔️👢", divineUpgradeId: "capsula_assassinio" },
+  { id: "armadura_espinhosa", name: "Armadura Espinhosa", type: "combined", recipe: ["placa_base", "chip_base"], desc: "Ganha 10 de Armadura para cada inimigo que estiver te atacando.", icon: "🛡️🏹", divineUpgradeId: "carapaca_galactica" },
+  { id: "placa_nanobots", name: "Placa de Nanobots", type: "combined", recipe: ["placa_base", "cristal_base"], desc: "Ao usar a habilidade, ganha um escudo de 400 HP por 4s.", icon: "🛡️🔮", divineUpgradeId: "protocolo_imortal" },
+  { id: "muralha_arcana", name: "Muralha Arcana", type: "combined", recipe: ["placa_base", "capa_base"], desc: "Reduz em 30% todo dano recebido de habilidades.", icon: "🛡️🧥", divineUpgradeId: "bastiao_infinito" },
+  { id: "estabilizador", name: "Estabilizador", type: "combined", recipe: ["placa_base", "bota_base"], desc: "Torna o portador imune a atordoamento e controles de grupo.", icon: "🛡️👢", divineUpgradeId: "inabalavel_divino" },
+  { id: "arco_fotons", name: "Arco de Fótons", type: "combined", recipe: ["chip_base", "cristal_base"], desc: "Ataques básicos causam 40 de dano mágico adicional.", icon: "🏹🔮", divineUpgradeId: "raio_supernova" },
+  { id: "manto_vidro", name: "Manto de Vidro", type: "combined", recipe: ["chip_base", "capa_base"], desc: "Ao sofrer dano, ganha +20% de Esquiva por 3 segundos.", icon: "🏹🧥", divineUpgradeId: "manto_antimateria" },
+  { id: "radar_ativo", name: "Radar Ativo", type: "combined", recipe: ["chip_base", "bota_base"], desc: "Aumenta o alcance de ataque (Range) em +2 Tiles.", icon: "🏹👢", divineUpgradeId: "observador_onipresente" },
+  { id: "capa_antimateria", name: "Capa de Antimatéria", type: "combined", recipe: ["cristal_base", "capa_base"], desc: "Habilidades reduzem a Resistência Mágica do inimigo em 40%.", icon: "🔮🧥", divineUpgradeId: "singularidade" },
+  { id: "sobrecarga", name: "Sobrecarga", type: "combined", recipe: ["cristal_base", "bota_base"], desc: "A primeira habilidade da luta causa 50% de dano adicional.", icon: "🔮👢", divineUpgradeId: "big_bang" },
+  { id: "filtro_energia", name: "Filtro de Energia", type: "combined", recipe: ["capa_base", "bota_base"], desc: "Ganha 15 de mana toda vez que esquiver de um ataque.", icon: "🧥👢", divineUpgradeId: "drenagem_neutrons" },
+];
+
+export const rareItems: Item[] = [
+  { id: "anjo_guardiao", name: "Anjo Guardião", type: "rare", icon: "💀", desc: "Revive o portador com 30% de HP após a primeira morte na rodada." },
+  { id: "lamina_infernal", name: "Lâmina Infernal", type: "rare", icon: "🔥", desc: "Ataques causam queimadura que drena 3% da vida máx por segundo." },
+  { id: "nucleo_instavel", name: "Núcleo Instável", type: "rare", icon: "⚡", desc: "Ao usar a habilidade, causa uma explosão em área (2 tiles) com dano real." },
+  { id: "coroa_comandante", name: "Coroa do Comandante", type: "rare", icon: "🧠", desc: "+1 Slot de unidade no tabuleiro." },
+];
+
+export const divineItems: Item[] = [
+  { id: "lamina_deuses", name: "Lâmina dos Deuses", type: "divine", icon: "🌌⚔️", desc: "+70 ATK / +40% Crítico. Ataques críticos causam 40% de dano real em área." },
+  { id: "egide_divina", name: "Égide Divina", type: "divine", icon: "🌌🛡️", desc: "+120 ARM. Concede escudo de 1500 HP ao iniciar combate." },
+  { id: "tempestade_divina", name: "Tempestade Divina", type: "divine", icon: "🌌🏹", desc: "+80% Vel. ATK. Ataques ricocheteiam em 3 alvos extras." },
+  { id: "nucleo_celestial", name: "Núcleo Celestial", type: "divine", icon: "🌌🔮", desc: "+80 AP. Mana Infinita / Habilidades sem tempo de cast." },
+  { id: "veu_eternidade", name: "Véu da Eternidade", type: "divine", icon: "🌌🧥", desc: "+100 RM. Cura 5% HP/s e purifica todos os debuffs periodicamente." },
+  { id: "salto_dimensional", name: "Salto Dimensional", type: "divine", icon: "🌌👢", desc: "+60 Mana Inicial. Salta para o tile mais seguro a cada 4 segundos." },
+  { id: "frenesi_divino", name: "Frenesi Divino", type: "divine", icon: "🌌✨", desc: "AS infinito. Cada ataque aumenta o dano físico em +2 permanentemente no round." },
+  { id: "gume_redencao", name: "Gume da Redenção", type: "divine", icon: "🌌🗡️", desc: "50% Roubo de Vida. Fica invulnerável por 2s ao atingir 20% de HP." },
+  { id: "coracao_gaia", name: "Coração de Gaia", type: "divine", icon: "🌌💚", desc: "50% Vampirismo Universal. Cura excedente vira dano de choque no inimigo mais próximo." },
+  { id: "aniquilador_codigo", name: "Aniquilador de Código", type: "divine", icon: "🌌💻", desc: "ARM -80%. Desativa passivas de itens do alvo por 5 segundos." },
+  { id: "capsula_assassinio", name: "Cápsula de Assassínio", type: "divine", icon: "🌌🎯", desc: "+100% Crítico. Executa instantaneamente inimigos abaixo de 20% HP." },
+  { id: "carapaca_galactica", name: "Carapaça Galáctica", type: "divine", icon: "🌌🐢", desc: "+20 ARM por inimigo. Atordoa agressores por 1.5s (CD: 4s/alvo)." },
+  { id: "protocolo_imortal", name: "Protocolo Imortal", type: "divine", icon: "🌌🔋", desc: "Escudo de 1000 HP ao usar skill. Imune a dano real enquanto o escudo durar." },
+  { id: "bastiao_infinito", name: "Bastião do Infinito", type: "divine", icon: "🌌🕍", desc: "60% Redução Dano Mágico. Reflete 50% de magias recebidas para o atacante." },
+  { id: "inabalavel_divino", name: "Inabalável Divino", type: "divine", icon: "🌌🏔️", desc: "Imunidade Total a CC. +20% Tamanho e +30% Vida Máxima." },
+  { id: "raio_supernova", name: "Raio de Supernova", type: "divine", icon: "🌌☄️", desc: "+100 Dano Mágico/Hit. Ataques queimam 20 de mana do inimigo por hit." },
+  { id: "manto_antimateria", name: "Manto de Antimatéria", type: "divine", icon: "🌌🌑", desc: "50% Esquiva. Fica invisível por 2 segundos ao esquivar." },
+  { id: "observador_onipresente", name: "Observador Onipresente", type: "divine", icon: "🌌👁️", desc: "Alcance +4 Tiles. Ataques agora atingem qualquer lugar do grid (Globais)." },
+  { id: "singularidade", name: "Singularidade", type: "divine", icon: "🌌🕳️", desc: "RM -80%. Habilidades puxam inimigos para o epicentro (CC de atração)." },
+  { id: "big_bang", name: "Big Bang", type: "divine", icon: "🌌💥", desc: "+100% Dano na 1ª Skill. Se matar, restaura mana total instantaneamente." },
+  { id: "drenagem_neutrons", name: "Drenagem de Nêutrons", type: "divine", icon: "🌌🧲", desc: "+40 Mana ao esquivar. Drena 15 de mana do atacante ao ser atingido." },
 ];
 
 export const specialItems: Item[] = [

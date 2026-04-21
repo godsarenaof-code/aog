@@ -4,21 +4,33 @@ import { History, Milestone, Rocket, ShieldCheck } from "lucide-react";
 
 const versions = [
   {
-    tag: "0.1.0",
-    name: "Pré-Alpha: A Ascensão Digital",
+    tag: "0.1.1",
+    name: "Ascensão Divina & Relíquias",
     date: "21 de Abril, 2026",
     current: true,
     highlights: [
-      "Nova Landing Page modularizada e responsiva.",
-      "Sistema de pré-inscrição integrado ao Supabase com recompensa exclusiva (Skin Kael).",
-      "Enciclopédia de Campeões com todos os 22 deuses catalogados.",
-      "Arsenal Tecnológico com simulador de combinação de itens.",
-      "Base de dados centralizada para maior consistência visual."
+      "Sistema de Upgrade Divino: Transforme itens completos usando a Essência Divina.",
+      "Novo Tier de Hardware: 21 versões Divinas com atributos dobrados e auras especiais.",
+      "Relíquias do Submundo: Adicionados 4 itens raros (Anjo Guardião, Lâmina Infernal, etc.).",
+      "Evento 'Chamado dos Deuses': Nova mecânica de final de jogo para os 3 sobreviventes.",
+      "UX Tech: Tags de balanceamento e estética Dourado+Roxo para itens lendários."
     ],
     technical: [
-      "Migração SQL para tabela de leads.",
-      "Implementação de Navbar global.",
-      "Refatoração de estilos usando Tailwind CSS e Orbitron/Rajdhani."
+      "Expansão massiva da base de dados central (data.ts).",
+      "Refatoração da página de Itens para suportar múltiplos tiers.",
+      "Implementação de auras de status e lógica de execução rúnica."
+    ]
+  },
+  {
+    tag: "0.1.0",
+    name: "Pré-Alpha: A Ascensão Digital",
+    date: "21 de Abril, 2026",
+    current: false,
+    highlights: [
+      "Nova Landing Page modularizada e responsiva.",
+      "Sistema de pré-inscrição integrado ao Supabase.",
+      "Enciclopédia de Campeões com todos os 22 deuses catalogados.",
+      "Arsenal Tecnológico com simulador de combinação de itens."
     ]
   },
   {
