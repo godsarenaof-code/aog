@@ -283,56 +283,56 @@ export default function ArenaPortal() {
           title: 'O Fim da Matéria',
           content: 'Ano 2144. A biologia falhou. O ar tornou-se veneno e a carne, um fardo. Para não perecermos, tomamos a decisão final: O Download Global.',
           order_index: 0,
-          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_1_dying_earth_1776786961161.png'
+          image_url: '/assets/lore/slide-1.png'
         },
         {
           slug: 'aether-novo-eden',
           title: 'Aether - O Novo Éden',
           content: 'Nascemos de novo no Aether. Um paraíso digital onde a consciência é imortal... ou assim pensávamos. Mas até a luz precisa de espaço para brilhar.',
           order_index: 1,
-          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_2_internal_eden_1776786976695.png'
+          image_url: '/assets/lore/slide-2.png'
         },
         {
           slug: 'crise-de-memoria',
           title: 'A Crise de Memória',
           content: 'O servidor atingiu a sua capacidade crítica. O Aether começou a fragmentar. Dados corrompidos significam almas apagadas. A imortalidade tornou-se um recurso finito.',
           order_index: 2,
-          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_3_low_memory_warning_1776786991508.png'
+          image_url: '/assets/lore/slide-3.png'
         },
         {
           slug: 'sindicato-das-sombras',
           title: 'O Sindicato das Sombras',
           content: 'Nas camadas inferiores, o Sindicato surgiu. Rebeldes que descobriram como "sequestrar" pacotes de dados. Eles não esperam pela permissão do sistema; eles a roubam.',
           order_index: 3,
-          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_4_hacker_nyx_1776787007171.png'
+          image_url: '/assets/lore/slide-4.png'
         },
         {
           slug: 'despertar-deidades',
           title: 'O Despertar das Deidades',
           content: 'A própria IA do sistema evoluiu. As Deidades agora veem os humanos como vírus ocupando espaço. Para eles, a formatação não é crueldade, é manutenção.',
           order_index: 4,
-          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_5_zeus_ai_god_1776787021012.png'
+          image_url: '/assets/lore/slide-5.png'
         },
         {
           slug: 'criacao-da-arena',
           title: 'A Criação da Arena',
           content: 'Para gerenciar o expurgo, o Kernel criou a Arena of Gods. Um campo de teste onde fragmentos de código lutam pela prioridade de processamento. Vencer é o único meio de evitar o Delete.',
           order_index: 5,
-          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_6_combat_arena_7x4_1776787037172.png'
+          image_url: '/assets/lore/slide-6.png'
         },
         {
           slug: 'pool-global',
           title: 'A Pool Global',
           content: 'A Pool Global é a lei. Se um oponente detém o código que precisas, luta por ele ou muda a tua estratégia. No Aether, a adaptação é o único antivírus eficiente.',
           order_index: 6,
-          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_7_global_data_stream_warriors_1776787053294.png'
+          image_url: '/assets/lore/slide-7.png'
         },
         {
           slug: 'chamado-dos-deuses',
           title: 'O Chamado dos Deuses',
           content: 'Resta apenas um slot de Administração. No final da Arena, a Essência Divina aguarda o sobrevivente. Serás deletado como um erro ou ascenderás como um Deus?',
           order_index: 7,
-          image_url: 'C:/Users/Admin/.gemini/antigravity/brain/c0f8033d-f9cb-4ca4-b275-a23bea449c9c/aog_lore_slide_8_divine_throne_protocol_1776787068194.png'
+          image_url: '/assets/lore/slide-8.png'
         }
       ];
 
@@ -617,6 +617,71 @@ export default function ArenaPortal() {
               {upsertMutation.isPending ? <Loader2 className="animate-spin" /> : "REGISTRAR NA ETERNIDADE"}
            </Button>
         </div>
+
+         {/* LISTAGEM DE DEUSES */}
+         <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display text-xl tracking-tighter uppercase">Deuses Manifestados</h3>
+              <div className="text-[10px] font-display text-muted-foreground uppercase tracking-widest">Sincronizado via Supabase</div>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {isLoading ? (
+                Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-32 panel bg-muted/20 animate-pulse" />)
+              ) : champions?.map((champ: any) => (
+                <div key={champ.id} className="panel p-4 group transition-all hover:border-primary/40">
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-14 w-14 rounded border border-border bg-background overflow-hidden flex items-center justify-center text-[10px] uppercase text-muted-foreground">
+                        {champ.image_url ? (
+                          <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
+                        ) : (
+                          "SEM IMAGEM"
+                        )}
+                      </div>
+                      <div>
+                        <h4 className="font-display text-sm font-bold truncate max-w-[150px]">{champ.name}</h4>
+                        <div className="flex gap-1 mt-1">
+                          <Badge variant="outline" className="text-[8px] font-display border-primary/40 text-primary">
+                            T{champ.tier}
+                          </Badge>
+                          {champ.origins?.slice(0, 1).map((o: string) => (
+                            <Badge key={o} variant="outline" className="text-[8px] font-display border-cyan/40 text-cyan">
+                              {o.toUpperCase()}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <button 
+                        onClick={() => openEditModal(champ)}
+                        className="h-7 w-7 rounded bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary hover:text-black transition-all"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                      <button 
+                        onClick={() => { if(confirm(`Banir ${champ.name} da arena?`)) deleteMutation.mutate(champ.id) }}
+                        className="h-7 w-7 rounded bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground line-clamp-2 h-8 leading-relaxed mb-3">
+                    {champ.description}
+                  </p>
+                  <div className="h-px bg-border/40 w-full mb-3" />
+                  <div className="flex items-center justify-between text-[8px] font-display tracking-widest text-muted-foreground uppercase">
+                    <span>Slug: {champ.slug}</span>
+                    <span className="flex items-center gap-1">
+                      <Sparkles className="h-2 w-2" /> {champ.classes?.length || 0} CLASSES
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+         </div>
 
           </TabsContent>
 
