@@ -7,6 +7,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  TooltipPortal,
 } from "@/components/ui/tooltip";
 
 interface TraitTrackerProps {
@@ -163,28 +164,30 @@ export function TraitTracker({ team, traits }: TraitTrackerProps) {
                         </div>
                       </motion.div>
                     </TooltipTrigger>
-                    <TooltipContent 
-                      side="right" 
-                      className="bg-background/95 backdrop-blur-xl border-primary/20 p-4 max-w-xs shadow-2xl z-[100]"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-                          <Icon className="h-4 w-4 text-primary" />
-                          <span className="font-display font-black tracking-widest text-xs uppercase text-primary">{trait.name}</span>
+                    <TooltipPortal>
+                      <TooltipContent 
+                        side="right" 
+                        className="bg-background/95 backdrop-blur-xl border-primary/20 p-4 max-w-xs shadow-2xl z-[100]"
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                            <Icon className="h-4 w-4 text-primary" />
+                            <span className="font-display font-black tracking-widest text-xs uppercase text-primary">{trait.name}</span>
+                          </div>
+                          <p className="text-[10px] leading-relaxed text-muted-foreground font-medium uppercase tracking-wider italic">
+                            {trait.description || "Descrição não disponível."}
+                          </p>
+                          <div className="flex flex-col gap-1 pt-2 border-t border-white/5">
+                             {trait.levels.map((lvl: number, idx: number) => (
+                               <div key={idx} className={`flex items-center justify-between text-[9px] font-bold ${trait.count >= lvl ? 'text-primary' : 'text-muted-foreground opacity-40'}`}>
+                                 <span className="uppercase tracking-tighter">Nível {idx + 1}</span>
+                                 <span>{lvl} UNIDADES</span>
+                               </div>
+                             ))}
+                          </div>
                         </div>
-                        <p className="text-[10px] leading-relaxed text-muted-foreground font-medium uppercase tracking-wider italic">
-                          {trait.description || "Descrição não disponível."}
-                        </p>
-                        <div className="flex flex-col gap-1 pt-2 border-t border-white/5">
-                           {trait.levels.map((lvl: number, idx: number) => (
-                             <div key={idx} className={`flex items-center justify-between text-[9px] font-bold ${trait.count >= lvl ? 'text-primary' : 'text-muted-foreground opacity-40'}`}>
-                               <span className="uppercase tracking-tighter">Nível {idx + 1}</span>
-                               <span>{lvl} UNIDADES</span>
-                             </div>
-                           ))}
-                        </div>
-                      </div>
-                    </TooltipContent>
+                      </TooltipContent>
+                    </TooltipPortal>
                   </Tooltip>
                 </TooltipProvider>
               );
