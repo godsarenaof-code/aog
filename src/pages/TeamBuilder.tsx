@@ -18,7 +18,7 @@ import { PROGRESSION } from "@/lib/rankUtils";
 export default function TeamBuilder() {
   const [team, setTeam] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const teamLimit = 10;
+  const teamLimit = 16; // 8 no tabuleiro + 8 no banco (total 16 heróis permitidos)
 
   const { data: champions, isLoading: champsLoading } = useQuery({
     queryKey: ['champions'],

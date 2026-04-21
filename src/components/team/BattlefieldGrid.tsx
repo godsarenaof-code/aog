@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 import { Sword, Shield, Zap, Target, Sparkles } from "lucide-react";
 
 interface Position {
@@ -23,7 +24,9 @@ export function BattlefieldGrid({ team, onPositionChange }: BattlefieldGridProps
   const [selectedFromBench, setSelectedFromBench] = useState<any | null>(null);
 
   const COLS = 7;
-  const ROWS = 8; // 4 rows for player, 4 for enemy
+  const ROWS = 8; // 4 fileiras para o jogador, 4 para o inimigo
+  const MAX_ON_BOARD = 8;
+  const TEAM_LIMIT = 16;
 
   // Ensure placed units are still in team
   const validPlacedUnits = useMemo(() => {
@@ -48,6 +51,12 @@ export function BattlefieldGrid({ team, onPositionChange }: BattlefieldGridProps
       // Check if unit is already placed elsewhere
       const unitIndex = validPlacedUnits.findIndex(pu => pu.id === selectedFromBench.tempId);
       
+      if (unitIndex === -1 && validPlacedUnits.length >= MAX_ON_BOARD) {
+        // Enforce board limit
+        // Omit toast for now as it's a subcomponent, but could pass it via props or use central toast
+        return;
+      }
+
       const newPlaced = [...validPlacedUnits];
       const newUnit: PlacedUnit = {
         id: selectedFromBench.tempId,
@@ -83,7 +92,20 @@ export function BattlefieldGrid({ team, onPositionChange }: BattlefieldGridProps
   return (
     <div className="space-y-8">
       {/* Battlefield Display */}
-      <div className="relative aspect-[7/8] w-full max-w-[500px] mx-auto bg-black/60 border-2 border-primary/40 rounded-xl overflow-hidden shadow-[0_0_50px_rgba(34,211,238,0.15)] backdrop-blur-xl p-2 grid grid-cols-7 grid-rows-8 gap-1">
+      <div className="space-y-4">
+        <div className="flex items-center justify-between max-w-[500px] mx-auto">
+          <div className="flex items-center gap-2">
+            <h4 className="font-display text-[10px] tracking-[0.3em] uppercase text-primary">Campo de Batalha (7x4)</h4>
+            <Badge variant="outline" className={`text-[9px] ${validPlacedUnits.length >= MAX_ON_BOARD ? 'border-amber-500 text-amber-500 shadow-glow-amber' : 'border-primary/40 text-primary'}`}>
+              {validPlacedUnits.length} / {MAX_ON_BOARD} UNIDADES
+            </Badge>
+          </div>
+          <div className="text-[9px] font-display text-muted-foreground uppercase tracking-tighter opacity-40 italic">
+            Zona de Conflito Ativa
+          </div>
+        </div>
+
+        <div className="relative aspect-[7/8] w-full max-w-[500px] mx-auto bg-black/60 border-2 border-primary/40 rounded-xl overflow-hidden shadow-[0_0_50px_rgba(34,211,238,0.15)] backdrop-blur-xl p-2 grid grid-cols-7 grid-rows-8 gap-1">
         {/* Decorative Grid Lines */}
         <div className="absolute inset-0 pointer-events-none grid grid-cols-7 grid-rows-8 italic opacity-10 leading-none overflow-hidden">
            {Array.from({ length: 56 }).map((_, i) => (
@@ -172,33 +194,46 @@ export function BattlefieldGrid({ team, onPositionChange }: BattlefieldGridProps
               SELECIONE HERÓIS NO ARSENAL ABAIXO
             </div>
           ) : (
-            team.map((champ) => {
-              const isPlaced = validPlacedUnits.some(pu => pu.id === champ.tempId);
-              const isSelected = selectedFromBench?.tempId === champ.tempId;
+            <div className="flex flex-col w-full gap-4">
+              <div className="flex flex-wrap gap-3">
+                {team.map((champ) => {
+                  const isPlaced = validPlacedUnits.some(pu => pu.id === champ.tempId);
+                  const isSelected = selectedFromBench?.tempId === champ.tempId;
 
-              return (
-                <button
-                  key={champ.tempId}
-                  onClick={() => setSelectedFromBench(champ)}
-                  className={`relative group transition-all duration-300 ${isPlaced ? 'opacity-40 grayscale pointer-events-none' : 'hover:-translate-y-1'}`}
-                >
-                  <div className={`h-12 w-12 rounded border-2 overflow-hidden bg-background transition-all ${
-                    isSelected ? 'border-cyan shadow-glow-sm scale-110' : getTierColor(champ.tier)
-                  }`}>
-                    {champ.image_url ? (
-                      <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center font-display font-bold">
-                        {champ.name[0]}
+                  return (
+                    <button
+                      key={champ.tempId}
+                      onClick={() => setSelectedFromBench(champ)}
+                      className={`relative group transition-all duration-300 ${isPlaced ? 'opacity-40 grayscale pointer-events-none' : 'hover:-translate-y-1'}`}
+                    >
+                      <div className={`h-12 w-12 rounded border-2 overflow-hidden bg-background transition-all ${
+                        isSelected ? 'border-cyan shadow-glow-sm scale-110' : getTierColor(champ.tier)
+                      }`}>
+                        {champ.image_url ? (
+                          <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center font-display font-bold">
+                            {champ.name[0]}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  {isSelected && (
-                    <div className="absolute inset-0 border-2 border-cyan animate-pulse rounded" />
-                  )}
-                </button>
-              );
-            })
+                      {isSelected && (
+                        <div className="absolute inset-0 border-2 border-cyan animate-pulse rounded" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              
+              <div className="flex items-center justify-between border-t border-white/5 pt-3">
+                 <div className="text-[9px] font-display text-muted-foreground uppercase tracking-widest">
+                    Heróis no Banco: <span className="text-foreground">{team.length - validPlacedUnits.length} / 8</span>
+                 </div>
+                 <div className="text-[9px] font-display text-muted-foreground uppercase tracking-widest">
+                    Inventário Total: <span className="text-foreground">{team.length} / 16</span>
+                 </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
