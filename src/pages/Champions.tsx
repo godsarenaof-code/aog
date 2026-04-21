@@ -212,7 +212,19 @@ const Champions = () => {
                         </span>
                       ))}
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{u.desc}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed mb-3">{u.desc}</p>
+                    <div className="border-t border-border/60 pt-3 space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <Sparkles className="h-3 w-3 text-cyan shrink-0" />
+                          <span className="font-display text-xs text-cyan truncate">{u.ability.name}</span>
+                        </div>
+                        <span className="flex items-center gap-1 text-[10px] font-display text-primary shrink-0">
+                          <Droplet className="h-3 w-3" />{u.ability.mana}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-snug">{u.ability.effect}</p>
+                    </div>
                   </div>
                 ))}
               </div>
