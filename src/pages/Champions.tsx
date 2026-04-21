@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Swords, Shield, Zap, Crown, Sparkles, Coins, Heart, Sword, Target, Flame } from "lucide-react";
+import { ChevronLeft, Swords, Shield, Zap, Crown, Sparkles, Coins, Sword, Target, Flame, Droplet } from "lucide-react";
 import logo from "@/assets/aog-logo.png";
 
 interface Champion {
@@ -9,36 +9,37 @@ interface Champion {
   tier: 1 | 2 | 3 | 4 | 5;
   origins: string[];
   classes: string[];
+  ability: { name: string; mana: number; effect: string };
   desc: string;
 }
 
 const champions: Champion[] = [
   // Tier 1
-  { id: "kael", name: "Kael", tier: 1, origins: ["Ciborgue"], classes: ["Lâmina"], desc: "Unidade agressiva de início, perfeita para abrir o early game com pressão." },
-  { id: "m1ra", name: "M1-RA", tier: 1, origins: ["Holográfico"], classes: ["Atirador"], desc: "Principal fonte de dano à distância na fase inicial do jogo." },
-  { id: "tork", name: "Tork", tier: 1, origins: ["Ciborgue"], classes: ["Sentinela"], desc: "Tanque padrão para segurar a linha de frente e proteger seus carregadores." },
-  { id: "vex", name: "Vex", tier: 1, origins: ["Sindicato"], classes: ["Lâmina"], desc: "Assassino oportunista que prospera quando o time perde rounds." },
-  { id: "nyx", name: "Nyx", tier: 1, origins: ["Holográfico"], classes: ["Tecnomago"], desc: "Conjuradora frágil com burst mágico de baixo custo." },
+  { id: "kael", name: "Kael", tier: 1, origins: ["Ciborgue"], classes: ["Lâmina"], ability: { name: "Corte Biônico", mana: 60, effect: "Causa 200% de dano físico e aplica sangramento por 3s." }, desc: "Lâmina ciborgue que abre o early game com pressão constante." },
+  { id: "m1ra", name: "M1-RA", tier: 1, origins: ["Holográfico"], classes: ["Atirador"], ability: { name: "Disparo Espelhado", mana: 50, effect: "O próximo tiro ricocheteia em 2 inimigos próximos." }, desc: "Principal fonte de dano à distância na fase inicial." },
+  { id: "tork", name: "Tork", tier: 1, origins: ["Ciborgue"], classes: ["Sentinela"], ability: { name: "Protocolo Escudo", mana: 70, effect: "Ganha um escudo de 300 HP e atordoa o alvo atual por 1s." }, desc: "Tanque padrão para segurar a linha de frente." },
+  { id: "nyx", name: "Nyx", tier: 1, origins: ["Sindicato"], classes: ["Lâmina"], ability: { name: "Golpe de Sorte", mana: 65, effect: "Salta no inimigo com menos vida e causa dano crítico garantido." }, desc: "Assassina do submundo que executa alvos enfraquecidos." },
+  { id: "pax", name: "Pax", tier: 1, origins: ["Ascendente"], classes: ["Bastion"], ability: { name: "Meditação Atômica", mana: 80, effect: "Cura 15% da vida máxima e ganha 20 de Armadura (acumulativo)." }, desc: "Monge ascendente que escala defensivamente a cada uso." },
   // Tier 2
-  { id: "orion", name: "Orion", tier: 2, origins: ["Ascendente"], classes: ["Atirador"], desc: "Atirador escalável que cresce conforme a rodada se prolonga." },
-  { id: "sera", name: "Sera", tier: 2, origins: ["Ciborgue"], classes: ["Tecnomago"], desc: "Suporte mágico com escudos de energia e cura sustentada." },
-  { id: "riven", name: "Riven", tier: 2, origins: ["Sindicato"], classes: ["Bastion"], desc: "Tanque do submundo com redução de dano desde o início." },
-  { id: "lyra", name: "Lyra", tier: 2, origins: ["Holográfico"], classes: ["Sentinela"], desc: "Cria clone defensivo que absorve ataques inimigos." },
+  { id: "volt", name: "Volt", tier: 2, origins: ["Ciborgue"], classes: ["Tecnomago"], ability: { name: "Corrente Curta", mana: 60, effect: "Dispara um raio que reduz a mana do alvo em 20 e causa dano mágico." }, desc: "Anti-mago: silencia conjuradores enquanto causa dano." },
+  { id: "sombra", name: "Sombra", tier: 2, origins: ["Holográfico"], classes: ["Lâmina"], ability: { name: "Fase de Luz", mana: 75, effect: "Torna-se invisível por 2s e reaparece atrás do inimigo mais distante." }, desc: "Assassina holográfica especialista em alcançar carregadores." },
+  { id: "barao", name: "Barão Grivas", tier: 2, origins: ["Sindicato"], classes: ["Sentinela", "Bastion"], ability: { name: "Impacto de Prestígio", mana: 85, effect: "Bate o cajado no chão, reduzindo a Vel. de Atk dos inimigos ao redor." }, desc: "Chefe do Sindicato — controla o ritmo da linha de frente." },
+  { id: "lyra", name: "Lyra", tier: 2, origins: ["Ascendente"], classes: ["Atirador"], ability: { name: "Flecha de Fóton", mana: 70, effect: "Atira um feixe que atravessa o mapa, causando dano a todos no caminho." }, desc: "Sniper ascendente perfeita para inimigos enfileirados." },
   // Tier 3
-  { id: "zane", name: "Zane", tier: 3, origins: ["Ciborgue", "Sindicato"], classes: ["Lâmina"], desc: "A unidade mais disputada. Mantém a economia alta enquanto luta bem." },
-  { id: "cybermonk", name: "Cyber-Monk", tier: 3, origins: ["Ascendente"], classes: ["Bastion"], desc: "Utilidade pura: tanca e escala conforme a luta demora." },
-  { id: "zeph", name: "Zeph", tier: 3, origins: ["Holográfico"], classes: ["Atirador"], desc: "Sniper de longo alcance que pune posicionamentos errados." },
-  { id: "aether", name: "Aether", tier: 3, origins: ["Ascendente"], classes: ["Tecnomago"], desc: "Mago de área que escala dano a cada segundo da rodada." },
+  { id: "astra", name: "Astra", tier: 3, origins: ["Holográfico"], classes: ["Tecnomago"], ability: { name: "Nebulosa Digital", mana: 90, effect: "Cria uma área de dano contínuo e gera 1 clone para cada inimigo morto ali." }, desc: "Conjuradora de área que escala com kills consecutivas." },
+  { id: "vector", name: "Vector", tier: 3, origins: ["Ciborgue"], classes: ["Atirador"], ability: { name: "Modo Artilharia", mana: 80, effect: "Fica imóvel e ganha +100% de Vel. de Atk por 5 segundos." }, desc: "Torre de fogo cibernética para sustained damage." },
+  { id: "titan", name: "Titan", tier: 3, origins: ["Ciborgue"], classes: ["Sentinela", "Bastion"], ability: { name: "Cúpula Alpha", mana: 100, effect: "Cria uma barreira que bloqueia todos os projéteis inimigos por 3s." }, desc: "Anti-atiradores definitivo. Domina rounds com burst à distância." },
+  { id: "zane", name: "Zane", tier: 3, origins: ["Ciborgue", "Sindicato"], classes: ["Lâmina"], ability: { name: "Turbilhão de Créditos", mana: 75, effect: "Gira as lâminas; se matar alguém, gera 1 ouro (máx. 2 por round)." }, desc: "A unidade mais disputada — economia + combate em um pacote." },
+  { id: "cybermonk", name: "Cyber-Monk", tier: 3, origins: ["Ascendente"], classes: ["Bastion"], ability: { name: "Palma de Plasma", mana: 85, effect: "Empurra o alvo para o final do grid e o atordoa por 2.5s." }, desc: "Disruptor de posicionamento — reorganiza qualquer comp inimiga." },
   // Tier 4
-  { id: "luna", name: "Luna", tier: 4, origins: ["Holográfico"], classes: ["Atirador", "Tecnomago"], desc: "Extremamente flexível. Carrega itens de dano físico ou mágico." },
-  { id: "dravenx", name: "Draven-X", tier: 4, origins: ["Sindicato"], classes: ["Lâmina"], desc: "Alto risco, alta recompensa. Sobreviver garante o bônus do Sindicato." },
-  { id: "ironclad", name: "Ironclad", tier: 4, origins: ["Ciborgue"], classes: ["Sentinela", "Bastion"], desc: "Fortaleza ambulante que protege e contra-ataca." },
-  { id: "solara", name: "Solara", tier: 4, origins: ["Ascendente"], classes: ["Tecnomago"], desc: "Conjuradora solar com explosões em cadeia devastadoras." },
+  { id: "nova", name: "Nova", tier: 4, origins: ["Ascendente"], classes: ["Tecnomago"], ability: { name: "Colapso Estelar", mana: 120, effect: "Invoca um meteoro com dano massivo em área e queima 50% da mana dos atingidos." }, desc: "Wipe mágico que silencia conjuradores inimigos no impacto." },
+  { id: "helius", name: "Helius", tier: 4, origins: ["Ciborgue"], classes: ["Sentinela"], ability: { name: "Núcleo de Fusão", mana: 110, effect: "Explode em energia, curando aliados e causando dano (baseado na vida máx dele)." }, desc: "Tank-suporte híbrido — quanto mais HP, mais devastador." },
+  { id: "luna", name: "Luna", tier: 4, origins: ["Holográfico"], classes: ["Atirador", "Tecnomago"], ability: { name: "Lua Binária", mana: 90, effect: "Alterna tiros físicos (azul) e mágicos (roxo), ignorando 40% das resistências." }, desc: "Carregadora flexível — escala com itens AD ou AP." },
+  { id: "dravenx", name: "Draven-X", tier: 4, origins: ["Sindicato"], classes: ["Lâmina"], ability: { name: "Lâmina de Retorno", mana: 80, effect: "Lança um disco com dano na ida e volta. Dano aumenta a cada retorno pego." }, desc: "Alto risco, alta recompensa do Sindicato." },
   // Tier 5
-  { id: "zeus01", name: "Zeus-01", tier: 5, origins: ["Deidade"], classes: ["Tecnomago"], desc: "Controle de grupo global. Atordoa todos os inimigos em sequência." },
-  { id: "ares", name: "Ares", tier: 5, origins: ["Deidade"], classes: ["Lâmina", "Bastion"], desc: "Um exército de um homem só. Difícil de matar e impossível de ignorar." },
-  { id: "athena", name: "Athena", tier: 5, origins: ["Deidade"], classes: ["Sentinela"], desc: "Estratégia divina: protege aliados e dita o ritmo da batalha." },
-  { id: "apollo", name: "Apollo", tier: 5, origins: ["Deidade"], classes: ["Atirador"], desc: "Carrega tardia definitivo. Cada flecha decide rounds." },
+  { id: "zeus01", name: "Zeus-01", tier: 5, origins: ["Deidade"], classes: ["Tecnomago"], ability: { name: "Julgamento Binário", mana: 150, effect: "Relâmpagos caem em todos os inimigos. Inimigos acima de 80% de HP são atordoados." }, desc: "IA divina de controle global — pune comps de tank stacking." },
+  { id: "ares", name: "Ares", tier: 5, origins: ["Deidade"], classes: ["Lâmina", "Bastion"], ability: { name: "Ira de Marte", mana: 130, effect: "Entra em frenesi: 100% de roubo de vida e ataques causam dano em área." }, desc: "Um exército de um homem só. Impossível de ignorar." },
+  { id: "gaia", name: "Gaia", tier: 5, origins: ["Deidade"], classes: ["Sentinela"], ability: { name: "Reforma da Terra", mana: 140, effect: "Transforma o chão em nanobots que regeneram 100% da vida de um aliado por segundo." }, desc: "Cura divina — mantém o carry vivo contra qualquer burst." },
 ];
 
 const origins = [
@@ -211,7 +212,19 @@ const Champions = () => {
                         </span>
                       ))}
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{u.desc}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed mb-3">{u.desc}</p>
+                    <div className="border-t border-border/60 pt-3 space-y-1.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <Sparkles className="h-3 w-3 text-cyan shrink-0" />
+                          <span className="font-display text-xs text-cyan truncate">{u.ability.name}</span>
+                        </div>
+                        <span className="flex items-center gap-1 text-[10px] font-display text-primary shrink-0">
+                          <Droplet className="h-3 w-3" />{u.ability.mana}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-snug">{u.ability.effect}</p>
+                    </div>
                   </div>
                 ))}
               </div>
