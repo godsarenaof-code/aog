@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
 import { Navbar } from "@/components/Navbar";
-import { Sparkles, Crown, Coins, Droplet, X } from "lucide-react";
-import { champions, origins, classes } from "@/lib/data";
+import { Sparkles, Crown, Coins, Droplet, X, Search, Loader2 } from "lucide-react";
+import { origins, classes } from "@/lib/data";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const tierConfig = {
   1: { color: "text-muted-foreground", border: "border-muted", bg: "bg-muted/20", label: "T1" },
@@ -26,13 +28,29 @@ const renderIcon = (icon: any, className = "h-4 w-4") => {
 
 const Champions = () => {
   const [active, setActive] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const { data: dbChampions, isLoading } = useQuery({
+    queryKey: ['champions'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('champions').select('*');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const champions = Array.isArray(dbChampions) ? dbChampions : [];
 
   const filtered = useMemo(() => {
-    if (!active) return champions;
+    if (!active && !searchTerm) return champions;
     return champions.filter(
-      (c) => c.origins?.includes(active) || c.classes?.includes(active)
+      (c) => {
+        const matchesTrait = !active || c.origins?.includes(active) || c.classes?.includes(active);
+        const matchesSearch = !searchTerm || c.name.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesTrait && matchesSearch;
+      }
     );
-  }, [active]);
+  }, [active, searchTerm, champions]);
 
   const grouped = [1, 2, 3, 4, 5].map((t) => ({
     tier: t as 1 | 2 | 3 | 4 | 5,
@@ -73,73 +91,95 @@ const Champions = () => {
         </div>
       </section>
 
-      <section className="container py-12 space-y-8">
-        <div className="panel p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="font-display text-xs tracking-[0.3em] text-primary uppercase">// Filtrar Sinergias</span>
-            {active && (
-              <button
-                onClick={() => setActive(null)}
-                className="flex items-center gap-1 text-xs font-display tracking-wider text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="h-3 w-3" /> LIMPAR
-              </button>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {allTraits.map((t) => {
-              const isActive = active === t.name;
-              const isOrigin = t.kind === "origin";
-              return (
-                <button
-                  key={t.name}
-                  onClick={() => setActive(isActive ? null : t.name)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded font-display text-xs tracking-wider border transition-all ${
-                    isActive
-                      ? isOrigin
-                        ? "bg-primary/20 border-primary text-primary shadow-glow"
-                        : "bg-accent/20 border-accent text-accent shadow-glow"
-                      : isOrigin
-                        ? "border-primary/30 text-primary/70 hover:border-primary/60 hover:text-primary"
-                        : "border-accent/30 text-accent/70 hover:border-accent/60 hover:text-accent"
-                  }`}
-                >
-                  {renderIcon(t.icon)}
-                  {t.name.toUpperCase()}
-                </button>
-              );
-            })}
-          </div>
         </div>
+      </section>
 
-        {activeTrait && (
-          <div className={`panel p-5 border-2 ${activeTrait.kind === "origin" ? "border-primary/60 bg-primary/5" : "border-accent/60 bg-accent/5"}`}>
-            <div className="flex items-start gap-4">
-              <div className="text-4xl shrink-0">{renderIcon(activeTrait.icon, "h-10 w-10")}</div>
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h3 className={`font-display text-2xl ${activeTrait.kind === "origin" ? "text-primary" : "text-accent"}`}>
-                    {activeTrait.name.toUpperCase()}
-                  </h3>
-                  <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-muted/30 text-muted-foreground">
-                    {activeTrait.kind === "origin" ? "ORIGEM" : "CLASSE"}
-                  </span>
-                  {activeTrait.levels && (
-                    <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-cyan/10 text-cyan border border-cyan/30">
-                      NÍVEIS {activeTrait.levels}
-                    </span>
+      <section className="container py-12 space-y-8">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 space-y-4">
+            <Loader2 className="h-12 w-12 text-primary animate-spin" />
+            <p className="font-display text-xs tracking-widest text-muted-foreground animate-pulse">SINCRONIZANDO COM O OLIMPO...</p>
+          </div>
+        ) : (
+          <>
+            <div className="panel p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-display text-xs tracking-[0.3em] text-primary uppercase">// Filtrar Sinergias</span>
+                <div className="flex items-center gap-4">
+                   <div className="relative hidden sm:block">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                      <input 
+                        type="text" 
+                        placeholder="BUSCAR DEUS..." 
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        className="bg-background border border-border/40 rounded px-8 py-1 text-[10px] font-display tracking-widest focus:outline-none focus:border-primary/60 w-48 transition-all"
+                      />
+                   </div>
+                   {active && (
+                    <button
+                      onClick={() => setActive(null)}
+                      className="flex items-center gap-1 text-xs font-display tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <X className="h-3 w-3" /> LIMPAR
+                    </button>
                   )}
-                  <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-muted/30 text-muted-foreground">
-                    {filtered.length} {filtered.length === 1 ? "UNIDADE DISPONÍVEL" : "UNIDADES DISPONÍVEIS"}
-                  </span>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{activeTrait.desc}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {allTraits.map((t) => {
+                  const isActive = active === t.name;
+                  const isOrigin = t.kind === "origin";
+                  return (
+                    <button
+                      key={t.name}
+                      onClick={() => setActive(isActive ? null : t.name)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded font-display text-xs tracking-wider border transition-all ${
+                        isActive
+                          ? isOrigin
+                            ? "bg-primary/20 border-primary text-primary shadow-glow"
+                            : "bg-accent/20 border-accent text-accent shadow-glow"
+                          : isOrigin
+                            ? "border-primary/30 text-primary/70 hover:border-primary/60 hover:text-primary"
+                            : "border-accent/30 text-accent/70 hover:border-accent/60 hover:text-accent"
+                      }`}
+                    >
+                      {renderIcon(t.icon)}
+                      {t.name.toUpperCase()}
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          </div>
-        )}
 
-        {grouped.filter((g) => g.units.length > 0).map(({ tier, units }) => {
+            {activeTrait && (
+              <div className={`panel p-5 border-2 ${activeTrait.kind === "origin" ? "border-primary/60 bg-primary/5" : "border-accent/60 bg-accent/5"}`}>
+                <div className="flex items-start gap-4">
+                  <div className="text-4xl shrink-0">{renderIcon(activeTrait.icon, "h-10 w-10")}</div>
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h3 className={`font-display text-2xl ${activeTrait.kind === "origin" ? "text-primary" : "text-accent"}`}>
+                        {activeTrait.name.toUpperCase()}
+                      </h3>
+                      <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-muted/30 text-muted-foreground">
+                        {activeTrait.kind === "origin" ? "ORIGEM" : "CLASSE"}
+                      </span>
+                      {activeTrait.levels && (
+                        <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-cyan/10 text-cyan border border-cyan/30">
+                          NÍVEIS {activeTrait.levels}
+                        </span>
+                      )}
+                      <span className="font-display text-[10px] tracking-widest px-2 py-1 rounded bg-muted/30 text-muted-foreground">
+                        {filtered.length} {filtered.length === 1 ? "UNIDADE DISPONÍVEL" : "UNIDADES DISPONÍVEIS"}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{activeTrait.desc}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {grouped.filter((g) => g.units.length > 0).map(({ tier, units }) => {
           const cfg = tierConfig[tier];
           return (
             <div key={tier} className="space-y-4">
@@ -195,9 +235,12 @@ const Champions = () => {
                   </div>
                 ))}
               </div>
-            </div>
-          );
-        })}
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
       </section>
 
       <footer className="border-t border-border/40 py-8 text-center text-xs font-display tracking-widest text-muted-foreground">

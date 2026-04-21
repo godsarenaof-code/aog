@@ -22,7 +22,7 @@ export function EncyclopediaSection() {
   const [selectedChamp, setSelectedChamp] = useState<any | null>(null);
 
   // Fetch Champions from Supabase
-  const { data: champions = [], isLoading } = useQuery({
+  const { data: championsData, isLoading } = useQuery({
     queryKey: ['champions'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -33,6 +33,8 @@ export function EncyclopediaSection() {
       return data;
     }
   });
+
+  const champions = Array.isArray(championsData) ? championsData : [];
 
   // Show only 5 featured champions on the landing page
   const featuredChampions = champions.slice(0, 5);
