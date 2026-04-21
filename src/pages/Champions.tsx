@@ -91,9 +91,6 @@ const Champions = () => {
         </div>
       </section>
 
-        </div>
-      </section>
-
       <section className="container py-12 space-y-8">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
