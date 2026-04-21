@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { 
   Database, ShieldCheck, Upload, Database as DbIcon, Trash2, Edit2, Plus, Zap, Loader2, Camera, User, 
-  Box, Sword, Crown, Sparkles, RefreshCw, Hammer, Globe
+  Box, Sword, Crown, Sparkles, RefreshCw, Hammer, Globe, BookOpen, FileText, Layout
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -74,6 +74,18 @@ export default function ArenaPortal() {
         .from('traits')
         .select('*')
         .order('type', { ascending: true });
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const { data: loreChapters, isLoading: loreLoading } = useQuery({
+    queryKey: ['lore'],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from('lore_chapters')
+        .select('*')
+        .order('order_index', { ascending: true });
       if (error) throw error;
       return data;
     }
@@ -238,6 +250,61 @@ export default function ArenaPortal() {
     }
   });
 
+  const upsertLoreMutation = useMutation({
+    mutationFn: async (chapter: any) => {
+      const { error } = await (supabase as any).from('lore_chapters').upsert(chapter, { onConflict: 'slug' });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Crônica registrada!");
+      setNewLore({ id: undefined, slug: "", title: "", content: "", image_url: "", order_index: 0 });
+      setEditingLore(null);
+      queryClient.invalidateQueries({ queryKey: ['lore'] });
+    }
+  });
+
+  const deleteLoreMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase as any).from('lore_chapters').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Capítulo removido da eternidade.");
+      queryClient.invalidateQueries({ queryKey: ['lore'] });
+    }
+  });
+
+  const handleMigrateLore = async () => {
+    setIsMigrating(true);
+    try {
+      const initialLore = [
+        {
+          slug: 'o-fim-da-materia',
+          title: 'O Fim da Matéria',
+          content: 'Ano 2144. O oxigênio tornou-se um luxo. A humanidade transcendeu o carbono, mas esqueceu sua alma no processo. Uma megaestrutura pulsando em azul neon flutua no vácuo espacial, servindo como o último tribunal da existência.',
+          order_index: 0,
+          image_url: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&q=80&w=2000'
+        },
+        {
+          slug: 'a-convergencia',
+          title: 'A Convergência',
+          content: 'Quando os antigos Deuses retornaram, não encontraram templos de pedra, mas servidores de silício. A guerra não foi por terra, mas por processamento. A Arena of Gods nasceu dessa colisão.',
+          order_index: 1,
+          image_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=2000'
+        }
+      ];
+
+      const { error } = await (supabase as any).from('lore_chapters').upsert(initialLore, { onConflict: 'slug' });
+      if (error) throw error;
+      toast.success("História do mundo sincronizada!");
+      queryClient.invalidateQueries({ queryKey: ['lore'] });
+    } catch (e: any) {
+      toast.error("Erro ao sincronizar lore: " + e.message);
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
   const [isUploading, setIsUploading] = useState(false);
   const [editingChamp, setEditingChamp] = useState<any>(null);
   
@@ -303,8 +370,18 @@ export default function ArenaPortal() {
     icon: ""
   });
 
+  const [newLore, setNewLore] = useState({
+    id: undefined,
+    slug: "",
+    title: "",
+    content: "",
+    image_url: "",
+    order_index: 0
+  });
+
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [editingTrait, setEditingTrait] = useState<any | null>(null);
+  const [editingLore, setEditingLore] = useState<any | null>(null);
 
   const upsertMutation = useMutation({
     mutationFn: async (champ: any) => {
@@ -376,7 +453,8 @@ export default function ArenaPortal() {
                  onClick={
                    activeTab === "champions" ? handleMigrate : 
                    activeTab === "items" ? handleMigrateItems : 
-                   handleMigrateTraits
+                   activeTab === "traits" ? handleMigrateTraits :
+                   handleMigrateLore
                  } 
                  className="bg-purple-600 hover:bg-purple-700 text-white font-display tracking-widest"
                  disabled={isMigrating}
@@ -385,7 +463,8 @@ export default function ArenaPortal() {
                  {isMigrating ? "PROCESSANDO..." : 
                   activeTab === "champions" ? "SINCRONIZAR DEUSES" : 
                   activeTab === "items" ? "SINCRONIZAR ARSENAL" : 
-                  "SINCRONIZAR SINERGIAS"}
+                  activeTab === "traits" ? "SINCRONIZAR SINERGIAS" :
+                  "SINCRONIZAR CRÔNICAS"}
                </Button>
             </div>
          </div>
@@ -400,6 +479,9 @@ export default function ArenaPortal() {
             </TabsTrigger>
             <TabsTrigger value="traits" className="data-[state=active]:bg-purple-500 data-[state=active]:text-black font-display tracking-widest text-[10px]">
               <Sparkles className="mr-2 h-3 w-3" /> SINERGIAS
+            </TabsTrigger>
+            <TabsTrigger value="lore" className="data-[state=active]:bg-cyan data-[state=active]:text-black font-display tracking-widest text-[10px]">
+              <BookOpen className="mr-2 h-3 w-3" /> CRONOLOGIA
             </TabsTrigger>
           </TabsList>
 
@@ -818,6 +900,86 @@ export default function ArenaPortal() {
                   </div>
                </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="lore" className="space-y-12 mt-0">
+             <div className="panel p-6 bg-cyan/5 border-cyan/20">
+                <div className="flex items-center justify-between mb-6">
+                   <div className="flex items-center gap-2 text-cyan font-display text-sm tracking-widest uppercase">
+                      {newLore.id ? <Edit2 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                      {newLore.id ? `Editando Crônica: ${newLore.title}` : 'Escrever Novo Capítulo'}
+                   </div>
+                   {newLore.id && (
+                      <Button variant="ghost" size="sm" onClick={() => {setEditingLore(null); setNewLore({id: undefined, slug: "", title: "", content: "", image_url: "", order_index: 0})}}>CANCELAR</Button>
+                   )}
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                   <div className="space-y-4">
+                      <div className="space-y-2">
+                         <Label className="text-[10px] tracking-widest">TÍTULO DO CAPÍTULO</Label>
+                         <Input value={newLore.title} onChange={e => setNewLore({...newLore, title: e.target.value})} placeholder="Ex: O Fim da Matéria" className="bg-background" />
+                      </div>
+                      <div className="flex gap-4">
+                        <div className="space-y-2 flex-1">
+                           <Label className="text-[10px] tracking-widest">SLUG (URL)</Label>
+                           <Input value={newLore.slug} onChange={e => setNewLore({...newLore, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})} placeholder="o-fim-da-materia" className="bg-background" />
+                        </div>
+                        <div className="space-y-2 w-24">
+                           <Label className="text-[10px] tracking-widest">ORDEM</Label>
+                           <Input type="number" value={newLore.order_index} onChange={e => setNewLore({...newLore, order_index: parseInt(e.target.value)})} className="bg-background" />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                         <Label className="text-[10px] tracking-widest">URL DA IMAGEM DE FUNDO</Label>
+                         <Input value={newLore.image_url} onChange={e => setNewLore({...newLore, image_url: e.target.value})} placeholder="https://..." className="bg-background" />
+                      </div>
+                   </div>
+                   <div className="space-y-2">
+                       <Label className="text-[10px] tracking-widest">CONTEÚDO DA NARRATIVA</Label>
+                       <Textarea value={newLore.content} onChange={e => setNewLore({...newLore, content: e.target.value})} placeholder="Escreva a história aqui..." className="bg-background h-[180px]" />
+                   </div>
+                </div>
+
+                <Button 
+                   onClick={() => upsertLoreMutation.mutate(newLore)}
+                   disabled={upsertLoreMutation.isPending || !newLore.title}
+                   className="w-full mt-8 bg-cyan hover:bg-cyan/80 text-black font-display font-bold tracking-widest h-12"
+                >
+                   {upsertLoreMutation.isPending ? "TRANSMITINDO..." : editingLore ? "ATUALIZAR CRÔNICA" : "ETERNIZAR CAPÍTULO"}
+                </Button>
+             </div>
+
+             <div className="space-y-4">
+                <h3 className="font-display text-sm tracking-[0.2em] text-cyan uppercase flex items-center gap-2">
+                  <FileText className="h-4 w-4" /> Crônicas Registradas
+                </h3>
+                <div className="grid gap-4">
+                   {loreLoading ? (
+                      <div className="h-40 animate-pulse bg-muted/10 rounded border border-border/40" />
+                   ) : loreChapters?.map((chapter: any) => (
+                      <div key={chapter.id} className="panel p-6 flex flex-col md:flex-row gap-6 hover:border-cyan/40 transition-all bg-card/40">
+                         <div className="w-full md:w-32 h-20 bg-muted rounded overflow-hidden shrink-0 border border-border/20">
+                            {chapter.image_url && <img src={chapter.image_url} className="w-full h-full object-cover" />}
+                         </div>
+                         <div className="flex-1 space-y-2">
+                            <div className="flex items-center justify-between">
+                               <h4 className="font-display font-bold tracking-widest text-lg uppercase">{chapter.title}</h4>
+                               <div className="flex gap-2">
+                                  <button onClick={() => { setEditingLore(chapter); setNewLore(chapter); window.scrollTo({top: 400, behavior: 'smooth'}) }} className="h-8 w-8 rounded border border-cyan/20 flex items-center justify-center text-cyan hover:bg-cyan hover:text-black transition-all"><Edit2 className="h-4 w-4" /></button>
+                                  <button onClick={() => { if(confirm("Apagar capítulo?")) deleteLoreMutation.mutate(chapter.id) }} className="h-8 w-8 rounded border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all"><Trash2 className="h-4 w-4" /></button>
+                               </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground line-clamp-2 italic">"{chapter.content}"</p>
+                            <div className="flex items-center gap-4 text-[10px] font-display tracking-widest uppercase opacity-60">
+                               <span className="flex items-center gap-1"><Layout className="h-3 w-3" /> Ordem: {chapter.order_index}</span>
+                               <span className="flex items-center gap-1"><Globe className="h-3 w-3" /> Slug: {chapter.slug}</span>
+                            </div>
+                         </div>
+                      </div>
+                   ))}
+                </div>
+             </div>
           </TabsContent>
         </Tabs>
       </main>
