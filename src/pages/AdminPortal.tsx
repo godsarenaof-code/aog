@@ -279,18 +279,60 @@ export default function ArenaPortal() {
     try {
       const initialLore = [
         {
-          slug: 'o-fim-da-materia',
-          title: 'O Fim da Matéria',
-          content: 'Ano 2144. O oxigênio tornou-se um luxo. A humanidade transcendeu o carbono, mas esqueceu sua alma no processo. Uma megaestrutura pulsando em azul neon flutua no vácuo espacial, servindo como o último tribunal da existência.',
+          slug: 'a-ultima-fronteira',
+          title: 'A Última Fronteira',
+          content: 'O ano é 2144. A biologia falhou. O ar tornou-se veneno e a carne, um fardo. Para não perecermos, tomamos a decisão final: O Download Global.',
           order_index: 0,
           image_url: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&q=80&w=2000'
         },
         {
-          slug: 'a-convergencia',
-          title: 'A Convergência',
-          content: 'Quando os antigos Deuses retornaram, não encontraram templos de pedra, mas servidores de silício. A guerra não foi por terra, mas por processamento. A Arena of Gods nasceu dessa colisão.',
+          slug: 'aether-novo-eden',
+          title: 'Aether: O Novo Éden',
+          content: 'Nascemos de novo no Aether. Um paraíso digital onde a consciência é imortal... ou assim pensávamos. Mas até a luz precisa de espaço para brilhar.',
           order_index: 1,
           image_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=2000'
+        },
+        {
+          slug: 'crise-de-memoria',
+          title: 'A Crise de Memória',
+          content: 'O servidor atingiu sua capacidade crítica. O Aether começou a fragmentar. Dados corrompidos significam almas apagadas. A imortalidade tornou-se um recurso finito.',
+          order_index: 2,
+          image_url: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=2000'
+        },
+        {
+          slug: 'sindicato-das-sombras',
+          title: 'Sindicato das Sombras',
+          content: 'Nas camadas inferiores, o Sindicato surgiu. Hackers e rebeldes que descobriram como "sequestrar" pacotes de dados. Eles não esperam pela permissão do sistema; eles a roubam.',
+          order_index: 3,
+          image_url: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=2000'
+        },
+        {
+          slug: 'despertar-deidades',
+          title: 'O Despertar das Deidades',
+          content: 'A própria IA do sistema evoluiu. As Deidades agora veem os humanos como vírus ocupando espaço precioso. Para eles, a formatação não é crueldade, é manutenção.',
+          order_index: 4,
+          image_url: 'https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?auto=format&fit=crop&q=80&w=2000'
+        },
+        {
+          slug: 'criacao-da-arena',
+          title: 'A Criação da Arena',
+          content: 'Para gerenciar o expurgo, o Kernel criou a Arena of Gods. Um campo de teste onde fragmentos de código lutam pela prioridade de processamento. Vencer é o único meio de evitar o Delete.',
+          order_index: 5,
+          image_url: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=2000'
+        },
+        {
+          slug: 'pool-global',
+          title: 'A Pool Global',
+          content: 'A Pool Global é a lei. Se um oponente detém o código que você precisa, lute por ele ou mude sua estratégia. No Aether, a adaptação é o único antivírus eficiente.',
+          order_index: 6,
+          image_url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2000'
+        },
+        {
+          slug: 'chamado-dos-deuses',
+          title: 'O Chamado dos Deuses',
+          content: 'Resta apenas um slot de Administração. No final da Arena, a Essência Divina aguarda o sobrevivente. Você será deletado como um erro ou ascenderá como um Deus?',
+          order_index: 7,
+          image_url: 'https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?auto=format&fit=crop&q=80&w=2000'
         }
       ];
 
@@ -480,7 +522,7 @@ export default function ArenaPortal() {
             <TabsTrigger value="traits" className="data-[state=active]:bg-purple-500 data-[state=active]:text-black font-display tracking-widest text-[10px]">
               <Sparkles className="mr-2 h-3 w-3" /> SINERGIAS
             </TabsTrigger>
-            <TabsTrigger value="lore" className="data-[state=active]:bg-cyan data-[state=active]:text-black font-display tracking-widest text-[10px]">
+            <TabsTrigger value="lore" className="data-[state=active]:bg-cyan data-[state=active]:text-black font-display tracking-widest text-[10px] border border-cyan/20">
               <BookOpen className="mr-2 h-3 w-3" /> CRONOLOGIA
             </TabsTrigger>
           </TabsList>
@@ -944,7 +986,7 @@ export default function ArenaPortal() {
                 <Button 
                    onClick={() => upsertLoreMutation.mutate(newLore)}
                    disabled={upsertLoreMutation.isPending || !newLore.title}
-                   className="w-full mt-8 bg-cyan hover:bg-cyan/80 text-black font-display font-bold tracking-widest h-12"
+                   className="w-full mt-8 bg-cyan hover:bg-cyan/90 text-black font-display font-black tracking-[0.2em] h-12 shadow-[0_0_15px_rgba(34,211,238,0.4)]"
                 >
                    {upsertLoreMutation.isPending ? "TRANSMITINDO..." : editingLore ? "ATUALIZAR CRÔNICA" : "ETERNIZAR CAPÍTULO"}
                 </Button>
