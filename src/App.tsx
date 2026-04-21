@@ -14,6 +14,7 @@ import Items from "./pages/Items.tsx";
 import PatchNotes from "./pages/PatchNotes.tsx";
 import Profile from "./pages/Profile.tsx";
 import AdminPortal from "./pages/AdminPortal.tsx";
+import TeamBuilder from "./pages/TeamBuilder.tsx";
 import Placeholder from "./pages/Placeholder.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/collection" element={<Collection />} />
             <Route path="/champions" element={<Champions />} />
             <Route path="/items" element={<Items />} />
+            <Route path="/simulator" element={<TeamBuilder />} />
             <Route path="/patch-notes" element={<PatchNotes />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/ranked" element={<Placeholder title="RANKED" desc="Sistema de ranking competitivo sazonal — em construção. Suba do Aço ao Divino." />} />

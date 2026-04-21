@@ -15,6 +15,7 @@ export function Navbar() {
           <Link to="/" className="hover:text-primary transition-colors">HOME</Link>
           <Link to="/champions" className="hover:text-primary transition-colors">CAMPEÕES</Link>
           <Link to="/items" className="hover:text-primary transition-colors">ITENS</Link>
+          <Link to="/simulator" className="hover:text-primary transition-colors text-cyan">SIMULADOR</Link>
           <Link to="/patch-notes" className="hover:text-primary transition-colors">PATCH NOTES</Link>
         </div>
         <LeadCaptureModal>
