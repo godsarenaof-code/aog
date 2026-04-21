@@ -1,9 +1,17 @@
 import { useState, useMemo } from "react";
 import { Navbar } from "@/components/Navbar";
-import { Sparkles, Crown, Coins, Droplet, X, Search, Loader2 } from "lucide-react";
+import { Sparkles, Crown, Coins, Droplet, X, Search, Loader2, Zap } from "lucide-react";
 import { origins, classes } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const tierConfig = {
   1: { color: "text-muted-foreground", border: "border-muted", bg: "bg-muted/20", label: "T1" },
@@ -29,6 +37,7 @@ const renderIcon = (icon: any, className = "h-4 w-4") => {
 const Champions = () => {
   const [active, setActive] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedChamp, setSelectedChamp] = useState<any | null>(null);
 
   const { data: dbChampions, isLoading } = useQuery({
     queryKey: ['champions'],
@@ -77,11 +86,10 @@ const Champions = () => {
             ELENCO COMPLETO
           </div>
           <h1 className="font-display text-5xl md:text-6xl font-black leading-[1.05]">
-            <span className="text-cyan text-glow uppercase">22 Deuses da Arena</span>
+            <span className="text-cyan text-glow uppercase">{champions.length > 0 ? `${champions.length} Deuses da Arena` : 'Os Deuses Estão Chegando'}</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Conheça as unidades, sinergias e estratégias do Pré-Alpha. Combine origens e classes
-            para forjar composições devastadoras.
+            Conheça as unidades, sinergias e estratégias. Combine origens e classes para forjar composições devastadoras e dominar os tiers.
           </p>
           <div className="flex gap-8 pt-4 text-sm">
             <div><div className="font-display text-2xl text-cyan">{champions.length}</div><div className="text-muted-foreground uppercase text-[10px] tracking-widest">Unidades</div></div>
@@ -191,13 +199,20 @@ const Champions = () => {
                 {units.map((u) => (
                   <div
                     key={u.id}
-                    className={`panel p-5 hover:shadow-glow transition-all hover:-translate-y-1 ${cfg.border}`}
+                    onClick={() => setSelectedChamp(u)}
+                    className={`panel p-5 hover:shadow-cyan-glow transition-all hover:-translate-y-1 cursor-pointer group ${cfg.border}`}
                   >
                     <div className="flex items-start justify-between mb-3">
-                      <div className={`h-14 w-14 rounded-md ${tier >= 4 ? "bg-gradient-gold" : "bg-gradient-primary"} grid place-items-center shadow-lg`}>
-                        <span className="font-display text-2xl font-black text-primary-foreground select-none">
-                          {u.name[0]}
-                        </span>
+                      <div className={`h-16 w-16 rounded-md overflow-hidden bg-card border-2 ${cfg.border} shadow-lg transition-transform group-hover:scale-105`}>
+                        {u.image_url ? (
+                          <img src={u.image_url} alt={u.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className={`w-full h-full ${tier >= 4 ? "bg-gradient-gold" : "bg-gradient-primary"} grid place-items-center`}>
+                            <span className="font-display text-2xl font-black text-primary-foreground select-none">
+                              {u.name[0]}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <span className={`font-display text-[10px] tracking-widest px-2 py-1 rounded ${cfg.bg} ${cfg.color} flex items-center gap-1`}>
                         <Coins className="h-3 w-3" />{tier}
@@ -231,7 +246,6 @@ const Champions = () => {
                     </div>
                   </div>
                 ))}
-              </div>
                 </div>
               </div>
             );
@@ -239,6 +253,52 @@ const Champions = () => {
         </>
       )}
       </section>
+
+      {/* MODAL CINEMÁTICO DO DEUS */}
+      <Dialog open={!!selectedChamp} onOpenChange={(open) => !open && setSelectedChamp(null)}>
+        <DialogContent className="max-w-4xl bg-background/95 border-primary/20 p-0 overflow-hidden backdrop-blur-xl">
+           <div className="grid lg:grid-cols-2">
+              <div className="relative aspect-[3/4] lg:aspect-auto h-[400px] lg:h-[600px] bg-card overflow-hidden">
+                 {selectedChamp?.action_image_url ? (
+                   <img src={selectedChamp.action_image_url} className="w-full h-full object-cover animate-fade-in" />
+                 ) : (
+                    <div className="h-full flex items-center justify-center text-muted-foreground/20 font-display text-8xl font-black">A.O.G</div>
+                 )}
+                 <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+              </div>
+              
+              <div className="p-8 flex flex-col justify-center space-y-6">
+                 <div>
+                    <div className="text-[10px] font-display tracking-[0.4em] text-cyan mb-2">// ARQUIVO DO DEUS</div>
+                    <DialogTitle className="font-display text-5xl font-black uppercase tracking-tighter">
+                       {selectedChamp?.name}
+                    </DialogTitle>
+                    <div className="flex gap-2 mt-2">
+                       {selectedChamp?.origins?.map((o: string) => <Badge key={o} variant="outline" className="border-primary/40 text-primary">{o}</Badge>)}
+                       {selectedChamp?.classes?.map((c: string) => <Badge key={c} variant="outline" className="border-accent/40 text-accent">{c}</Badge>)}
+                    </div>
+                 </div>
+                 
+                 <div className="panel p-4 bg-muted/20 border-primary/10">
+                    <div className="flex items-center gap-2 text-primary font-display text-xs mb-2 tracking-widest">
+                       <Zap className="h-3 w-3" /> HABILIDADE: {selectedChamp?.ability?.name}
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                       {selectedChamp?.ability?.effect || selectedChamp?.description}
+                    </p>
+                 </div>
+                 
+                 <p className="text-xs text-muted-foreground italic leading-relaxed">
+                    "{selectedChamp?.description || "Uma lenda da arena aguarda o chamado para a batalha final."}"
+                 </p>
+                 
+                 <Button onClick={() => setSelectedChamp(null)} className="w-full bg-primary text-black font-display font-bold tracking-widest mt-4">
+                    VOLTAR PARA A LISTAGEM
+                 </Button>
+              </div>
+           </div>
+        </DialogContent>
+      </Dialog>
 
       <footer className="border-t border-border/40 py-8 text-center text-xs font-display tracking-widest text-muted-foreground">
         © 2026 ARENA OF GODS
