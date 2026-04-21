@@ -628,58 +628,77 @@ export default function ArenaPortal() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-32 panel bg-muted/20 animate-pulse" />)
-              ) : champions?.map((champ: any) => (
-                <div key={champ.id} className="panel p-4 group transition-all hover:border-primary/40">
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="h-14 w-14 rounded border border-border bg-background overflow-hidden flex items-center justify-center text-[10px] uppercase text-muted-foreground">
-                        {champ.image_url ? (
-                          <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
-                        ) : (
-                          "SEM IMAGEM"
-                        )}
-                      </div>
-                      <div>
-                        <h4 className="font-display text-sm font-bold truncate max-w-[150px]">{champ.name}</h4>
-                        <div className="flex gap-1 mt-1">
-                          <Badge variant="outline" className="text-[8px] font-display border-primary/40 text-primary">
-                            T{champ.tier}
-                          </Badge>
-                          {champ.origins?.slice(0, 1).map((o: string) => (
-                            <Badge key={o} variant="outline" className="text-[8px] font-display border-cyan/40 text-cyan">
-                              {o.toUpperCase()}
+              ) : champions?.map((champ: any) => {
+                const getTierStyles = (tier: number) => {
+                  switch(tier) {
+                    case 1: return "border-slate-500/30 bg-slate-500/5 hover:border-slate-500/60";
+                    case 2: return "border-emerald-500/30 bg-emerald-500/5 hover:border-emerald-500/60";
+                    case 3: return "border-blue-500/30 bg-blue-500/5 hover:border-blue-500/60";
+                    case 4: return "border-purple-500/30 bg-purple-500/5 hover:border-purple-500/60";
+                    case 5: return "border-amber-500/40 bg-amber-500/5 hover:border-amber-500/80 shadow-[0_0_15px_rgba(245,158,11,0.15)]";
+                    default: return "border-border/40 bg-card/40";
+                  }
+                };
+
+                return (
+                  <div key={champ.id} className={`panel p-4 group transition-all ${getTierStyles(champ.tier)}`}>
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`h-14 w-14 rounded border overflow-hidden flex items-center justify-center text-[10px] uppercase text-muted-foreground ${
+                          champ.tier === 5 ? 'border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.3)]' : 'border-border'
+                        }`}>
+                          {champ.image_url ? (
+                            <img src={champ.image_url} alt={champ.name} className="w-full h-full object-cover" />
+                          ) : (
+                            "SEM IMAGEM"
+                          )}
+                        </div>
+                        <div>
+                          <h4 className={`font-display text-sm font-bold truncate max-w-[150px] ${
+                            champ.tier === 5 ? 'text-amber-500' : 'text-foreground'
+                          }`}>{champ.name}</h4>
+                          <div className="flex gap-1 mt-1">
+                            <Badge variant="outline" className={`text-[8px] font-display border-primary/40 text-primary ${
+                              champ.tier === 5 ? 'border-amber-500 text-amber-500' : ''
+                            }`}>
+                              TIER {champ.tier}
                             </Badge>
-                          ))}
+                            {champ.origins?.slice(0, 1).map((o: string) => (
+                              <Badge key={o} variant="outline" className="text-[8px] font-display border-cyan/40 text-cyan">
+                                {o.toUpperCase()}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
                       </div>
+                      <div className="flex gap-1">
+                        <button 
+                          onClick={() => openEditModal(champ)}
+                          className="h-7 w-7 rounded bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary hover:text-black transition-all"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </button>
+                        <button 
+                          onClick={() => { if(confirm(`Banir ${champ.name} da arena?`)) deleteMutation.mutate(champ.id) }}
+                          className="h-7 w-7 rounded bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-1">
-                      <button 
-                        onClick={() => openEditModal(champ)}
-                        className="h-7 w-7 rounded bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary hover:text-black transition-all"
-                      >
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </button>
-                      <button 
-                        onClick={() => { if(confirm(`Banir ${champ.name} da arena?`)) deleteMutation.mutate(champ.id) }}
-                        className="h-7 w-7 rounded bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                    <p className="text-[10px] text-muted-foreground line-clamp-2 h-8 leading-relaxed mb-3">
+                      {champ.description}
+                    </p>
+                    <div className="h-px bg-border/40 w-full mb-3" />
+                    <div className="flex items-center justify-between text-[8px] font-display tracking-widest text-muted-foreground uppercase">
+                      <span>Slug: {champ.slug}</span>
+                      <span className="flex items-center gap-1">
+                        <Sparkles className="h-2 w-2" /> {champ.classes?.length || 0} CLASSES
+                      </span>
                     </div>
                   </div>
-                  <p className="text-[10px] text-muted-foreground line-clamp-2 h-8 leading-relaxed mb-3">
-                    {champ.description}
-                  </p>
-                  <div className="h-px bg-border/40 w-full mb-3" />
-                  <div className="flex items-center justify-between text-[8px] font-display tracking-widest text-muted-foreground uppercase">
-                    <span>Slug: {champ.slug}</span>
-                    <span className="flex items-center gap-1">
-                      <Sparkles className="h-2 w-2" /> {champ.classes?.length || 0} CLASSES
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
          </div>
 
