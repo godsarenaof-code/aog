@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowRight, Plus, ChevronRight, Info } from "lucide-react";
+import { ArrowRight, Plus, ChevronRight, Info, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { baseItems, combinedItems } from "@/lib/data";
